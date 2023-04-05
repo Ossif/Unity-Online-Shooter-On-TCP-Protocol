@@ -185,7 +185,7 @@ public class Server : MonoBehaviour
             case (WorldCommand.MSG_NULL_ACTION):
             {
                 Debug.Log("SERVER: Клиент подтвердил, что его id - " + packet.ReadInt());
-                if(clients.Count == 1){
+                if(clients.Count == 2){
                     Debug.Log("SERVER: Начинаем игру!");
                     int counter = 0;
                     foreach (var client in clients.Keys)
