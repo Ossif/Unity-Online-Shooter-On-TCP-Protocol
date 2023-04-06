@@ -67,7 +67,7 @@ public class MenuLogic : MonoBehaviour
             c.ClientName = nameInput.text;
             if(c.ClientName == "") c.ClientName = "Host";
             c.IsHost = true;
-            //c.ConnectToServer("127.0.0.1", 6321);
+            c.ConnectToServer("127.0.0.1", 6321);
         }
         catch (Exception e)
         {

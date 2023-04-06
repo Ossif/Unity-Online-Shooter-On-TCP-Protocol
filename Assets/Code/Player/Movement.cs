@@ -88,10 +88,10 @@ public class Movement : MonoBehaviour
         actualVel.y = currVelY;
         _rb.velocity = actualVel;
 
-        if(!Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.D)){
+        /*if(!Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.D)){
             //newAnimId = 0;
             _rb.velocity = new Vector3(0, _rb.velocity.y, 0);
-        }
+        }*/
 
         /*if(animId != newAnimId){
             animId = newAnimId;

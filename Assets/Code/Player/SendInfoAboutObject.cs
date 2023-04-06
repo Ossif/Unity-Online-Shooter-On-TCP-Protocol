@@ -36,7 +36,7 @@ public class SendInfoAboutObject : MonoBehaviour
         if(client == null) Debug.Log("Ошибка:Клиент не найден!");
         if(rb == null) Debug.Log("Ошибка:у обьекта нет свойства Rigidbody!");
 
-        InvokeRepeating("SendInfo", 2.0f, 0.25f);
+        InvokeRepeating("SendInfo", 2f, 0.1f);
     }
 
     // Update is called once per frame

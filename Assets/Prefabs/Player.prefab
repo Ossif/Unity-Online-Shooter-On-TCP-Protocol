@@ -99,7 +99,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Speed: 1000
-  JumpForce: 25
+  JumpForce: 10
   _isGrounded: 1
   girl: {fileID: 0}
 --- !u!114 &6015010691042460308

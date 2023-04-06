@@ -185,17 +185,10 @@ public class Server : MonoBehaviour
             case (WorldCommand.MSG_NULL_ACTION):
             {
                 Debug.Log("SERVER: Клиент подтвердил, что его id - " + packet.ReadInt());
-                if(clients.Count == 2){
-                    Debug.Log("SERVER: Начинаем игру!");
-                    int counter = 0;
-                    foreach (var client in clients.Keys)
-                    {
-                        Packet apacket = new Packet((int) PacketHeaders.WorldCommand.SMSG_START_GAME);
-                        apacket.Write((int)counter);
-                        counter ++;
-                        client.stream.WriteAsync(apacket.GetBytes());
-                    }
-                }
+                Debug.Log("SERVER: Начинаем игру!");
+                Packet apacket = new Packet((int) PacketHeaders.WorldCommand.SMSG_START_GAME);
+                apacket.Write(1);
+                c.stream.WriteAsync(apacket.GetBytes());
                 break;
             }
             case (WorldCommand.CMSG_PLAYER_LOGIN):

@@ -182,7 +182,7 @@ public class Client : MonoBehaviour
     private void OnIncomingData(PacketDecryptor InComePacket)
     {
         int packetid = InComePacket.GetPacketId();
-        Debug.Log(packetid);
+        //Debug.Log(packetid);
         switch ((WorldCommand) packetid)
         {
             case WorldCommand.MSG_NULL_ACTION: //Теперь используй PacketHeader.cs чтобы создать новый пакет
@@ -260,7 +260,7 @@ public class Client : MonoBehaviour
             {
                 
                 string objectId = InComePacket.ReadString();
-                Debug.Log(objectId);
+                //Debug.Log(objectId);
                 GameObject enemy = null;
                 foreach (GameObject obj in enemies.Values){
                     //Debug.Log(uniqueId);
