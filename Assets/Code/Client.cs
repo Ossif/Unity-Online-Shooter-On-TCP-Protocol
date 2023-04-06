@@ -41,7 +41,7 @@ public class Client : MonoBehaviour
     private void Start()
     {
         DontDestroyOnLoad(gameObject);
-        ConnectToServer(host, port);
+        //ConnectToServer(host, port);
     }
 
 
@@ -75,6 +75,7 @@ public class Client : MonoBehaviour
         
         try
         {
+            Debug.Log($"ConnectToServer {host}");
             socket = new TcpClient();
             await socket.ConnectAsync(host, port);
 
