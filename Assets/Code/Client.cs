@@ -15,6 +15,8 @@ public class Client : MonoBehaviour
 
 
 
+    private Queue<Tuple<Packet>> sendQueue = new Queue<Tuple<Packet>>(); //Packet send queue
+
     private Queue<Tuple<PacketDecryptor>> messageQueue = new Queue<Tuple<PacketDecryptor>>(); //Packet queue
     private string host = "127.0.0.1";
     public int port = 6321;
@@ -48,6 +50,7 @@ public class Client : MonoBehaviour
     private void Update()
     {
         PacketDecryptor packet = null;
+        Packet SendPacket = null;
         lock (messageQueue)
         {
             if (messageQueue.Count > 0)
@@ -57,6 +60,20 @@ public class Client : MonoBehaviour
                 
             }
         }
+
+        lock(sendQueue)
+        {
+            if(sendQueue.Count > 0)
+            {
+                for(int i = 0; i < sendQueue.Count; i++)
+                {
+                    Tuple<Packet> packetTuple = sendQueue.Dequeue();
+                    SendPacket = packetTuple.Item1;
+                    stream.WriteAsync(SendPacket.GetBytes());
+                }
+            }
+        }
+
 
         if (packet != null) //Если нашли какой-то пакетик
         {
@@ -169,14 +186,11 @@ public class Client : MonoBehaviour
         }
     }
 
-    /*public void Send(string data)
+    public void Send(Packet pack)
     {
-        if(!socketReady){
-            Debug.Log("CLIENT Сообщение не удалось отправить, так как клиент не подключен к серверу, или флаг, отвечающий за это, не изменился.");
-            return;
-        }
-        //Логика отправки
-    }*/
+        sendQueue.Enqueue(Tuple.Create(pack));
+        return;
+    }
 
     //Получение данных от сервера
     private void OnIncomingData(PacketDecryptor InComePacket)
@@ -191,7 +205,7 @@ public class Client : MonoBehaviour
                 Debug.Log("CLIENT: На клиент передали его id - " + playerid);
                 Packet packet = new Packet(0);
                 packet.Write(playerid);
-                stream.WriteAsync(packet.GetBytes(), 0, packet.GetBytes().Length);
+                Send(packet);
                 ClientId = playerid;
 
 
@@ -270,6 +284,7 @@ public class Client : MonoBehaviour
                         break;
                     }
                 }
+                if (enemy == null) break;
 
                 int before = InComePacket.ReadInt();
 

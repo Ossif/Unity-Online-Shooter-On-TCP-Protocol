@@ -23,7 +23,7 @@ public class LevelLogic : MonoBehaviour
 
         packet.Write((float) gameObject.transform.rotation.z);
 
-        client.stream.WriteAsync(packet.GetBytes());
+        client.Send(packet);
         //enemy = Instantiate(enemyPrefab, new Vector3(0, 2, 0), Quaternion.identity);
     }
 

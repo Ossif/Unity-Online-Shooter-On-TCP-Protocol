@@ -46,7 +46,7 @@ public class Shoot : MonoBehaviour
                 packet.Write((float) speed.y);
                 packet.Write((float) speed.z);
                 
-                client.stream.WriteAsync(packet.GetBytes());
+                client.Send(packet);
             }
         }
     }
