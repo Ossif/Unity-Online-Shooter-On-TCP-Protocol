@@ -9,6 +9,8 @@ using System.Threading;
 using PacketHeaders;
 using System.Collections.Concurrent;
 
+using UnityEditor.Animations;
+
 public class Client : MonoBehaviour
 {
     public bool readyToWork = false;
@@ -36,6 +38,8 @@ public class Client : MonoBehaviour
     public bool IsHost;
 
     static ConcurrentDictionary<string, GameObject> enemies = new ConcurrentDictionary<string, GameObject>();
+
+    private Animator animator;
     //От ФИМЫ
     private int ClientId;
 
@@ -244,7 +248,7 @@ public class Client : MonoBehaviour
                 Quaternion rotation = newPlayer.transform.rotation;
                 rotation.z = rot;
                 newPlayer.transform.rotation = rotation;
-                newPlayer.GetComponent<PlayerId>().playerId = uniqueId;
+                newPlayer.GetComponent<EnemyInfo>().playerId = uniqueId;
 
                 enemies.TryAdd(uniqueId, newPlayer);
                 break;
@@ -268,7 +272,7 @@ public class Client : MonoBehaviour
 
                     GameObject go = Instantiate(playerPrefab, position, Quaternion.identity);
                     go.transform.rotation = rotation;
-                    go.GetComponent<PlayerId>().playerId = id;
+                    go.GetComponent<EnemyInfo>().playerId = id;
 
                     enemies.TryAdd(id, go);
                 }
@@ -284,13 +288,39 @@ public class Client : MonoBehaviour
                 GameObject enemy = null;
                 foreach (GameObject obj in enemies.Values){
                     //Debug.Log(uniqueId);
-                    if(obj.GetComponent<PlayerId>().playerId == objectId) 
+                    if(obj.GetComponent<EnemyInfo>().playerId == objectId) 
                     {
                         enemy = obj;
                         break;
                     }
                 }
                 if (enemy == null) break;
+
+                int animId = InComePacket.ReadInt();
+                if(enemy.GetComponent<EnemyInfo>().playerAnimId != animId) 
+                {
+                    animator = enemy.GetComponent<Animator>();
+                    enemy.GetComponent<EnemyInfo>().playerAnimId = animId;
+                    switch (animId)
+                    {
+                        case 0:
+                            animator.Play("Idle");
+                            break;
+                        case 1:
+                            animator.Play("RForward");
+                            break;
+                        case 2:
+                            animator.Play("RBack");
+                            break;
+                        case 3:
+                            animator.Play("RLeft");
+                            break;
+                        case 4:
+                            animator.Play("RRight");
+                            break;
+
+                    }
+                }
 
                 int before = InComePacket.ReadInt();
 
@@ -336,6 +366,8 @@ public class Client : MonoBehaviour
             }
             case WorldCommand.SMSG_CREATE_BULLET:
             {
+                string objectId = InComePacket.ReadString();
+
                 Vector3 position = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
 
                 Quaternion rotation = new Quaternion();
@@ -347,6 +379,7 @@ public class Client : MonoBehaviour
                 Vector3 speed = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
 
                 GameObject bullet = Instantiate(bulletPrefab, position, Quaternion.identity);
+                bullet.GetComponent<Bullet>().creatorId = objectId;
                 bullet.transform.rotation = rotation;
                 bullet.GetComponent<Rigidbody>().velocity = speed;
 

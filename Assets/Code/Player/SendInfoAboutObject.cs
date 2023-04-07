@@ -45,7 +45,27 @@ public class SendInfoAboutObject : MonoBehaviour
         if(client.readyToWork == true){
             if(client != null){
                 Packet packet = new Packet((int) PacketHeaders.WorldCommand.CMSG_OBJ_INFO);
-                
+
+                //Определяем анимацию игрока, отправляем ее
+                int animationId = 0;
+                if (Input.GetKey(KeyCode.A)) {
+                    animationId = 3;
+                }
+                if (Input.GetKey(KeyCode.D))
+                {
+                    animationId = 4;
+                }
+                if (Input.GetKey(KeyCode.W))
+                {
+                    animationId = 1;
+                }
+                if (Input.GetKey(KeyCode.S))
+                {
+                    animationId = 2;
+                }
+                packet.Write((int)animationId);
+
+                //Определяем, какую информацию мы отправляем
                 int beforeInt = 0;
                 if(Position) beforeInt += 100;
                 if(Rotation) beforeInt += 10;

@@ -266,6 +266,8 @@ public class Server : MonoBehaviour
 
                 responcePacket.Write((string) c.tcp.Client.RemoteEndPoint.ToString());
 
+                responcePacket.Write((int) packet.ReadInt());
+
                 responcePacket.Write((int) before);
 
                 for(int i = 0; i < 3; i ++){
@@ -318,7 +320,9 @@ public class Server : MonoBehaviour
             case (WorldCommand.CMSG_CREATE_BULLET):
             {
                 Packet responcePacket = new Packet((int)WorldCommand.SMSG_CREATE_BULLET);
-                
+
+                responcePacket.Write((string)c.tcp.Client.RemoteEndPoint.ToString());
+
                 //Позиция
                 responcePacket.Write((float) packet.ReadFloat());
                 responcePacket.Write((float) packet.ReadFloat());

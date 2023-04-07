@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
+    public string creatorId;
     // Start is called before the first frame update
     void Start()
     {
@@ -12,7 +13,7 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Player")
+        if (other.tag == "Enemy")
         {
             //Логика столкновения  пули и игрока
             /*other.GetComponent<Health>().health -= 30.0f;
@@ -20,8 +21,16 @@ public class Bullet : MonoBehaviour
             {
                 other.GetComponent<Rigidbody>().constraints =  RigidbodyConstraints.None;
             }*/
-        } 
-        Destroy(gameObject);
+
+            if (creatorId != other.GetComponent<EnemyInfo>().playerId)
+            {
+                Destroy(gameObject);
+            }
+        }
+        else 
+        {
+            Destroy(gameObject);
+        }
     }
 
     void DestroyBullet()

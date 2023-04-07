@@ -41,10 +41,10 @@ public class Shoot : MonoBehaviour
                 packet.Write((float) rotation.y);
                 packet.Write((float) rotation.z);
 
-                Vector3 speed = gameObject.GetComponent<Rigidbody>().velocity;
-                packet.Write((float) speed.x);
-                packet.Write((float) speed.y);
-                packet.Write((float) speed.z);
+                Vector3 bulletSpeed = cam.transform.forward * speed;
+                packet.Write((float) bulletSpeed.x);
+                packet.Write((float) bulletSpeed.y);
+                packet.Write((float) bulletSpeed.z);
                 
                 client.Send(packet);
             }

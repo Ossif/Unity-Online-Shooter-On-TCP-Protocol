@@ -47,7 +47,7 @@ MonoBehaviour:
   readyToWork: 0
   port: 6321
   socketReady: 0
-  playerPrefab: {fileID: 5555749068233812709, guid: 40f0fc5faf63ac04b88dde14e37f9170, type: 3}
+  playerPrefab: {fileID: 80344335250525252, guid: ae77195d26c597748b046d61f9f6bad0, type: 3}
   bulletPrefab: {fileID: 383235577832844704, guid: 5094691bacca0eb49a3efe3f4a6986c3, type: 3}
   ClientName: 
   IsHost: 0
