@@ -78,7 +78,8 @@ public class SendInfoAboutObject : MonoBehaviour
 
                 }
                 
-                client.stream.WriteAsync(packet.GetBytes());
+                //client.SendMessage(packet.GetBytes());
+                client.Send(packet);
             }
         }
     }

@@ -103,11 +103,16 @@ public class Server : MonoBehaviour
             client.CountGetPacketData += bytesRead;
 
             int headerSize = (int)BitConverter.ToUInt32(client.buffer, 2);
-            //Debug.Log($"HeaderSize: {headerSize}, {PrintByteArray(client.buffer)}");
-            Array.Resize(ref client.buffer, client.CountGetPacketData + headerSize);
-            // Обработка принятых данных
-            client.stream.BeginRead(client.buffer, client.CountGetPacketData, headerSize, ReadDataCallback, new Tuple<ServerClient>(client));
-            //
+
+            try
+            {
+                Array.Resize(ref client.buffer, client.CountGetPacketData + headerSize);
+                client.stream.BeginRead(client.buffer, client.CountGetPacketData, headerSize, ReadDataCallback, new Tuple<ServerClient>(client));
+            }
+            catch(Exception ex)
+            {
+                Debug.Log($"Fail to read header. Packet size: {headerSize}\nError: {ex}");
+            }
         }
         catch (Exception ex)
         {
@@ -302,7 +307,7 @@ public class Server : MonoBehaviour
                 foreach (ServerClient client in clients.Keys)
                 {
                     if(c == client) continue;
-                    if(c.authorized == false) continue;
+                    if(client.authorized == false) continue;
                     
                     client.stream.WriteAsync(responcePacket.GetBytes());
                 }
@@ -332,7 +337,7 @@ public class Server : MonoBehaviour
                 foreach (ServerClient client in clients.Keys)
                 {
                     if(c == client) continue;
-                    if(c.authorized == false) continue;
+                    if(client.authorized == false) continue;
                     
                     client.stream.WriteAsync(responcePacket.GetBytes());
                 }

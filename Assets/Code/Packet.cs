@@ -7,7 +7,7 @@ using System.IO;
 
 //namespace socketAPP
 //{
-    class Packet
+    public class Packet
     {
         private MemoryStream stream;
         private BinaryWriter writer;
