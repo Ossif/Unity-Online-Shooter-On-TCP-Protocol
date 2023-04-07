@@ -113,8 +113,10 @@ public class Client : MonoBehaviour
 
         try
         {
+            Debug.Log("TEST 1");
             int bytesRead = stream.EndRead(ar);
 
+            Debug.Log("TEST 2");
             if (bytesRead == 0)
             {
                 // Соединение было закрыто сервером
@@ -123,11 +125,15 @@ public class Client : MonoBehaviour
                 return;
             }
             CountGetPacketData += bytesRead;
-            
+
+            Debug.Log("TEST 3");
             int headerSize = (int) BitConverter.ToUInt32(buffer, 2);
+            Debug.Log("TEST 4");
             Array.Resize(ref buffer, CountGetPacketData + headerSize);
+            Debug.Log("TEST 5");
             // Обработка принятых данных
             stream.BeginRead(buffer, CountGetPacketData, headerSize, ReadDataCallback, new Tuple<NetworkStream, byte[]>(stream, buffer));
+            Debug.Log("TEST 6");
             //
         }
         catch (Exception ex)
@@ -270,6 +276,7 @@ public class Client : MonoBehaviour
                         break;
                     }
                 }
+                if (enemy == null) break;
 
                 int before = InComePacket.ReadInt();
 
