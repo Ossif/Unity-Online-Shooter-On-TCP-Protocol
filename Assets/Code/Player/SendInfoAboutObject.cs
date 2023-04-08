@@ -66,11 +66,8 @@ public class SendInfoAboutObject : MonoBehaviour
                 packet.Write((int)animationId);
 
                 //Определяем, какую информацию мы отправляем
-                int beforeInt = 0;
-                if(Position) beforeInt += 100;
-                if(Rotation) beforeInt += 10;
-                if(Speed) beforeInt += 1;
-                packet.Write((int) beforeInt);
+                byte movementInfoFlag = (byte)((Position ? 1 : 0) << 2 | (Rotation ? 1 : 0) << 1 | (Speed ? 1 : 0));
+                packet.Write((byte)movementInfoFlag);
 
                 if(Position)
                 {
@@ -83,8 +80,8 @@ public class SendInfoAboutObject : MonoBehaviour
                 }
 
                 if(Rotation){
-                    Quaternion rotation = gameObject.transform.rotation;
-                    packet.Write((float) rotation.z);
+                    Vector3 rotation = gameObject.transform.rotation.eulerAngles;
+                    packet.Write((float) rotation.y);
                 }
 
                 if(Speed)

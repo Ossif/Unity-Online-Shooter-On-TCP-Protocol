@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6836055871954740150}
   - component: {fileID: 1478658425712917370}
   - component: {fileID: 1260795794855074469}
+  - component: {fileID: 6431343123464668820}
   m_Layer: 0
   m_Name: GirlEnemy
   m_TagString: Untagged
@@ -50,7 +51,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!136 &1478658425712917370
 CapsuleCollider:
@@ -65,7 +66,7 @@ CapsuleCollider:
   m_Radius: 0.5
   m_Height: 2.3
   m_Direction: 1
-  m_Center: {x: 0, y: 1.1, z: 0}
+  m_Center: {x: 0, y: 1.15, z: 0}
 --- !u!114 &1260795794855074469
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -80,6 +81,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerId: 
   playerAnimId: 0
+--- !u!95 &6431343123464668820
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 80344335250525252}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 1d4fe145c45ce1a48bc8b285b05ba4f7, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
 --- !u!1 &205223785567317791
 GameObject:
   m_ObjectHideFlags: 0

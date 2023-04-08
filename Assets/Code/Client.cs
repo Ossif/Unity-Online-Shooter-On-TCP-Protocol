@@ -9,8 +9,6 @@ using System.Threading;
 using PacketHeaders;
 using System.Collections.Concurrent;
 
-using UnityEditor.Animations;
-
 public class Client : MonoBehaviour
 {
     public bool readyToWork = false;
@@ -134,10 +132,7 @@ public class Client : MonoBehaviour
 
         try
         {
-            Debug.Log("TEST 1");
             int bytesRead = stream.EndRead(ar);
-
-            Debug.Log("TEST 2");
             if (bytesRead == 0)
             {
                 // Соединение было закрыто сервером
@@ -146,15 +141,10 @@ public class Client : MonoBehaviour
                 return;
             }
             CountGetPacketData += bytesRead;
-
-            Debug.Log("TEST 3");
             int headerSize = (int) BitConverter.ToUInt32(buffer, 2);
-            Debug.Log("TEST 4");
             Array.Resize(ref buffer, CountGetPacketData + headerSize);
-            Debug.Log("TEST 5");
             // Обработка принятых данных
             stream.BeginRead(buffer, CountGetPacketData, headerSize, ReadDataCallback, new Tuple<NetworkStream, byte[]>(stream, buffer));
-            Debug.Log("TEST 6");
             //
         }
         catch (Exception ex)
@@ -295,7 +285,6 @@ public class Client : MonoBehaviour
                     }
                 }
                 if (enemy == null) break;
-
                 int animId = InComePacket.ReadInt();
                 if(enemy.GetComponent<EnemyInfo>().playerAnimId != animId) 
                 {
@@ -322,46 +311,29 @@ public class Client : MonoBehaviour
                     }
                 }
 
-                int before = InComePacket.ReadInt();
+                int before = InComePacket.ReadByte();
 
-                for(int i = 0; i < 3; i ++){
-                    switch (i)
-                    {
-                        case 0:
-                        {
-                            
-                            if(before / 100 >= 1){
-                                //Debug.Log($"POS: {InComePacket.ReadFloat()}; {InComePacket.ReadFloat()}; {InComePacket.ReadFloat()}");
-                                Vector3 position = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
-                                enemy.transform.position = position; 
-                            }
-                            break;
-                        }
-                        case 1:
-                        {
-                            if((before % 100) / 10 >= 1)
-                            {
-                                Quaternion q = new Quaternion();
-                                q.y = InComePacket.ReadFloat();
-                                enemy.transform.rotation = q; 
-                                //Debug.Log($"ROT: {InComePacket.ReadFloat()};");
-                            
-                            }
-                            break;
-                        }
-                        case 2:
-                        {
-                            if(before % 10 >= 1)
-                            {
-                                Vector3 speed = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
-                                enemy.GetComponent<Rigidbody>().velocity = speed;
-                                //Debug.Log($"SPEED: {InComePacket.ReadFloat()}; {InComePacket.ReadFloat()}; {InComePacket.ReadFloat()}");
-                            }
-                            break;
-                        }
-                    }
+                bool Position = (before & 0b100) != 0;
+                bool Rotation = (before & 0b010) != 0;
+                bool Speed = (before & 0b001) != 0;
+
+                if(Position)
+                {
+                    Vector3 position = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                    enemy.transform.position = position;
                 }
 
+                if(Rotation)
+                {
+                    Vector3 q = new Vector3(0, InComePacket.ReadFloat(), 0);
+                    enemy.transform.rotation = Quaternion.Euler(q);
+                }
+
+                if(Speed)
+                {
+                    Vector3 speed = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                    enemy.GetComponent<Rigidbody>().velocity = speed;
+                }
                 break;
             }
             case WorldCommand.SMSG_CREATE_BULLET:

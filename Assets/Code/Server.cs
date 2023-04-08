@@ -67,7 +67,6 @@ public class Server : MonoBehaviour
             Debug.Log("SERVER Socket error: " + e.Message);
         }
     }
-
     public async Task StartListening()
     {
         ServerClient client = new ServerClient(await server.AcceptTcpClientAsync());
@@ -82,7 +81,6 @@ public class Server : MonoBehaviour
         client.stream.BeginRead(client.buffer, 0, HeaderSize, ReadHeaderCallback, new Tuple<ServerClient>(client));
         StartListening();
     }
-
     void ReadHeaderCallback(IAsyncResult ar)
     {
         var state = (Tuple<ServerClient>)ar.AsyncState;
@@ -258,53 +256,40 @@ public class Server : MonoBehaviour
             }
             case (WorldCommand.CMSG_OBJ_INFO):
             {
-                //int objectId = packet.ReadInt();
-
-                int before = packet.ReadInt();
-
                 Packet responcePacket = new Packet( (int) WorldCommand.SMSG_OBJ_INFO);
 
-                responcePacket.Write((string) c.tcp.Client.RemoteEndPoint.ToString());
+                responcePacket.Write((string) c.tcp.Client.RemoteEndPoint.ToString()); //Object ID
+                responcePacket.Write((int) packet.ReadInt()); //animid
+                byte before = packet.ReadByte();
+                responcePacket.Write((byte) before); //before
 
-                responcePacket.Write((int) packet.ReadInt());
+                bool position = (before & 0b100) != 0;
+                bool rotation = (before & 0b010) != 0;
+                bool speed = (before & 0b001) != 0;
 
-                responcePacket.Write((int) before);
-
-                for(int i = 0; i < 3; i ++){
-                    switch (i)
-                    {
-                        case 0:
-                        {
-                            if(before / 100 >= 1){
-                                //Debug.Log($"POS: {packet.ReadFloat()}; {packet.ReadFloat()}; {packet.ReadFloat()}");
-                                responcePacket.Write((float) packet.ReadFloat());
-                                responcePacket.Write((float) packet.ReadFloat());
-                                responcePacket.Write((float) packet.ReadFloat());
-                            }
-                            break;
-                        }
-                        case 1:
-                        {
-                            if((before % 100) / 10 >= 1)
-                            {
-                                //Debug.Log($"ROT: {packet.ReadFloat()}; {packet.ReadFloat()}; {packet.ReadFloat()}");
-                                responcePacket.Write((float) packet.ReadFloat());
-                            }
-                            break;
-                        }
-                        case 2:
-                        {
-                            if(before % 10 >= 1)
-                            {
-                                //Debug.Log($"SPEED: {packet.ReadFloat()}; {packet.ReadFloat()}; {packet.ReadFloat()}");
-                                responcePacket.Write((float) packet.ReadFloat());
-                                responcePacket.Write((float) packet.ReadFloat());
-                                responcePacket.Write((float) packet.ReadFloat());
-                            }
-                            break;
-                        }
-                    }
+                if(position){
+                    //Debug.Log($"POS: {packet.ReadFloat()}; {packet.ReadFloat()}; {packet.ReadFloat()}");
+                    responcePacket.Write((float) packet.ReadFloat());
+                    responcePacket.Write((float) packet.ReadFloat());
+                    responcePacket.Write((float) packet.ReadFloat());
                 }
+
+                if(rotation)
+                {
+                    //Debug.Log($"ROT: {packet.ReadFloat()}; {packet.ReadFloat()}; {packet.ReadFloat()}");
+                    responcePacket.Write((float) packet.ReadFloat());
+                }
+
+                if(speed)
+                {
+                    //Debug.Log($"SPEED: {packet.ReadFloat()}; {packet.ReadFloat()}; {packet.ReadFloat()}");
+                    responcePacket.Write((float) packet.ReadFloat());
+                    responcePacket.Write((float) packet.ReadFloat());
+                    responcePacket.Write((float) packet.ReadFloat());
+                }
+
+                    
+                
 
                 foreach (ServerClient client in clients.Keys)
                 {
@@ -316,7 +301,6 @@ public class Server : MonoBehaviour
                 //Debug.Log("POS: " +packet.ReadFloat() + "; " + packet.ReadFloat() + "; " + packet.ReadFloat() + "; ");
                 break;
             }
-
             case (WorldCommand.CMSG_CREATE_BULLET):
             {
                 Packet responcePacket = new Packet((int)WorldCommand.SMSG_CREATE_BULLET);
@@ -348,10 +332,8 @@ public class Server : MonoBehaviour
 
                 break;
             }
-            
         }
     }
-
 
     void OnDestroy()
     {

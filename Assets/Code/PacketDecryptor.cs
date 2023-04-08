@@ -57,6 +57,12 @@ using System.Threading.Tasks;
             return value;
         }
 
+        public byte ReadByte()
+        {
+            byte value = _data[_offset];
+            _offset += sizeof(byte);
+            return value;
+        }
         public string ReadString()
         {
             // Считываем длину строки
