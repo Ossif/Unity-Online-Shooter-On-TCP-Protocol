@@ -30,11 +30,11 @@ public class Shoot : MonoBehaviour
                 Packet packet = new Packet((int) PacketHeaders.WorldCommand.CMSG_CREATE_BULLET);
                 
 
-                Vector3 position = gameObject.transform.position;
+                //Vector3 position = gameObject.transform.position;
                 
-                packet.Write((float) position.x);
-                packet.Write((float) position.y);
-                packet.Write((float) position.z);
+                packet.Write((float)vec.x);
+                packet.Write((float)vec.y);
+                packet.Write((float)vec.z);
 
                 Quaternion rotation = gameObject.transform.rotation;
                 packet.Write((float) rotation.x);
