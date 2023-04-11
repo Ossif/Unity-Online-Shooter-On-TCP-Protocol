@@ -22,9 +22,6 @@ public class Movement : MonoBehaviour
     public AnimatorController left;
     public AnimatorController right;*/
 
-    private Animator animator;
-    private int animId = 0;
-
     void OnCollisionEnter(Collision collision)
     {
         _isGrounded = true;
@@ -82,6 +79,7 @@ public class Movement : MonoBehaviour
             //newAnimId = 2;
             verV = -transform.forward * Speed * Time.deltaTime;
         }
+        
         
         actualVel = verV + horV;
 

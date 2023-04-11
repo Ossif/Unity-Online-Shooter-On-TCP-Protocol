@@ -25,9 +25,9 @@ using System.IO;
         public byte[] GetBytes()
         {
             // update packet size in header
-            int packetSize = (int)stream.Length;
+            int packetSize = (int)stream.Length - 6; // отнимаем 6, так как нам нужна длинна пакета без учета заголовка
             stream.Seek(sizeof(ushort), SeekOrigin.Begin);
-            writer.Write((byte)packetSize);
+            writer.Write((uint)packetSize);
 
             return stream.ToArray();
         }

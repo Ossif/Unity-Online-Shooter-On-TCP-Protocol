@@ -28,7 +28,8 @@ public class Server : MonoBehaviour
     {
         public TcpClient tcp;
         public byte[] buffer;
-        public int CountGetPacketData;
+        public int CountGetPacketData; //Количество уже полученных байт
+        public int Remaining; //Количество запрошеных байт
         public NetworkStream stream;
         public ServerClient(TcpClient tcp)
         {
@@ -41,6 +42,7 @@ public class Server : MonoBehaviour
 
     public int port = 6321;
     private static int HeaderSize = 6; //(uint16(2) - PacketID, Uint32(4) - PacketSize)
+    private static int MaxDataSize = 256; //Максимальный размер пакета, который может обработать сервер
     private TcpListener server;
     private bool serverStarted;
     private Thread serverThread;
@@ -48,64 +50,86 @@ public class Server : MonoBehaviour
     private Queue<Tuple<ServerClient, PacketDecryptor>> messageQueue = new Queue<Tuple<ServerClient, PacketDecryptor>>(); //Packet queue
 
     // Start is called before the first frame update
-    public void Init()
+    public async Task Init()
     {
         DontDestroyOnLoad(gameObject);
         try
         {
             server = new TcpListener(IPAddress.Any, port);
             server.Start();
-            StartListening();
-
             serverStarted = true;
             Debug.Log("SERVER начал работу.");
             serverThread = new Thread(new ThreadStart(QueueUpdate));
             serverThread.Start();
+            await StartListening();
         }
         catch (Exception e)
         {
             Debug.Log("SERVER Socket error: " + e.Message);
         }
-    }
+    } 
     public async Task StartListening()
     {
-        ServerClient client = new ServerClient(await server.AcceptTcpClientAsync());
-        clients.TryAdd(client, null);
-        Debug.Log($"Client connected: {client.tcp.Client.RemoteEndPoint}");
-        client.stream = client.tcp.GetStream();
-        Packet packet = new Packet((int) PacketHeaders.WorldCommand.MSG_NULL_ACTION);
-        packet.Write((int)0);
-        client.stream.WriteAsync(packet.GetBytes());
-        client.buffer = new byte[HeaderSize];
-        client.CountGetPacketData = 0;
-        client.stream.BeginRead(client.buffer, 0, HeaderSize, ReadHeaderCallback, new Tuple<ServerClient>(client));
-        StartListening();
-    }
-    void ReadHeaderCallback(IAsyncResult ar)
-    {
-        var state = (Tuple<ServerClient>)ar.AsyncState;
-        var client = state.Item1;
+        while (true)
+        {
+            ServerClient client = new ServerClient(await server.AcceptTcpClientAsync());
+            clients.TryAdd(client, null);
+            Debug.Log($"Client connected: {client.tcp.Client.RemoteEndPoint}");
+            client.stream = client.tcp.GetStream();
+            Packet packet = new Packet((int)PacketHeaders.WorldCommand.MSG_NULL_ACTION);
+            packet.Write((int)0);
+            await client.stream.WriteAsync(packet.GetBytes());
 
+            client.Remaining = HeaderSize;
+            client.CountGetPacketData = 0;
+            client.buffer = new byte[client.Remaining];
+            //client.stream.BeginRead(client.buffer, 0, client.Remaining, ReadHeaderCallback, new Tuple<ServerClient>(client));
+            await client.stream.ReadAsync(client.buffer, 0, client.Remaining);
+            ReadHeaderCallback(client.buffer, client);
+        }
+    }
+    async void ReadHeaderCallback(byte[] buffer, ServerClient client)
+    {
         try
         {
-            int bytesRead = client.stream.EndRead(ar);
+            int bytesRead = buffer.Length;
 
             if (bytesRead == 0)
             {
                 // Соединение было закрыто сервером
-                Debug.Log("Сервер разорвал соединение(1)");
+                Debug.Log($"HEADER: Сервер разорвал соединение с {client.tcp.Client.RemoteEndPoint}");
                 client.stream.Close();
                 clients.TryRemove(client, out _);
                 return;
             }
+            if(bytesRead != client.Remaining) //Если количество байт которое мы получили не соответствует тому, которое мы запросили
+            {
+                Debug.Log($"Ошибка сети, количество байт не соответствует запрошенному значению. Запрошено байт: {client.Remaining}, получено: {bytesRead}");
+                //Пытаемся запросить байты по новой
+                client.buffer = new byte[client.Remaining];
+                await client.stream.ReadAsync(client.buffer, 0, client.Remaining);
+                ReadHeaderCallback(client.buffer, client);
+                return;
+            }
+            
+            int headerSize = (int)BitConverter.ToUInt32(client.buffer, 2); //Ищем длинну пакета
+            
+            if (headerSize > MaxDataSize || headerSize < 1) //Если количество байтов пакета больше или меньше разрешенного 
+            {
+                Debug.Log($"Ошибка сети, получен пакет некорректной длинны. Длинна {headerSize}, байт код: {PrintByteArray(client.buffer)}");
+                client.buffer = new byte[client.Remaining];
+                await client.stream.ReadAsync(client.buffer, 0, client.Remaining);
+                ReadHeaderCallback(client.buffer, client);
+            }
+
             client.CountGetPacketData += bytesRead;
-
-            int headerSize = (int)BitConverter.ToUInt32(client.buffer, 2);
-
             try
             {
-                Array.Resize(ref client.buffer, client.CountGetPacketData + headerSize);
-                client.stream.BeginRead(client.buffer, client.CountGetPacketData, headerSize, ReadDataCallback, new Tuple<ServerClient>(client));
+                client.Remaining = headerSize; 
+                Array.Resize(ref client.buffer, client.CountGetPacketData + client.Remaining);
+                //client.stream.BeginRead(client.buffer, client.CountGetPacketData, client.Remaining, ReadDataCallback, new Tuple<ServerClient>(client));
+                await client.stream.ReadAsync(client.buffer, client.CountGetPacketData, client.Remaining);
+                ReadDataCallback(client.buffer, client);
             }
             catch(Exception ex)
             {
@@ -119,29 +143,39 @@ public class Server : MonoBehaviour
             clients.TryRemove(client, out _);
         }
     }
-    void ReadDataCallback(IAsyncResult ar)
+    async void ReadDataCallback(byte[] buffer, ServerClient client)
     {
-        var state = (Tuple<ServerClient>)ar.AsyncState;
-        var client = state.Item1;
         try
         {
-            int bytesRead = client.stream.EndRead(ar);
+            int bytesRead = buffer.Length;
 
             if (bytesRead == 0)
             {
                 // Соединение было закрыто сервером
-                Debug.Log("Соединение закрыто(2)");
+                Debug.Log($"DATA: Сервер разорвал соединение с {client.tcp.Client.RemoteEndPoint}");
                 client.stream.Close();
                 clients.TryRemove(client, out _);
                 return;
             }
+
+ /*           if (bytesRead != client.Remaining) //Если количество байт которое мы получили не соответствует тому, которое мы запросили
+            {
+                Debug.Log($"Ошибка сети, количество байт не соответствует запрошенному значению. Запрошено байт: {client.Remaining}, получено: {bytesRead}");
+                //Пытаемся запросить байты по новой
+                client.stream.BeginRead(client.buffer, client.CountGetPacketData, client.Remaining, ReadDataCallback, new Tuple<ServerClient>(client));
+                return;
+            }*/
+
             PacketDecryptor packet = new PacketDecryptor(client.buffer);
             client.CountGetPacketData = 0;
 
             messageQueue.Enqueue(Tuple.Create(client, packet));
 
-            client.buffer = new byte[HeaderSize];
-            client.stream.BeginRead(client.buffer, 0, HeaderSize, ReadHeaderCallback, new Tuple<ServerClient>(client));
+            client.Remaining = HeaderSize;
+            client.buffer = new byte[client.Remaining];
+            //client.stream.BeginRead(client.buffer, 0, client.Remaining, ReadHeaderCallback, new Tuple<ServerClient>(client));
+            await client.stream.ReadAsync(client.buffer, 0, client.Remaining);
+            ReadHeaderCallback(client.buffer, client);
             //Debug.Log("Packet get, find new");
             //
         }
@@ -185,7 +219,7 @@ public class Server : MonoBehaviour
         int packetid = packet.GetPacketId();
         switch ((WorldCommand) packetid)
         {
-            case (WorldCommand.MSG_NULL_ACTION):
+            case (WorldCommand.MSG_NULL_ACTION): //Запрос на авторизацию клиента
             {
                 Debug.Log("SERVER: Клиент подтвердил, что его id - " + packet.ReadInt());
                 Debug.Log("SERVER: Начинаем игру!");
@@ -194,14 +228,12 @@ public class Server : MonoBehaviour
                 c.stream.WriteAsync(apacket.GetBytes());
                 break;
             }
-            case (WorldCommand.CMSG_PLAYER_LOGIN):
+            case (WorldCommand.CMSG_PLAYER_LOGIN): //Запрос на вход в игровой мир клиента
             {
 
                 c.authorized = true;
                 int objModelId = packet.ReadInt();
 
-                Vector3 position = new Vector3();
-                float rotation;
 
                 c.lastPos[0] = packet.ReadFloat();
                 c.lastPos[1] = packet.ReadFloat();
@@ -254,7 +286,7 @@ public class Server : MonoBehaviour
 
                 break;
             }
-            case (WorldCommand.CMSG_OBJ_INFO):
+            case (WorldCommand.CMSG_OBJ_INFO): //Синхронизация объектов и игроков
             {
                 Packet responcePacket = new Packet( (int) WorldCommand.SMSG_OBJ_INFO);
 
@@ -301,7 +333,7 @@ public class Server : MonoBehaviour
                 //Debug.Log("POS: " +packet.ReadFloat() + "; " + packet.ReadFloat() + "; " + packet.ReadFloat() + "; ");
                 break;
             }
-            case (WorldCommand.CMSG_CREATE_BULLET):
+            case (WorldCommand.CMSG_CREATE_BULLET): //Создание пули от клиента
             {
                 Packet responcePacket = new Packet((int)WorldCommand.SMSG_CREATE_BULLET);
 

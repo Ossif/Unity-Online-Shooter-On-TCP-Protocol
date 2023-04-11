@@ -40,7 +40,7 @@ public class SendInfoAboutObject : MonoBehaviour
     }
 
     // Update is called once per frame
-    async public void SendInfo()
+    public void SendInfo()
     {
         if(client.readyToWork == true){
             if(client != null){

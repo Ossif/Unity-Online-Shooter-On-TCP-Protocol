@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
 using System.Net.Sockets;
-using System.Threading;
 using PacketHeaders;
 using System.Collections.Concurrent;
 
@@ -15,10 +14,8 @@ public class Client : MonoBehaviour
 
 
 
-    private Queue<Tuple<Packet>> sendQueue = new Queue<Tuple<Packet>>(); //Packet send queue
-
-    private Queue<Tuple<PacketDecryptor>> messageQueue = new Queue<Tuple<PacketDecryptor>>(); //Packet queue
-    private string host = "127.0.0.1";
+    private ConcurrentQueue<Tuple<Packet>> sendQueue = new ConcurrentQueue<Tuple<Packet>>(); //Packet send queue
+    private ConcurrentQueue<Tuple<PacketDecryptor>> messageQueue = new ConcurrentQueue<Tuple<PacketDecryptor>>(); //Packet queue
     public int port = 6321;
     public bool socketReady;
     private TcpClient socket;
@@ -45,45 +42,25 @@ public class Client : MonoBehaviour
     private void Start()
     {
         DontDestroyOnLoad(gameObject);
-        //ConnectToServer(host, port);
     }
 
 
     private void Update()
     {
-        PacketDecryptor packet = null;
-        Packet SendPacket = null;
-        lock (messageQueue)
+        Tuple<PacketDecryptor> packet = null;
+        Tuple<Packet> SendPacket = null;
+
+        if (messageQueue.TryDequeue(out packet))
         {
-            if (messageQueue.Count > 0)
-            {
-                Tuple<PacketDecryptor> packetTuple = messageQueue.Dequeue();
-                packet = packetTuple.Item1;
-                
-            }
+            OnIncomingData(packet.Item1); //Отправляем его на обработку
+
         }
 
-        lock(sendQueue)
+        if(sendQueue.TryDequeue(out SendPacket))
         {
-            if(sendQueue.Count > 0)
-            {
-                for(int i = 0; i < sendQueue.Count; i++)
-                {
-                    Tuple<Packet> packetTuple = sendQueue.Dequeue();
-                    SendPacket = packetTuple.Item1;
-                    stream.WriteAsync(SendPacket.GetBytes());
-                }
-            }
-        }
-
-
-        if (packet != null) //Если нашли какой-то пакетик
-        {
-            OnIncomingData(packet); //Отправляем его на обработку
-        }
-        else //Если нет
-        {
-            Thread.Sleep(10); //Спим 10 мс
+            byte[] packets = SendPacket.Item1.GetBytes();
+            if(packets.Length > 0)
+                stream.Write(packets);
         }
     }
 
@@ -137,7 +114,8 @@ public class Client : MonoBehaviour
             {
                 // Соединение было закрыто сервером
                 Debug.Log("Сервер разорвал соединение(1)");
-                stream.Close();
+                CloseSocket();
+                SceneManager.LoadScene("Menu");
                 return;
             }
             CountGetPacketData += bytesRead;
@@ -150,7 +128,7 @@ public class Client : MonoBehaviour
         catch (Exception ex)
         {
             Debug.Log($"Error: {ex.Message}");
-            stream.Close();
+            CloseSocket();
         }
     }
 
@@ -167,7 +145,8 @@ public class Client : MonoBehaviour
             {
                 // Соединение было закрыто сервером
                 Debug.Log("Соединение закрыто(2)");
-                stream.Close();
+                SceneManager.LoadScene("Menu");
+                CloseSocket();
                 return;
             }
             PacketDecryptor packet = new PacketDecryptor(buffer);
@@ -182,7 +161,7 @@ public class Client : MonoBehaviour
         catch (Exception ex)
         {
             Debug.Log($"Error: {ex.Message}");
-            stream.Close();
+            CloseSocket();
         }
     }
 
@@ -199,7 +178,7 @@ public class Client : MonoBehaviour
         //Debug.Log(packetid);
         switch ((WorldCommand) packetid)
         {
-            case WorldCommand.MSG_NULL_ACTION: //Теперь используй PacketHeader.cs чтобы создать новый пакет
+            case WorldCommand.MSG_NULL_ACTION: //Авторизация на сервере
             {
                 int playerid = InComePacket.ReadInt();
                 Debug.Log("CLIENT: На клиент передали его id - " + playerid);
@@ -213,13 +192,13 @@ public class Client : MonoBehaviour
 
                 break;
             }
-            case WorldCommand.SMSG_START_GAME:
+            case WorldCommand.SMSG_START_GAME: //Вход в игровой мир
             {
                 GameObject.Find("MenuLogic").GetComponent<MenuLogic>().StartGame();
                 break;
             }
-
-            case WorldCommand.SMSG_PLAYER_LOGIN:{
+            case WorldCommand.SMSG_PLAYER_LOGIN: //Создание вновь подключившегося игрока
+            {
                 
                 string uniqueId;
                 Vector3 position = new Vector3();
@@ -243,8 +222,7 @@ public class Client : MonoBehaviour
                 enemies.TryAdd(uniqueId, newPlayer);
                 break;
             }
-
-            case WorldCommand.SMSG_CREATE_PLAYERS:
+            case WorldCommand.SMSG_CREATE_PLAYERS: //Создание игорьков при подключении
             {
                 string id;
                 Vector3 position = new Vector3();
@@ -269,8 +247,7 @@ public class Client : MonoBehaviour
 
                 break;
             }
-
-            case WorldCommand.SMSG_OBJ_INFO:
+            case WorldCommand.SMSG_OBJ_INFO: //Синхронизация объектов и игроков
             {
                 
                 string objectId = InComePacket.ReadString();
@@ -336,7 +313,7 @@ public class Client : MonoBehaviour
                 }
                 break;
             }
-            case WorldCommand.SMSG_CREATE_BULLET:
+            case WorldCommand.SMSG_CREATE_BULLET: //Создание выстрела другого игрока
             {
                 string objectId = InComePacket.ReadString();
 
@@ -375,6 +352,7 @@ public class Client : MonoBehaviour
             return;
         socket.Close();
         socketReady = false;
+        SceneManager.LoadScene("Menu");
     }
 }
 

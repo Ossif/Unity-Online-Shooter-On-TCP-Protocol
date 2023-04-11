@@ -1,16 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
 using UnityEngine.SceneManagement;
-
-using UnityEngine.UI;
 using TMPro;
-
+using System.Threading.Tasks;
 using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
+
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!НОВЫЙ ФАЙЛ НОВЫЙ ФАЙЛ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -30,7 +23,7 @@ public class MenuLogic : MonoBehaviour
 
     private void Start()
     {
-        if(windowed) Screen.fullScreen = !Screen.fullScreen; 
+        //if(windowed) Screen.fullScreen = !Screen.fullScreen; 
         waitingMenu.SetActive(false);
         mainMenu.SetActive(true);
     }

@@ -14,7 +14,7 @@ using System.Threading.Tasks;
         public PacketDecryptor(byte[] data)
         {
             _data = data;
-            _offset = 6; // пропускаем 5 байт заголовка пакета
+            _offset = 6; // пропускаем 6 байт заголовка пакета
         }
 
         public int GetPacketId()
