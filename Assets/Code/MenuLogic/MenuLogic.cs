@@ -18,6 +18,8 @@ public class MenuLogic : MonoBehaviour
     public TMP_InputField nameInput;
     public GameObject mainMenu;
     public GameObject waitingMenu;
+    public GameObject FindMenu;
+    public GameObject AddServerMenu;
 
     public bool windowed = true;
 
@@ -26,27 +28,56 @@ public class MenuLogic : MonoBehaviour
         //if(windowed) Screen.fullScreen = !Screen.fullScreen; 
         waitingMenu.SetActive(false);
         mainMenu.SetActive(true);
+        FindMenu.SetActive(false);
+        AddServerMenu.SetActive(false);
     }
 
 
-    public void FindButton(){
-        string IpString = IpInput.text.ToString();
+    public void OpenFindMenu()
+    {
+        FindMenu.SetActive(true); //Открываем меню
+        FindMenu.GetComponent<FavoriteServersManager>().LoadFavoriteServers(); //Загружаем все сервера
+        /*string IpString = IpInput.text.ToString();
 
         if(IpString == "")
             IpString = "127.0.0.1";
 
+*/
+    }
+
+    public void ConnectedToServer(FavoriteServer server)
+    {
         try
         {
             Client c = Instantiate(clientPrefab).GetComponent<Client>();
             c.ClientName = nameInput.text;
-            if(c.ClientName == "") c.ClientName = "Client";
+            if (c.ClientName == "") c.ClientName = "Client";
             c.IsHost = false;
-            c.ConnectToServer(IpString, 6321);
+            c.ConnectToServer(server.IP, server.Port);
         }
         catch (Exception e)
         {
             Debug.Log(e.Message);
         }
+    }
+
+    public void CloseFindMenu()
+    {
+        if(FindMenu.activeInHierarchy == true)
+            FindMenu.SetActive(false);
+        return;
+    }
+
+    public void OpenAddServerMenu()
+    {
+        AddServerMenu.SetActive(true);
+        return;
+    }
+    public void CloseAddServerMenu()
+    {
+        if (AddServerMenu.activeInHierarchy == true)
+            AddServerMenu.SetActive(false);
+        return;
     }
 
     public void HostButton()

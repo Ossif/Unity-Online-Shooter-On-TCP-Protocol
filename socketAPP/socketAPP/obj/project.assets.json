@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\socketAPP\\socketAPP\\socketAPP.csproj",
+      "projectUniqueName": "E:\\UnityServerGameRep\\socketAPP\\socketAPP\\socketAPP.csproj",
       "projectName": "socketAPP",
-      "projectPath": "E:\\socketAPP\\socketAPP\\socketAPP.csproj",
+      "projectPath": "E:\\UnityServerGameRep\\socketAPP\\socketAPP\\socketAPP.csproj",
       "packagesPath": "C:\\Users\\Dima\\.nuget\\packages\\",
-      "outputPath": "E:\\socketAPP\\socketAPP\\obj\\",
+      "outputPath": "E:\\UnityServerGameRep\\socketAPP\\socketAPP\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Users\\Dima\\AppData\\Roaming\\Godot\\mono\\GodotNuGetFallbackFolder"

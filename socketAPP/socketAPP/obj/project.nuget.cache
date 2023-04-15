@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "eLHmbqmjqPwwgFHJS8IWzrE/A/9m5HPjPE8eJJSn1UvgdDFsWvuMJ+s8ZFIrQ5f7lKjmbXDBOW5XUmiVQlMB7Q==",
+  "dgSpecHash": "3B1BwczHkizZf9bHzaixdihewOIvrxVWvxHCXufJsN7XD1hxDpG1jYUHq7aqtgtcnslsC04sfdVeEp5fYbtOpA==",
   "success": true,
-  "projectFilePath": "E:\\socketAPP\\socketAPP\\socketAPP.csproj",
+  "projectFilePath": "E:\\UnityServerGameRep\\socketAPP\\socketAPP\\socketAPP.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }
