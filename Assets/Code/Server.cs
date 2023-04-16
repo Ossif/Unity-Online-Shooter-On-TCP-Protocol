@@ -76,7 +76,7 @@ public class Server : MonoBehaviour
             clients.TryAdd(client, null);
             Debug.Log($"Client connected: {client.tcp.Client.RemoteEndPoint}");
             client.stream = client.tcp.GetStream();
-            Packet packet = new Packet((int)PacketHeaders.WorldCommand.MSG_NULL_ACTION);
+            Packet packet = new Packet((int)PacketHeaders.WorldCommand.SMSG_OFFER_ENTER);
             packet.Write((int)0);
             await client.stream.WriteAsync(packet.GetBytes());
 
@@ -219,7 +219,7 @@ public class Server : MonoBehaviour
         int packetid = packet.GetPacketId();
         switch ((WorldCommand) packetid)
         {
-            case (WorldCommand.MSG_NULL_ACTION): //Запрос на авторизацию клиента
+            case (WorldCommand.CMSG_OFFER_ENTER_ANSWER): //Запрос на авторизацию клиента
             {
                 Debug.Log("SERVER: Клиент подтвердил, что его id - " + packet.ReadInt());
                 Debug.Log("SERVER: Начинаем игру!");

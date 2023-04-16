@@ -80,6 +80,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerId: 
+  PlayerName: 
   playerAnimId: 0
 --- !u!95 &6431343123464668820
 Animator:

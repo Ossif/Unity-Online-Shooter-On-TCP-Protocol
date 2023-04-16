@@ -178,12 +178,15 @@ public class Client : MonoBehaviour
         //Debug.Log(packetid);
         switch ((WorldCommand) packetid)
         {
-            case WorldCommand.MSG_NULL_ACTION: //Авторизация на сервере
+            case WorldCommand.SMSG_OFFER_ENTER: //Сервер предлагает авторизоваться
             {
+                string NickName = PlayerPrefs.GetString("PlayerNick");
                 int playerid = InComePacket.ReadInt();
                 Debug.Log("CLIENT: На клиент передали его id - " + playerid);
-                Packet packet = new Packet(0);
+                Packet packet = new Packet((int) WorldCommand.CMSG_OFFER_ENTER_ANSWER);
                 packet.Write(playerid);
+               
+                packet.Write(NickName);
                 Send(packet);
                 ClientId = playerid;
 

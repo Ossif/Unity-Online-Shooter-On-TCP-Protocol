@@ -35,6 +35,7 @@ namespace socketAPP
                 this.tcp = tcp;
             }
 
+            public string PlayerName;
             public float[] lastPos = new float[4];
             public bool authorized = false;
         }
@@ -95,7 +96,7 @@ namespace socketAPP
                 clients.TryAdd(client, null);
                 Console.WriteLine($"Client connected: {client.tcp.Client.RemoteEndPoint}");
                 client.stream = client.tcp.GetStream();
-                Packet packet = new Packet((int)WorldCommand.MSG_NULL_ACTION);
+                Packet packet = new Packet((int)WorldCommand.SMSG_OFFER_ENTER);
                 packet.Write((int)0);
                 await client.stream.WriteAsync(packet.GetBytes());
 
@@ -243,10 +244,13 @@ namespace socketAPP
             int packetid = packet.GetPacketId();
             switch ((WorldCommand)packetid)
             {
-                case (WorldCommand.MSG_NULL_ACTION): //Запрос на авторизацию клиента
+                case (WorldCommand.CMSG_OFFER_ENTER_ANSWER): //Запрос на авторизацию клиента
                     {
-                        Console.WriteLine("SERVER: Клиент подтвердил, что его id - " + packet.ReadInt());
+                        int playerid = packet.ReadInt();
+                        c.PlayerName = packet.ReadString();
+                        Console.WriteLine($"SERVER: Игрок {c.PlayerName} подключился к серверу");
                         Console.WriteLine("SERVER: Начинаем игру!");
+                        
                         Packet apacket = new Packet((int)WorldCommand.SMSG_START_GAME);
                         apacket.Write(1);
                         c.stream.WriteAsync(apacket.GetBytes());
