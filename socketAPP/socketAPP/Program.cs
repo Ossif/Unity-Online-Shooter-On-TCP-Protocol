@@ -271,6 +271,7 @@ namespace socketAPP
 
                         Packet responcePacket = new Packet((int)WorldCommand.SMSG_PLAYER_LOGIN);
                         responcePacket.Write((string)c.tcp.Client.RemoteEndPoint.ToString());
+                        responcePacket.Write((string)c.PlayerName);
 
                         responcePacket.Write((float)c.lastPos[0]);
                         responcePacket.Write((float)c.lastPos[1]);
@@ -304,6 +305,7 @@ namespace socketAPP
                             if (client.authorized == false) continue;
 
                             playersPacket.Write((string)client.tcp.Client.RemoteEndPoint.ToString());
+                            playersPacket.Write((string)client.PlayerName);
                             playersPacket.Write((float)client.lastPos[0]);
                             playersPacket.Write((float)client.lastPos[1]);
                             playersPacket.Write((float)client.lastPos[2]);

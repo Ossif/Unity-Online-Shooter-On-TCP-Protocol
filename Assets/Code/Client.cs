@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using TMPro;
 using UnityEngine.SceneManagement;
 using System;
 using System.Net.Sockets;
@@ -183,16 +183,14 @@ public class Client : MonoBehaviour
                 string NickName = PlayerPrefs.GetString("PlayerNick");
                 int playerid = InComePacket.ReadInt();
                 Debug.Log("CLIENT: На клиент передали его id - " + playerid);
+                
                 Packet packet = new Packet((int) WorldCommand.CMSG_OFFER_ENTER_ANSWER);
                 packet.Write(playerid);
-               
                 packet.Write(NickName);
                 Send(packet);
+
                 ClientId = playerid;
-
-
                 readyToWork = true;
-
                 break;
             }
             case WorldCommand.SMSG_START_GAME: //Вход в игровой мир
@@ -204,10 +202,12 @@ public class Client : MonoBehaviour
             {
                 
                 string uniqueId;
+                string PlayerName;
                 Vector3 position = new Vector3();
                 float rot;
 
                 uniqueId = InComePacket.ReadString();
+                PlayerName = InComePacket.ReadString();
 
                 position.x = InComePacket.ReadFloat();
                 position.y = InComePacket.ReadFloat();
@@ -221,6 +221,7 @@ public class Client : MonoBehaviour
                 rotation.z = rot;
                 newPlayer.transform.rotation = rotation;
                 newPlayer.GetComponent<EnemyInfo>().playerId = uniqueId;
+                newPlayer.transform.Find("NickName").GetComponent<TMP_Text>().text = PlayerName;
 
                 enemies.TryAdd(uniqueId, newPlayer);
                 break;
@@ -228,6 +229,7 @@ public class Client : MonoBehaviour
             case WorldCommand.SMSG_CREATE_PLAYERS: //Создание игорьков при подключении
             {
                 string id;
+                string PlayerName;
                 Vector3 position = new Vector3();
                 Quaternion rotation = new Quaternion();
 
@@ -236,6 +238,7 @@ public class Client : MonoBehaviour
                 for (int i = 0; i < counter; i ++){
 
                     id = InComePacket.ReadString();
+                    PlayerName = InComePacket.ReadString();
                     position.x = InComePacket.ReadFloat();
                     position.y = InComePacket.ReadFloat();
                     position.z = InComePacket.ReadFloat();
@@ -244,7 +247,8 @@ public class Client : MonoBehaviour
                     GameObject go = Instantiate(playerPrefab, position, Quaternion.identity);
                     go.transform.rotation = rotation;
                     go.GetComponent<EnemyInfo>().playerId = id;
-
+                    go.transform.Find("NickName").GetComponent<TMP_Text>().text = PlayerName;
+                    
                     enemies.TryAdd(id, go);
                 }
 
