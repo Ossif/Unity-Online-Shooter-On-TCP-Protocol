@@ -7,7 +7,12 @@ public class Shoot : MonoBehaviour
 
     public GameObject bullet;
     public Camera cam;
+    public ParticleSystem ShotParticle;
+    public AudioSource ShotAudioSource;
+    public AudioClip ShotClip;
+    public float ShotRate = 15f;
     public float speed;
+    private float TimeToNextShot;
 
     private Client client = null;
 
@@ -21,8 +26,17 @@ public class Shoot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Mouse0)){
-            Vector3 vec = cam.transform.position + cam.transform.forward;
+        if(Input.GetKey(KeyCode.Mouse0) && Time.time >= TimeToNextShot) 
+        {
+            TimeToNextShot = Time.time + 1f / ShotRate;
+            ShotParticle.Play();
+            ShotAudioSource.PlayOneShot(ShotClip);
+
+
+
+
+
+            /*Vector3 vec = cam.transform.position + cam.transform.forward;
             GameObject insBull = Instantiate(bullet, vec, Quaternion.identity);
             insBull.GetComponent<Rigidbody>().velocity = cam.transform.forward * speed;
         
@@ -47,7 +61,7 @@ public class Shoot : MonoBehaviour
                 packet.Write((float) bulletSpeed.z);
                 
                 client.Send(packet);
-            }
+            }*/
         }
     }
 }
