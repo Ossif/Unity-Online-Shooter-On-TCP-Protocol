@@ -50,6 +50,11 @@ public class MenuLogic : MonoBehaviour
 
     public void OpenFindMenu()
     {
+        if(!CheckNickNameToAvaible())
+        {
+            CreateNotify(NotificationType.Error, "Некорректный ник-нейм", "Вы не можете приступить к поиску игры пока не установите корректный ник-нейм");
+            return;
+        }
         FindMenu.SetActive(true); //Открываем меню
         FindMenu.GetComponent<FavoriteServersManager>().LoadFavoriteServers(); //Загружаем все сервера
     }
@@ -87,6 +92,11 @@ public class MenuLogic : MonoBehaviour
     }
     public void HostButton()
     {
+        if (!CheckNickNameToAvaible())
+        {
+            CreateNotify(NotificationType.Error, "Некорректный ник-нейм", "Вы не можете приступить к созданию игры пока не установите корректный ник-нейм");
+            return;
+        }
         try
         {
             Server s = Instantiate(serverPrefab).GetComponent<Server>();
@@ -167,7 +177,17 @@ public class MenuLogic : MonoBehaviour
         SceneManager.LoadScene("Game");
     }
 
+    public bool CheckNickNameToAvaible()
+    {
+        if (NickName == null) return false;
+        if (NickName.Length < 4) return false;
+        if (NickName.Length > 20) return false;
+        foreach (char c in NickName)
+            if (!Char.IsLetter(c) && c != '-' && c != '_')
+                return false;
 
+        return true;
+    }
     public void CreateNotify(NotificationType type, string title, string description)
     {
         if (currentNotifications >= maxNotifications)
