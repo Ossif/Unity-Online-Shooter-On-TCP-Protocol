@@ -43,12 +43,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8866188630672528429}
-  - component: {fileID: 8866188630672528430}
-  - component: {fileID: 8866188630672528431}
   - component: {fileID: 8866188630672528416}
   - component: {fileID: 5454742425673392110}
   - component: {fileID: 6015010691042460308}
   - component: {fileID: 993722691079666622}
+  - component: {fileID: 2377452962190152235}
+  - component: {fileID: 1635357367002409428}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -73,36 +73,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &8866188630672528430
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8866188630672528427}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 112
-  m_CollisionDetection: 0
---- !u!136 &8866188630672528431
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8866188630672528427}
-  m_Material: {fileID: 13400000, guid: b09207e3dbd78b841b1556c3e211e3a7, type: 2}
-  m_IsTrigger: 0
-  m_Enabled: 0
-  m_Radius: 0.5
-  m_Height: 1
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &8866188630672528416
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -132,9 +102,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c48281385b01db46bd0dfe1fb54757d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Speed: 1000
-  JumpForce: 10
-  _isGrounded: 1
+  Speed: 7.5
+  JumpForce: 8
+  Gravity: 20
   girl: {fileID: 0}
 --- !u!114 &6015010691042460308
 MonoBehaviour:
@@ -170,6 +140,40 @@ MonoBehaviour:
   ShotClip: {fileID: 0}
   ShotRate: 15
   speed: 4
+--- !u!143 &2377452962190152235
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8866188630672528427}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 1, z: 0}
+--- !u!54 &1635357367002409428
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8866188630672528427}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &8866188631274992930
 GameObject:
   m_ObjectHideFlags: 0
@@ -181,7 +185,6 @@ GameObject:
   - component: {fileID: 8866188631274992931}
   - component: {fileID: 8866188631274992935}
   - component: {fileID: 8866188631274992934}
-  - component: {fileID: 8866188631274992933}
   m_Layer: 0
   m_Name: Capsule
   m_TagString: Untagged
@@ -254,20 +257,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &8866188631274992933
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8866188631274992930}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &8866188631761620777
 GameObject:
   m_ObjectHideFlags: 0
@@ -577,6 +566,14 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 99e879c2783a1e64997c80db2426bcc9, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -6135210556861813103, guid: 99e879c2783a1e64997c80db2426bcc9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.10098199
+      objectReference: {fileID: 0}
+    - target: {fileID: -6135210556861813103, guid: 99e879c2783a1e64997c80db2426bcc9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.12488307
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 99e879c2783a1e64997c80db2426bcc9, type: 3}
       propertyPath: m_Name

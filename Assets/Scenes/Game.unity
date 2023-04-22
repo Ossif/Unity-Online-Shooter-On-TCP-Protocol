@@ -380,6 +380,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1635357367002409428, guid: 7ff87f4f753366e45be94fef247cd516, type: 3}
+      propertyPath: m_UseGravity
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2377452962190152235, guid: 7ff87f4f753366e45be94fef247cd516, type: 3}
+      propertyPath: m_SlopeLimit
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: 5454742425673392110, guid: 7ff87f4f753366e45be94fef247cd516, type: 3}
+      propertyPath: JumpForce
+      value: 15
+      objectReference: {fileID: 0}
     - target: {fileID: 8866188630672528427, guid: 7ff87f4f753366e45be94fef247cd516, type: 3}
       propertyPath: m_Name
       value: Player
