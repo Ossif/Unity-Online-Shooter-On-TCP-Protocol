@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f2eecac2852e89b45977540b8c737648
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - PistolObject: {fileID: 8775130466359070812, guid: be1a950b6ef43284e91b85c696fcec66, type: 3}
+  - AKObject: {fileID: 7430526173987213069, guid: 6d21e11344fb5e84ab4fcafdd8e8d9fe, type: 3}
+  - SawnedOffObject: {fileID: 6458820679182214592, guid: 8cfe636401f8e154ebcbadee048ebd85, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
