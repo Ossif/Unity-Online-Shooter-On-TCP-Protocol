@@ -9,18 +9,24 @@ public class WeaponSystem : MonoBehaviour
     public GameObject AK_cartridge;
     private GameObject weaponCartridge = null;
 
-    private WeaponEnum we;
+    public WeaponEnum we;
 
-    private WeaponId[] weaponSlots = new WeaponId[3];
-    private int currentSlot = 0;
+    public WeaponId[] weaponSlots = new WeaponId[3];
+    public int[] slotAmmo = new int[3];
+    public int[] maxAmmo = new int[3];
+    public int currentSlot = 0;
 
     private bool isReloading = false;
 
-    private GameObject weaponObject;
-    private Animator handsAnimator;
+    public GameObject weaponObject;
+    public Animator handsAnimator;
+
+    public CanvasLogic canvasController;
     // Start is called before the first frame update
     void Start()
-    {
+    { 
+        canvasController = GameObject.Find("Canvas").GetComponent<CanvasLogic>();
+
         handsAnimator = GameObject.Find("hands").GetComponent<Animator>();
         we = gameObject.GetComponent<WeaponEnum>();
         we.InitializeAllWeapon();
@@ -28,6 +34,14 @@ public class WeaponSystem : MonoBehaviour
         weaponSlots[0] = WeaponId.AK;
         weaponSlots[1] = WeaponId.PISTOL;
         weaponSlots[2] = WeaponId.SAWNED_OFF;
+    
+        slotAmmo[0] = 30;
+        slotAmmo[1] = 10;
+        slotAmmo[2] = 2;
+
+        maxAmmo[0] = 120;
+        maxAmmo[1] = 70;
+        maxAmmo[2] = 30;
 
         foreach(Weapon w in we.weaponList)
         {
@@ -38,9 +52,15 @@ public class WeaponSystem : MonoBehaviour
                 weaponObject.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
                 weaponObject.transform.localRotation = new Quaternion(0, 0, 0, 0);
                 weaponObject.transform.localPosition = new Vector3(0, 0, 0);
+
+                canvasController.SetAmmoLeft(slotAmmo[currentSlot]);
+                canvasController.SetAmmoRight(w.ammoCartridge);
+                canvasController.SetAmmoTotal(maxAmmo[currentSlot]);
                 break;
             }
         }
+
+        
     }
 
     public void ChangeWeapon(int slotId)
@@ -60,12 +80,33 @@ public class WeaponSystem : MonoBehaviour
                 weaponObject.transform.localRotation = new Quaternion(0, 0, 0, 0);
                 weaponObject.transform.localPosition = new Vector3(0, 0, 0);
 
+                canvasController.SetAmmoLeft(slotAmmo[currentSlot]);
+                canvasController.SetAmmoRight(w.ammoCartridge);
+                canvasController.SetAmmoTotal(maxAmmo[currentSlot]);
+
                 handAnim += w.takeAnim;
                 break;
             }
         }
         handsAnimator.Play(handAnim);
         FinishReload();
+    }
+
+    public void SuccessReload(){
+        foreach(Weapon w in we.weaponList){ 
+            if(weaponSlots[currentSlot] == w.weaponId){
+                maxAmmo[currentSlot] -= (w.ammoCartridge - slotAmmo[currentSlot]);
+                slotAmmo[currentSlot] = w.ammoCartridge;
+                if(maxAmmo[currentSlot] < 0){ 
+                    slotAmmo[currentSlot] += maxAmmo[currentSlot];
+                    maxAmmo[currentSlot] = 0;
+                }
+                FinishReload();
+                canvasController.SetAmmoLeft(slotAmmo[currentSlot]);
+                canvasController.SetAmmoTotal(maxAmmo[currentSlot]);
+                break;
+            } 
+        }
     }
 
     public void FinishReload(){
@@ -91,7 +132,7 @@ public class WeaponSystem : MonoBehaviour
             ChangeWeapon(2);
         }
 
-        if(Input.GetKeyDown(KeyCode.R) && isReloading == false){
+        if(Input.GetKeyDown(KeyCode.R) && isReloading == false && maxAmmo[currentSlot] > 0){
             Debug.Log("RRR");
             isReloading = true;
             string handAnim = "H_";

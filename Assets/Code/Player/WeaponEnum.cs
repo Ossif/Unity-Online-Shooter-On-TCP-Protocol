@@ -62,7 +62,7 @@ namespace WeaponEnumIds
             weaponList.Add(new Weapon(WeaponId.NONE, null, "none", 0, 0, 0, false, 0, "", "", "", ""));
             weaponList.Add(new Weapon(WeaponId.FISTS, null, "fists", 0, 0, 10.0f, false, 0.3f, "", "", "", ""));
             weaponList.Add(new Weapon(WeaponId.PISTOL, PistolObject, "pistol", 10, 70, 25.0f, false, 0, "pistol_take", "pistol_shot", "pistol_reload", "pistol_walk"));
-            weaponList.Add(new Weapon(WeaponId.AK, AKObject, "AK", 30, 120, 20.0f, true, 0.5f, "AK_take", "AK_shot", "AK_reload", "AK_walk"));
+            weaponList.Add(new Weapon(WeaponId.AK, AKObject, "AK", 30, 120, 20.0f, true, 0.1f, "AK_take", "AK_shot", "AK_reload", "AK_walk"));
             weaponList.Add(new Weapon(WeaponId.SAWNED_OFF, SawnedOffObject, "Sawned-Off", 2, 30, 40.0f, false, 0.5f, "SO_take", "SO_shot", "SO_reload", "SO_walk"));
         }
     }

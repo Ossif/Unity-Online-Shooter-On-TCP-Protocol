@@ -44,11 +44,11 @@ GameObject:
   - component: {fileID: 8866188630672528416}
   - component: {fileID: 5454742425673392110}
   - component: {fileID: 6015010691042460308}
-  - component: {fileID: 993722691079666622}
   - component: {fileID: 2377452962190152235}
   - component: {fileID: 1635357367002409428}
   - component: {fileID: 5133388568540746660}
   - component: {fileID: 3036624323170665951}
+  - component: {fileID: 993722691079666622}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -121,25 +121,6 @@ MonoBehaviour:
   Position: 1
   Rotation: 1
   Speed: 1
---- !u!114 &993722691079666622
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8866188630672528427}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e3cf174aabea48f40a6381f68f922af0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bullet: {fileID: 383235577832844704, guid: 5094691bacca0eb49a3efe3f4a6986c3, type: 3}
-  cam: {fileID: 8866188631761620779}
-  ShotParticle: {fileID: 0}
-  ShotAudioSource: {fileID: 0}
-  ShotClip: {fileID: 0}
-  ShotRate: 15
-  speed: 4
 --- !u!143 &2377452962190152235
 CharacterController:
   m_ObjectHideFlags: 0
@@ -202,6 +183,32 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AK_cartridge: {fileID: 4361209956758616561, guid: 50258e38ac3dfe046a69095e45b8f093, type: 3}
+  we: {fileID: 0}
+  weaponSlots: 000000000000000000000000
+  slotAmmo: 000000000000000000000000
+  maxAmmo: 000000000000000000000000
+  currentSlot: 0
+  weaponObject: {fileID: 0}
+  handsAnimator: {fileID: 0}
+--- !u!114 &993722691079666622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8866188630672528427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3cf174aabea48f40a6381f68f922af0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bullet: {fileID: 383235577832844704, guid: 5094691bacca0eb49a3efe3f4a6986c3, type: 3}
+  cam: {fileID: 8866188631761620779}
+  ShotParticle: {fileID: 0}
+  ShotAudioSource: {fileID: 0}
+  ShotClip: {fileID: 0}
+  ShotRate: 15
+  speed: 70
 --- !u!1 &8866188631274992930
 GameObject:
   m_ObjectHideFlags: 0
@@ -465,3 +472,15 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
+--- !u!114 &4923283836587158541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8753553336611521332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1af326ef347b97042862d1ac08ef6ba2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
