@@ -16,7 +16,7 @@ public class SendInfoAboutObject : MonoBehaviour
     public bool Speed = true;
 
     private Client client = null;
-    private Rigidbody rb = null;
+    private CharacterController rb = null;
 
     public static string PrintByteArray(byte[] bytes, int offset = 0)
     {
@@ -32,7 +32,7 @@ public class SendInfoAboutObject : MonoBehaviour
     void Start()
     {
         client = FindObjectOfType<Client>().GetComponent<Client>();
-        rb = gameObject.GetComponent<Rigidbody>();
+        rb = gameObject.GetComponent<CharacterController>();
         if(client == null) Debug.Log("Ошибка:Клиент не найден!");
         if(rb == null) Debug.Log("Ошибка:у обьекта нет свойства Rigidbody!");
 
