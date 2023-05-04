@@ -14,7 +14,7 @@ namespace PacketHeaders
         CMSG_OBJ_INFO = 3,
         SMSG_OBJ_INFO = 4,
         CMSG_OBJ_CREATE = 5,
-        SMSG_OBJ_CREATE = 6, 
+        SMSG_OBJ_CREATE = 6,
         CMSG_PLAYER_LOGIN = 7,
         SMSG_PLAYER_LOGIN = 8,
         SMSG_CREATE_PLAYERS = 9,

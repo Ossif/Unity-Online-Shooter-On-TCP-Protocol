@@ -1,0 +1,40 @@
+SERVER начал работу.
+01 00 0E 00 00 00 
+01 00 0E 00 00 00 00 00 00 00 08 00 54 61 6D 65 72 6C 61 6E 
+07 00 10 00 00 00 
+07 00 10 00 00 00 00 00 00 00 00 00 00 40 00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 
+Ошибка сети, получен пакет некорректной длинны. Длинна 0, байт код: 00 00 00 00 00 00 
+00 00 00 00 00 00 
+Ошибка сети, получен пакет некорректной длинны. Длинна 0, байт код: 00 00 00 00 00 00 
+00 00 00 00 00 00 
+Ошибка сети, количество байт не соответствует запрошенному значению. Запрошено байт: 0, получено: 6
+00 00 00 00 00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 
+Ошибка сети, получен пакет некорректной длинны. Длинна 0, байт код: 00 00 00 00 00 00 
+00 00 00 00 00 00 
+00 00 00 00 00 00 
+Ошибка сети, получен пакет некорректной длинны. Длинна 0, байт код: 00 00 00 00 00 00 
+00 00 00 00 00 00 
+Ошибка сети, получен пакет некорректной длинны. Длинна 0, байт код: 00 00 00 00 00 00 
+00 00 00 00 00 00 
+Ошибка сети, количество байт не соответствует запрошенному значению. Запрошено байт: 0, получено: 6
+Fail to read header. Packet size: 0
+Error: System.ObjectDisposedException: Cannot access a disposed object.
+Object name: 'System.Net.Sockets.NetworkStream'.
+  at System.Net.Sockets.NetworkStream.ReadAsync (System.Byte[] buffer, System.Int32 offset, System.Int32 size, System.Threading.CancellationToken cancellationToken) [0x0001b] in <4663fa2b329d4dfb93efb27413cffe64>:0 
+  at System.IO.Stream.ReadAsync (System.Byte[] buffer, System.Int32 offset, System.Int32 count) [0x00009] in <1f66344f2f89470293d8b67d71308c07>:0 
+  at (wrapper remoting-invoke-with-check) System.IO.Stream.ReadAsync(byte[],int,int)
+  at Server.ReadHeaderCallback (System.Byte[] buffer, Server+ServerClient client) [0x003b5] in E:\UnityServerGameRep\Assets\Code\Server.cs:159 
+00 00 00 00 00 00 00 00 00 00 00 00 
+Ошибка сети, количество байт не соответствует запрошенному значению. Запрошено байт: 0, получено: 12
+Fail to read header. Packet size: 0
+Error: System.ObjectDisposedException: Cannot access a disposed object.
+Object name: 'System.Net.Sockets.NetworkStream'.
+  at System.Net.Sockets.NetworkStream.ReadAsync (System.Byte[] buffer, System.Int32 offset, System.Int32 size, System.Threading.CancellationToken cancellationToken) [0x0001b] in <4663fa2b329d4dfb93efb27413cffe64>:0 
+  at System.IO.Stream.ReadAsync (System.Byte[] buffer, System.Int32 offset, System.Int32 count) [0x00009] in <1f66344f2f89470293d8b67d71308c07>:0 
+  at (wrapper remoting-invoke-with-check) System.IO.Stream.ReadAsync(byte[],int,int)
+  at Server.ReadHeaderCallback (System.Byte[] buffer, Server+ServerClient client) [0x003b5] in E:\UnityServerGameRep\Assets\Code\Server.cs:159 
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+00 00 00 00 00 00 
+Ошибка сети, получен пакет некорректной длинны. Длинна 0, байт код: 00 00 00 00 00 00 

@@ -13,7 +13,6 @@ using PacketHeaders;
 
 public class Server : MonoBehaviour
 {
-
     public static string PrintByteArray(byte[] bytes, int offset = 0)
     {
         StringBuilder sb = new StringBuilder();
@@ -36,7 +35,8 @@ public class Server : MonoBehaviour
             this.tcp = tcp;
         }
 
-        public float [] lastPos = new float[4];
+        public string PlayerName;
+        public float[] lastPos = new float[4];
         public bool authorized = false;
     }
 
@@ -48,16 +48,41 @@ public class Server : MonoBehaviour
     private Thread serverThread;
     static ConcurrentDictionary<ServerClient, object> clients = new ConcurrentDictionary<ServerClient, object>();
     private Queue<Tuple<ServerClient, PacketDecryptor>> messageQueue = new Queue<Tuple<ServerClient, PacketDecryptor>>(); //Packet queue
+    public StreamWriter sw = null;
 
+    /*public static void Main()
+    {
+        Program init = new Program();
+        init.Init();
+    }*/
+
+    private void Start()
+    {
+        Init();
+    }
+
+    public void printf(string str)
+    {
+        if (sw != null)
+        {
+            sw.WriteLine(str);
+            sw.Flush();
+        }
+    }
     // Start is called before the first frame update
     public async Task Init()
     {
-        DontDestroyOnLoad(gameObject);
+        // Create a file to write to.
+        sw = new StreamWriter(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "ServerLogs.txt"));
+        printf("SERVER начал работу.");
         try
         {
+
+
             server = new TcpListener(IPAddress.Any, port);
             server.Start();
             serverStarted = true;
+
             Debug.Log("SERVER начал работу.");
             serverThread = new Thread(new ThreadStart(QueueUpdate));
             serverThread.Start();
@@ -67,7 +92,7 @@ public class Server : MonoBehaviour
         {
             Debug.Log("SERVER Socket error: " + e.Message);
         }
-    } 
+    }
     public async Task StartListening()
     {
         while (true)
@@ -76,7 +101,7 @@ public class Server : MonoBehaviour
             clients.TryAdd(client, null);
             Debug.Log($"Client connected: {client.tcp.Client.RemoteEndPoint}");
             client.stream = client.tcp.GetStream();
-            Packet packet = new Packet((int)PacketHeaders.WorldCommand.SMSG_OFFER_ENTER);
+            Packet packet = new Packet((int)WorldCommand.SMSG_OFFER_ENTER);
             packet.Write((int)0);
             await client.stream.WriteAsync(packet.GetBytes());
 
@@ -102,8 +127,10 @@ public class Server : MonoBehaviour
                 clients.TryRemove(client, out _);
                 return;
             }
-            if(bytesRead != client.Remaining) //Если количество байт которое мы получили не соответствует тому, которое мы запросили
+            printf($"{PrintByteArray(client.buffer)}");
+            if (bytesRead != client.Remaining) //Если количество байт которое мы получили не соответствует тому, которое мы запросили
             {
+                printf($"Ошибка сети, количество байт не соответствует запрошенному значению. Запрошено байт: {client.Remaining}, получено: {bytesRead}");
                 Debug.Log($"Ошибка сети, количество байт не соответствует запрошенному значению. Запрошено байт: {client.Remaining}, получено: {bytesRead}");
                 //Пытаемся запросить байты по новой
                 client.buffer = new byte[client.Remaining];
@@ -111,11 +138,12 @@ public class Server : MonoBehaviour
                 ReadHeaderCallback(client.buffer, client);
                 return;
             }
-            
+
             int headerSize = (int)BitConverter.ToUInt32(client.buffer, 2); //Ищем длинну пакета
-            
+
             if (headerSize > MaxDataSize || headerSize < 1) //Если количество байтов пакета больше или меньше разрешенного 
             {
+                printf($"Ошибка сети, получен пакет некорректной длинны. Длинна {headerSize}, байт код: {PrintByteArray(client.buffer)}");
                 Debug.Log($"Ошибка сети, получен пакет некорректной длинны. Длинна {headerSize}, байт код: {PrintByteArray(client.buffer)}");
                 client.buffer = new byte[client.Remaining];
                 await client.stream.ReadAsync(client.buffer, 0, client.Remaining);
@@ -125,14 +153,16 @@ public class Server : MonoBehaviour
             client.CountGetPacketData += bytesRead;
             try
             {
-                client.Remaining = headerSize; 
+                client.Remaining = headerSize;
                 Array.Resize(ref client.buffer, client.CountGetPacketData + client.Remaining);
                 //client.stream.BeginRead(client.buffer, client.CountGetPacketData, client.Remaining, ReadDataCallback, new Tuple<ServerClient>(client));
                 await client.stream.ReadAsync(client.buffer, client.CountGetPacketData, client.Remaining);
                 ReadDataCallback(client.buffer, client);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
+                printf($"Fail to read header. Packet size: {headerSize}\nError: {ex}");
+
                 Debug.Log($"Fail to read header. Packet size: {headerSize}\nError: {ex}");
             }
         }
@@ -157,14 +187,14 @@ public class Server : MonoBehaviour
                 clients.TryRemove(client, out _);
                 return;
             }
-
- /*           if (bytesRead != client.Remaining) //Если количество байт которое мы получили не соответствует тому, которое мы запросили
-            {
-                Debug.Log($"Ошибка сети, количество байт не соответствует запрошенному значению. Запрошено байт: {client.Remaining}, получено: {bytesRead}");
-                //Пытаемся запросить байты по новой
-                client.stream.BeginRead(client.buffer, client.CountGetPacketData, client.Remaining, ReadDataCallback, new Tuple<ServerClient>(client));
-                return;
-            }*/
+            printf($"{PrintByteArray(client.buffer)}");
+            /*           if (bytesRead != client.Remaining) //Если количество байт которое мы получили не соответствует тому, которое мы запросили
+                       {
+                           Debug.Log($"Ошибка сети, количество байт не соответствует запрошенному значению. Запрошено байт: {client.Remaining}, получено: {bytesRead}");
+                           //Пытаемся запросить байты по новой
+                           client.stream.BeginRead(client.buffer, client.CountGetPacketData, client.Remaining, ReadDataCallback, new Tuple<ServerClient>(client));
+                           return;
+                       }*/
 
             PacketDecryptor packet = new PacketDecryptor(client.buffer);
             client.CountGetPacketData = 0;
@@ -217,153 +247,159 @@ public class Server : MonoBehaviour
     {
         //Логика обработчика данных
         int packetid = packet.GetPacketId();
-        switch ((WorldCommand) packetid)
+        switch ((WorldCommand)packetid)
         {
             case (WorldCommand.CMSG_OFFER_ENTER_ANSWER): //Запрос на авторизацию клиента
-            {
-                Debug.Log("SERVER: Клиент подтвердил, что его id - " + packet.ReadInt());
-                Debug.Log("SERVER: Начинаем игру!");
-                Packet apacket = new Packet((int) PacketHeaders.WorldCommand.SMSG_START_GAME);
-                apacket.Write(1);
-                c.stream.WriteAsync(apacket.GetBytes());
-                break;
-            }
+                {
+                    int playerid = packet.ReadInt();
+                    c.PlayerName = packet.ReadString();
+                    Debug.Log($"SERVER: Игрок {c.PlayerName} подключился к серверу");
+                    Debug.Log("SERVER: Начинаем игру!");
+
+                    Packet apacket = new Packet((int)WorldCommand.SMSG_START_GAME);
+                    apacket.Write(1);
+                    c.stream.WriteAsync(apacket.GetBytes());
+                    break;
+                }
             case (WorldCommand.CMSG_PLAYER_LOGIN): //Запрос на вход в игровой мир клиента
-            {
-
-                c.authorized = true;
-                int objModelId = packet.ReadInt();
-
-
-                c.lastPos[0] = packet.ReadFloat();
-                c.lastPos[1] = packet.ReadFloat();
-                c.lastPos[2] = packet.ReadFloat();
-
-                c.lastPos[3] = packet.ReadFloat();
-
-                Packet responcePacket = new Packet((int)WorldCommand.SMSG_PLAYER_LOGIN);
-                responcePacket.Write((string) c.tcp.Client.RemoteEndPoint.ToString());
-
-                responcePacket.Write((float) c.lastPos[0]);
-                responcePacket.Write((float) c.lastPos[1]);
-                responcePacket.Write((float) c.lastPos[2]);
-                responcePacket.Write((float) c.lastPos[3]);
-
-                foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
                 {
-                    if(c.tcp == client.tcp) continue;
-                    if(client.authorized == false) continue;
-                    client.stream.WriteAsync(responcePacket.GetBytes());
-                    Debug.Log($"Тестирование - {client.tcp.Client.RemoteEndPoint.ToString()}");
+
+                    c.authorized = true;
+                    //int objModelId = packet.ReadInt();
+
+
+                    c.lastPos[0] = packet.ReadFloat();
+                    c.lastPos[1] = packet.ReadFloat();
+                    c.lastPos[2] = packet.ReadFloat();
+
+                    c.lastPos[3] = packet.ReadFloat();
+
+                    Packet responcePacket = new Packet((int)WorldCommand.SMSG_PLAYER_LOGIN);
+                    responcePacket.Write((string)c.tcp.Client.RemoteEndPoint.ToString());
+                    responcePacket.Write((string)c.PlayerName);
+
+                    responcePacket.Write((float)c.lastPos[0]);
+                    responcePacket.Write((float)c.lastPos[1]);
+                    responcePacket.Write((float)c.lastPos[2]);
+                    responcePacket.Write((float)c.lastPos[3]);
+
+                    foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
+                    {
+                        if (c.tcp == client.tcp) continue;
+                        if (client.authorized == false) continue;
+                        client.stream.WriteAsync(responcePacket.GetBytes());
+                        Debug.Log($"Тестирование - {client.tcp.Client.RemoteEndPoint.ToString()}");
+                    }
+
+                    //
+                    Packet playersPacket = new Packet((int)WorldCommand.SMSG_CREATE_PLAYERS);
+
+                    int counter = 0;
+                    foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
+                    {
+                        if (c.tcp == client.tcp) continue;
+                        if (client.authorized == false) continue;
+                        counter++;
+                    }
+
+                    playersPacket.Write((int)counter);
+
+                    foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
+                    {
+                        if (c.tcp == client.tcp) continue;
+                        if (client.authorized == false) continue;
+
+                        playersPacket.Write((string)client.tcp.Client.RemoteEndPoint.ToString());
+                        playersPacket.Write((string)client.PlayerName);
+                        playersPacket.Write((float)client.lastPos[0]);
+                        playersPacket.Write((float)client.lastPos[1]);
+                        playersPacket.Write((float)client.lastPos[2]);
+                        playersPacket.Write((float)client.lastPos[3]);
+                    }
+
+                    c.stream.WriteAsync(playersPacket.GetBytes());
+
+                    break;
                 }
-
-                //
-                Packet playersPacket = new Packet((int) WorldCommand.SMSG_CREATE_PLAYERS);
-
-                int counter = 0;
-                foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
-                {
-                    if(c.tcp == client.tcp) continue;
-                    if(client.authorized == false) continue;
-                    counter ++;
-                }
-
-                playersPacket.Write((int) counter);
-                
-                foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
-                {
-                    if(c.tcp == client.tcp) continue;
-                    if(client.authorized == false) continue;
-                    
-                    playersPacket.Write((string) client.tcp.Client.RemoteEndPoint.ToString());
-                    playersPacket.Write((float) client.lastPos[0]);
-                    playersPacket.Write((float) client.lastPos[1]);
-                    playersPacket.Write((float) client.lastPos[2]);
-                    playersPacket.Write((float) client.lastPos[3]);
-                }
-
-                c.stream.WriteAsync(playersPacket.GetBytes());
-
-                break;
-            }
             case (WorldCommand.CMSG_OBJ_INFO): //Синхронизация объектов и игроков
-            {
-                Packet responcePacket = new Packet( (int) WorldCommand.SMSG_OBJ_INFO);
-
-                responcePacket.Write((string) c.tcp.Client.RemoteEndPoint.ToString()); //Object ID
-                responcePacket.Write((int) packet.ReadInt()); //animid
-                byte before = packet.ReadByte();
-                responcePacket.Write((byte) before); //before
-
-                bool position = (before & 0b100) != 0;
-                bool rotation = (before & 0b010) != 0;
-                bool speed = (before & 0b001) != 0;
-
-                if(position){
-                    //Debug.Log($"POS: {packet.ReadFloat()}; {packet.ReadFloat()}; {packet.ReadFloat()}");
-                    responcePacket.Write((float) packet.ReadFloat());
-                    responcePacket.Write((float) packet.ReadFloat());
-                    responcePacket.Write((float) packet.ReadFloat());
-                }
-
-                if(rotation)
                 {
-                    //Debug.Log($"ROT: {packet.ReadFloat()}; {packet.ReadFloat()}; {packet.ReadFloat()}");
-                    responcePacket.Write((float) packet.ReadFloat());
-                }
+                    Packet responcePacket = new Packet((int)WorldCommand.SMSG_OBJ_INFO);
 
-                if(speed)
-                {
-                    //Debug.Log($"SPEED: {packet.ReadFloat()}; {packet.ReadFloat()}; {packet.ReadFloat()}");
-                    responcePacket.Write((float) packet.ReadFloat());
-                    responcePacket.Write((float) packet.ReadFloat());
-                    responcePacket.Write((float) packet.ReadFloat());
-                }
+                    responcePacket.Write((string)c.tcp.Client.RemoteEndPoint.ToString()); //Object ID
+                    responcePacket.Write((int)packet.ReadInt()); //animid
+                    byte before = packet.ReadByte();
+                    responcePacket.Write((byte)before); //before
 
-                    
-                
+                    bool position = (before & 0b100) != 0;
+                    bool rotation = (before & 0b010) != 0;
+                    bool speed = (before & 0b001) != 0;
 
-                foreach (ServerClient client in clients.Keys)
-                {
-                    if(c == client) continue;
-                    if(client.authorized == false) continue;
-                    
-                    client.stream.WriteAsync(responcePacket.GetBytes());
+                    if (position)
+                    {
+                        //Debug.Log($"POS: {packet.ReadFloat()}; {packet.ReadFloat()}; {packet.ReadFloat()}");
+                        responcePacket.Write((float)packet.ReadFloat());
+                        responcePacket.Write((float)packet.ReadFloat());
+                        responcePacket.Write((float)packet.ReadFloat());
+                    }
+
+                    if (rotation)
+                    {
+                        //Debug.Log($"ROT: {packet.ReadFloat()}; {packet.ReadFloat()}; {packet.ReadFloat()}");
+                        responcePacket.Write((float)packet.ReadFloat());
+                    }
+
+                    if (speed)
+                    {
+                        //Debug.Log($"SPEED: {packet.ReadFloat()}; {packet.ReadFloat()}; {packet.ReadFloat()}");
+                        responcePacket.Write((float)packet.ReadFloat());
+                        responcePacket.Write((float)packet.ReadFloat());
+                        responcePacket.Write((float)packet.ReadFloat());
+                    }
+
+
+
+
+                    foreach (ServerClient client in clients.Keys)
+                    {
+                        if (c == client) continue;
+                        if (client.authorized == false) continue;
+
+                        client.stream.WriteAsync(responcePacket.GetBytes());
+                    }
+                    //Debug.Log("POS: " +packet.ReadFloat() + "; " + packet.ReadFloat() + "; " + packet.ReadFloat() + "; ");
+                    break;
                 }
-                //Debug.Log("POS: " +packet.ReadFloat() + "; " + packet.ReadFloat() + "; " + packet.ReadFloat() + "; ");
-                break;
-            }
             case (WorldCommand.CMSG_CREATE_BULLET): //Создание пули от клиента
-            {
-                Packet responcePacket = new Packet((int)WorldCommand.SMSG_CREATE_BULLET);
-
-                responcePacket.Write((string)c.tcp.Client.RemoteEndPoint.ToString());
-
-                //Позиция
-                responcePacket.Write((float) packet.ReadFloat());
-                responcePacket.Write((float) packet.ReadFloat());
-                responcePacket.Write((float) packet.ReadFloat());
-
-                //ротация
-                responcePacket.Write((float) packet.ReadFloat());
-                responcePacket.Write((float) packet.ReadFloat());
-                responcePacket.Write((float) packet.ReadFloat());
-
-                //Скорость
-                responcePacket.Write((float) packet.ReadFloat());
-                responcePacket.Write((float) packet.ReadFloat());
-                responcePacket.Write((float) packet.ReadFloat());
-
-                foreach (ServerClient client in clients.Keys)
                 {
-                    if(c == client) continue;
-                    if(client.authorized == false) continue;
-                    
-                    client.stream.WriteAsync(responcePacket.GetBytes());
-                }
+                    Packet responcePacket = new Packet((int)WorldCommand.SMSG_CREATE_BULLET);
 
-                break;
-            }
+                    responcePacket.Write((string)c.tcp.Client.RemoteEndPoint.ToString());
+
+                    //Позиция
+                    responcePacket.Write((float)packet.ReadFloat());
+                    responcePacket.Write((float)packet.ReadFloat());
+                    responcePacket.Write((float)packet.ReadFloat());
+
+                    //ротация
+                    responcePacket.Write((float)packet.ReadFloat());
+                    responcePacket.Write((float)packet.ReadFloat());
+                    responcePacket.Write((float)packet.ReadFloat());
+
+                    //Скорость
+                    responcePacket.Write((float)packet.ReadFloat());
+                    responcePacket.Write((float)packet.ReadFloat());
+                    responcePacket.Write((float)packet.ReadFloat());
+
+                    foreach (ServerClient client in clients.Keys)
+                    {
+                        if (c == client) continue;
+                        if (client.authorized == false) continue;
+
+                        client.stream.WriteAsync(responcePacket.GetBytes());
+                    }
+
+                    break;
+                }
         }
     }
 
