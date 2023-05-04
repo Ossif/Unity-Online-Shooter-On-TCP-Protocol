@@ -67,6 +67,7 @@ public class Server : MonoBehaviour
     // Start is called before the first frame update
     public async Task Init()
     {
+        DontDestroyOnLoad(gameObject);
         // Create a file to write to.
         sw = new StreamWriter(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "ServerLogs.txt"));
         printf("SERVER начал работу.");
