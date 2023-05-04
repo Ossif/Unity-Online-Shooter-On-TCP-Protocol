@@ -142,8 +142,8 @@ public class Shoot : MonoBehaviour
         }
         
         if(ws.slotAmmo[ws.currentSlot] != 0){ 
-            if(weaponList[index].isAuto == true){
-
+            if(weaponList[index].isAuto == true)
+            { 
                 if(Input.GetKey(KeyCode.Mouse0)) {
                     CreateBullet(index);
                 }

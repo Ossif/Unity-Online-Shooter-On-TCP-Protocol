@@ -231,7 +231,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c48281385b01db46bd0dfe1fb54757d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Speed: 7.5
+  Speed: 14
   JumpForce: 8
   Gravity: 20
   girl: {fileID: 0}
