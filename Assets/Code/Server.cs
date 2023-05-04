@@ -72,20 +72,25 @@ public class Server : MonoBehaviour
         printf("SERVER начал работу.");
         try
         {
-
-
             server = new TcpListener(IPAddress.Any, port);
             server.Start();
             serverStarted = true;
 
             Debug.Log("SERVER начал работу.");
-            serverThread = new Thread(new ThreadStart(QueueUpdate));
-            serverThread.Start();
-            await StartListening();
         }
         catch (Exception e)
         {
             Debug.Log("SERVER Socket error: " + e.Message);
+        }
+        try
+        {
+            serverThread = new Thread(new ThreadStart(QueueUpdate));
+            serverThread.Start();
+            await StartListening();
+        }
+        catch(Exception e)
+        {
+            Debug.Log($"Server listener error: {e.Message}");
         }
     }
     public async Task StartListening()
