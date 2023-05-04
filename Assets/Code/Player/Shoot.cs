@@ -9,9 +9,6 @@ public class Shoot : MonoBehaviour
     public GameObject bullet;
     public Camera cam;
     public ParticleSystem ShotParticle;
-    public AudioSource ShotAudioSource;
-    public AudioClip ShotClip;
-    public float ShotRate = 0;
     public float speed;
     private float TimeToNextShot;
 
@@ -38,6 +35,62 @@ public class Shoot : MonoBehaviour
         weaponList = we.weaponList;
     }
 
+    public void CreateBullet(int index){ 
+        if(TimeToNextShot >= weaponList[index].shotTime){
+            TimeToNextShot = 0;
+            ws.slotAmmo[ws.currentSlot] --;
+            ws.canvasController.SetAmmoLeft(ws.slotAmmo[ws.currentSlot]);
+            /*TimeToNextShot = Time.time + 1f / ShotRate;
+            ShotParticle.Play();
+            ShotAudioSource.PlayOneShot(ShotClip);*/
+
+            ws.handsAnimator.SetTrigger("H_" + weaponList[index].shotAnim);
+            ws.weaponObject.transform.Find("model").GetComponent<Animator>().SetTrigger("shot");
+
+            Vector3 vec = cam.transform.position + cam.transform.forward;
+            GameObject insBull = Instantiate(bullet, vec, Quaternion.identity);
+            insBull.GetComponent<Rigidbody>().velocity = cam.transform.forward * speed;
+        
+            if(client != null){
+                Packet packet = new Packet((int) PacketHeaders.WorldCommand.CMSG_CREATE_BULLET);
+                
+
+                //Vector3 position = gameObject.transform.position;
+                
+                packet.Write((float)vec.x);
+                packet.Write((float)vec.y);
+                packet.Write((float)vec.z);
+
+                Quaternion rotation = gameObject.transform.rotation;
+                packet.Write((float) rotation.x);
+                packet.Write((float) rotation.y);
+                packet.Write((float) rotation.z);
+
+                Vector3 bulletSpeed = cam.transform.forward * speed;
+                packet.Write((float) bulletSpeed.x);
+                packet.Write((float) bulletSpeed.y);
+                packet.Write((float) bulletSpeed.z);
+                
+                client.Send(packet);
+            }
+
+            switch (weaponList[index].weaponId){ 
+                case WeaponEnumIds.WeaponId.PISTOL:{
+                    ws.AS.PlayOneShot(ws.PistolShotClip);
+                    break;
+                }
+                case WeaponEnumIds.WeaponId.AK:{
+                    ws.AS.PlayOneShot(ws.AKShotClip);
+                    break;
+                }
+                case WeaponEnumIds.WeaponId.SAWNED_OFF:{
+                    ws.AS.PlayOneShot(ws.SOShotClip);
+                    break;
+                }
+            }
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -58,47 +111,8 @@ public class Shoot : MonoBehaviour
         if(ws.slotAmmo[ws.currentSlot] != 0){ 
             if(weaponList[index].isAuto == true){
 
-                if(Input.GetKey(KeyCode.Mouse0)) 
-                {
-                    if(TimeToNextShot >= weaponList[index].shotTime){
-
-                        TimeToNextShot = 0;
-                        ws.slotAmmo[ws.currentSlot] --;
-                        ws.canvasController.SetAmmoLeft(ws.slotAmmo[ws.currentSlot]);
-                        /*TimeToNextShot = Time.time + 1f / ShotRate;
-                        ShotParticle.Play();
-                        ShotAudioSource.PlayOneShot(ShotClip);*/
-
-                        ws.handsAnimator.SetTrigger("H_" + weaponList[index].shotAnim);
-                        ws.weaponObject.transform.Find("model").GetComponent<Animator>().SetTrigger("shot");
-
-                        Vector3 vec = cam.transform.position + cam.transform.forward;
-                        GameObject insBull = Instantiate(bullet, vec, Quaternion.identity);
-                        insBull.GetComponent<Rigidbody>().velocity = cam.transform.forward * speed;
-        
-                        if(client != null){
-                            Packet packet = new Packet((int) PacketHeaders.WorldCommand.CMSG_CREATE_BULLET);
-                
-
-                            //Vector3 position = gameObject.transform.position;
-                
-                            packet.Write((float)vec.x);
-                            packet.Write((float)vec.y);
-                            packet.Write((float)vec.z);
-
-                            Quaternion rotation = gameObject.transform.rotation;
-                            packet.Write((float) rotation.x);
-                            packet.Write((float) rotation.y);
-                            packet.Write((float) rotation.z);
-
-                            Vector3 bulletSpeed = cam.transform.forward * speed;
-                            packet.Write((float) bulletSpeed.x);
-                            packet.Write((float) bulletSpeed.y);
-                            packet.Write((float) bulletSpeed.z);
-                
-                            client.Send(packet);
-                        }
-                    }
+                if(Input.GetKey(KeyCode.Mouse0)) {
+                    CreateBullet(index);
                 }
                 if(TimeToNextShot <= weaponList[index].shotTime) TimeToNextShot += Time.deltaTime;
             }
@@ -106,47 +120,15 @@ public class Shoot : MonoBehaviour
             {
                 if(Input.GetKeyDown(KeyCode.Mouse0)) 
                 {
-                    if(TimeToNextShot >= weaponList[index].shotTime){
-
-                        TimeToNextShot = 0;
-                        ws.slotAmmo[ws.currentSlot] --;
-                        ws.canvasController.SetAmmoLeft(ws.slotAmmo[ws.currentSlot]);
-                        /*TimeToNextShot = Time.time + 1f / ShotRate;
-                        ShotParticle.Play();
-                        ShotAudioSource.PlayOneShot(ShotClip);*/
-
-                        ws.handsAnimator.SetTrigger("H_"+weaponList[index].shotAnim);
-                        ws.weaponObject.transform.Find("model").GetComponent<Animator>().SetTrigger("shot");
-
-                        Vector3 vec = cam.transform.position + cam.transform.forward;
-                        GameObject insBull = Instantiate(bullet, vec, Quaternion.identity);
-                        insBull.GetComponent<Rigidbody>().velocity = cam.transform.forward * speed;
-        
-                        if(client != null){
-                            Packet packet = new Packet((int) PacketHeaders.WorldCommand.CMSG_CREATE_BULLET);
-                
-
-                            //Vector3 position = gameObject.transform.position;
-                
-                            packet.Write((float)vec.x);
-                            packet.Write((float)vec.y);
-                            packet.Write((float)vec.z);
-
-                            Quaternion rotation = gameObject.transform.rotation;
-                            packet.Write((float) rotation.x);
-                            packet.Write((float) rotation.y);
-                            packet.Write((float) rotation.z);
-
-                            Vector3 bulletSpeed = cam.transform.forward * speed;
-                            packet.Write((float) bulletSpeed.x);
-                            packet.Write((float) bulletSpeed.y);
-                            packet.Write((float) bulletSpeed.z);
-                
-                            client.Send(packet);
-                        }
-                    }
+                    CreateBullet(index);
                 }
                 if(TimeToNextShot <= weaponList[index].shotTime) TimeToNextShot += Time.deltaTime;
+            }
+        }
+        else{ 
+            if(Input.GetKeyDown(KeyCode.Mouse0)) 
+            {
+                ws.AS.PlayOneShot(ws.EmptyAmmo);
             }
         }
     }

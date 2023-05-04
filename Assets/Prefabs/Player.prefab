@@ -1,5 +1,133 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4638908677949621108
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3530615993983580739}
+  - component: {fileID: 1884678611136456869}
+  m_Layer: 0
+  m_Name: Audio Source
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3530615993983580739
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4638908677949621108}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.348, z: 1.106}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8866188630672528429}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!82 &1884678611136456869
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4638908677949621108}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &5329557961677732252
 GameObject:
   m_ObjectHideFlags: 0
@@ -70,6 +198,7 @@ Transform:
   m_Children:
   - {fileID: 8866188631761620780}
   - {fileID: 8866188631274992931}
+  - {fileID: 3530615993983580739}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -184,12 +313,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AK_cartridge: {fileID: 4361209956758616561, guid: 50258e38ac3dfe046a69095e45b8f093, type: 3}
   we: {fileID: 0}
+  AS: {fileID: 1884678611136456869}
+  EmptyAmmo: {fileID: 8300000, guid: 9149461fcad64454692b15938b689ef6, type: 3}
+  PistolReloadClip: {fileID: 8300000, guid: 2462f478c7bee6c48a519b1123c2e6b7, type: 3}
+  PistolShotClip: {fileID: 8300000, guid: 362f61e14b253a64cb971c8441c94633, type: 3}
+  PistolTakeClip: {fileID: 8300000, guid: f46352dd37b9a284cb3d266b380a8b6a, type: 3}
+  AKReloadClip: {fileID: 8300000, guid: ec41a9a1b82351a459e47b69845d9bbe, type: 3}
+  AKShotClip: {fileID: 8300000, guid: 03b2d2e29659d6543b9c0e715fb37ecd, type: 3}
+  AKTakeClip: {fileID: 8300000, guid: 12d4017dc9326ae45b335cbb9124d0be, type: 3}
+  SOReloadClip: {fileID: 8300000, guid: c053152386b4e124ab6fcef10fa9b00b, type: 3}
+  SOShotClip: {fileID: 8300000, guid: 8d15cbf5824508c4590f1b8a2da82e3b, type: 3}
+  SOTakeClip: {fileID: 8300000, guid: 37f52cbbc68a91240ba7c3dfe2471170, type: 3}
   weaponSlots: 000000000000000000000000
   slotAmmo: 000000000000000000000000
   maxAmmo: 000000000000000000000000
   currentSlot: 0
   weaponObject: {fileID: 0}
   handsAnimator: {fileID: 0}
+  canvasController: {fileID: 0}
 --- !u!114 &993722691079666622
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -205,9 +346,6 @@ MonoBehaviour:
   bullet: {fileID: 383235577832844704, guid: 5094691bacca0eb49a3efe3f4a6986c3, type: 3}
   cam: {fileID: 8866188631761620779}
   ShotParticle: {fileID: 0}
-  ShotAudioSource: {fileID: 0}
-  ShotClip: {fileID: 0}
-  ShotRate: 15
   speed: 70
 --- !u!1 &8866188631274992930
 GameObject:

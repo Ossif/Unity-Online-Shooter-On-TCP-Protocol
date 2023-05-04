@@ -11,6 +11,22 @@ public class WeaponSystem : MonoBehaviour
 
     public WeaponEnum we;
 
+    public AudioSource AS;
+    
+    public AudioClip EmptyAmmo;
+
+    public AudioClip PistolReloadClip;
+    public AudioClip PistolShotClip;
+    public AudioClip PistolTakeClip;
+
+    public AudioClip AKReloadClip;
+    public AudioClip AKShotClip;
+    public AudioClip AKTakeClip;
+
+    public AudioClip SOReloadClip;
+    public AudioClip SOShotClip;
+    public AudioClip SOTakeClip;
+
     public WeaponId[] weaponSlots = new WeaponId[3];
     public int[] slotAmmo = new int[3];
     public int[] maxAmmo = new int[3];
@@ -85,6 +101,22 @@ public class WeaponSystem : MonoBehaviour
                 canvasController.SetAmmoTotal(maxAmmo[currentSlot]);
 
                 handAnim += w.takeAnim;
+
+                switch (w.weaponId){ 
+                    case WeaponEnumIds.WeaponId.PISTOL:{ 
+                        AS.PlayOneShot(PistolTakeClip);
+                        break;
+                    }
+                    case WeaponEnumIds.WeaponId.AK:{ 
+                        AS.PlayOneShot(AKTakeClip);
+                        break;
+                    }
+                    case WeaponEnumIds.WeaponId.SAWNED_OFF:{ 
+                        AS.PlayOneShot(SOTakeClip);
+                        break;
+                    }
+                }  
+
                 break;
             }
         }
@@ -146,10 +178,24 @@ public class WeaponSystem : MonoBehaviour
                         weaponCartridge.transform.parent = GameObject.Find("FPSAnimationsObject").GetComponent<Transform>();
                         weaponCartridge.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
                         weaponCartridge.transform.localRotation = new Quaternion(0, 0, 0, 0);
-                        weaponCartridge.transform.localPosition = new Vector3(0, 0, 0);
+                        weaponCartridge.transform.localPosition = new Vector3(0, 0f, 0);
                     }
                     handAnim += w.reloadAnim;
                     weaponObject.transform.GetChild(0).GetComponent<Animator>().Play(w.reloadAnim);
+                    switch (w.weaponId){ 
+                        case WeaponEnumIds.WeaponId.PISTOL:{ 
+                            AS.PlayOneShot(PistolReloadClip);
+                            break;
+                        }
+                        case WeaponEnumIds.WeaponId.AK:{ 
+                            AS.PlayOneShot(AKReloadClip);
+                            break;
+                        }
+                        case WeaponEnumIds.WeaponId.SAWNED_OFF:{ 
+                            AS.PlayOneShot(SOReloadClip);
+                            break;
+                        }
+                    }           
                     break;
                 }
             }
