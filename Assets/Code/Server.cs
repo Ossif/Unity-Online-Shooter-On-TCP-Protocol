@@ -56,11 +56,6 @@ public class Server : MonoBehaviour
         init.Init();
     }*/
 
-    private void Start()
-    {
-        Init();
-    }
-
     public void printf(string str)
     {
         if (sw != null)
