@@ -30,7 +30,7 @@ public class Shoot : MonoBehaviour
         if(client == null) Debug.Log("Ошибка:Клиент не найден!");
         ws = gameObject.GetComponent<WeaponSystem>();
 
-        WeaponEnum we = new WeaponEnum();
+        WeaponEnum we = gameObject.GetComponent<WeaponEnum>();
         we.InitializeAllWeapon();
         weaponList = we.weaponList;
     }

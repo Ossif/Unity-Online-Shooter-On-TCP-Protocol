@@ -18,7 +18,7 @@ public class HandsAnimationEvents : MonoBehaviour
     
     void SuccessReload()
     { 
-        GameObject.Find("Player").GetComponent<WeaponSystem>().SuccessReload();
+        GameObject.Find("Player(Clone)").GetComponent<WeaponSystem>().SuccessReload();
     }
 
 }
