@@ -48,32 +48,65 @@ public class Shoot : MonoBehaviour
             ws.weaponObject.transform.Find("model").GetComponent<Animator>().SetTrigger("shot");
 
             Vector3 vec = cam.transform.position + cam.transform.forward;
-            GameObject insBull = Instantiate(bullet, vec, Quaternion.identity);
-            insBull.GetComponent<Rigidbody>().velocity = cam.transform.forward * speed;
+            if(weaponList[index].weaponId != WeaponEnumIds.WeaponId.SAWNED_OFF){ 
+                GameObject insBull = Instantiate(bullet, vec, Quaternion.identity);
+                insBull.GetComponent<Rigidbody>().velocity = cam.transform.forward * speed;
         
-            if(client != null){
-                Packet packet = new Packet((int) PacketHeaders.WorldCommand.CMSG_CREATE_BULLET);
+                if(client != null){
+                    Packet packet = new Packet((int) PacketHeaders.WorldCommand.CMSG_CREATE_BULLET);
                 
 
-                //Vector3 position = gameObject.transform.position;
+                    //Vector3 position = gameObject.transform.position;
                 
-                packet.Write((float)vec.x);
-                packet.Write((float)vec.y);
-                packet.Write((float)vec.z);
+                    packet.Write((float)vec.x);
+                    packet.Write((float)vec.y);
+                    packet.Write((float)vec.z);
 
-                Quaternion rotation = gameObject.transform.rotation;
-                packet.Write((float) rotation.x);
-                packet.Write((float) rotation.y);
-                packet.Write((float) rotation.z);
+                    Quaternion rotation = gameObject.transform.rotation;
+                    packet.Write((float) rotation.x);
+                    packet.Write((float) rotation.y);
+                    packet.Write((float) rotation.z);
 
-                Vector3 bulletSpeed = cam.transform.forward * speed;
-                packet.Write((float) bulletSpeed.x);
-                packet.Write((float) bulletSpeed.y);
-                packet.Write((float) bulletSpeed.z);
+                    Vector3 bulletSpeed = cam.transform.forward * speed;
+                    packet.Write((float) bulletSpeed.x);
+                    packet.Write((float) bulletSpeed.y);
+                    packet.Write((float) bulletSpeed.z);
                 
-                client.Send(packet);
+                    client.Send(packet);
+                }
             }
+            else{ 
+                for(int i = 0; i < 5; i ++){ 
+                    var rotationY = Quaternion.AngleAxis(Random.Range(-5.0f,5.0f), transform.up);
+                    var rotationX = Quaternion.AngleAxis(Random.Range(-5.0f,5.0f), transform.right);
 
+                    GameObject insBull = Instantiate(bullet, vec, cam.transform.rotation * rotationX * rotationY);
+                    insBull.GetComponent<Rigidbody>().velocity = insBull.transform.forward * speed;
+        
+                    if(client != null){
+                        Packet packet = new Packet((int) PacketHeaders.WorldCommand.CMSG_CREATE_BULLET);
+                
+
+                        //Vector3 position = gameObject.transform.position;
+                
+                        packet.Write((float)vec.x);
+                        packet.Write((float)vec.y);
+                        packet.Write((float)vec.z);
+
+                        Quaternion rotation = gameObject.transform.rotation;
+                        packet.Write((float) rotation.x);
+                        packet.Write((float) rotation.y);
+                        packet.Write((float) rotation.z);
+
+                        Vector3 bulletSpeed = cam.transform.forward * speed;
+                        packet.Write((float) bulletSpeed.x);
+                        packet.Write((float) bulletSpeed.y);
+                        packet.Write((float) bulletSpeed.z);
+                
+                        client.Send(packet);
+                    }
+                }
+            }
             switch (weaponList[index].weaponId){ 
                 case WeaponEnumIds.WeaponId.PISTOL:{
                     ws.AS.PlayOneShot(ws.PistolShotClip);
@@ -87,7 +120,7 @@ public class Shoot : MonoBehaviour
                     ws.AS.PlayOneShot(ws.SOShotClip);
                     break;
                 }
-            }
+            }        
         }
     }
 

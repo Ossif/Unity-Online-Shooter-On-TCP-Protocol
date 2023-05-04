@@ -13,23 +13,14 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Enemy")
-        {
-            //Логика столкновения  пули и игрока
-            /*other.GetComponent<Health>().health -= 30.0f;
-            if(other.GetComponent<Health>().health - 30.0f <= 0)
+        if (other.tag != "bullet"){
+            if (other.tag == "Enemy")
             {
-                other.GetComponent<Rigidbody>().constraints =  RigidbodyConstraints.None;
-            }*/
-
-            if (creatorId != other.GetComponent<EnemyInfo>().playerId)
+            }
+            else 
             {
                 Destroy(gameObject);
             }
-        }
-        else 
-        {
-            Destroy(gameObject);
         }
     }
 
