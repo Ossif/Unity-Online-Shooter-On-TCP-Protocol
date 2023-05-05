@@ -28,13 +28,14 @@ public class HealthSystem : MonoBehaviour
         else health = newHealth;
         GameObject.Find("Canvas").GetComponent<CanvasLogic>().SetHealth((int) Mathf.Round(health));
         if(health <= 0) { 
-            GameObject.Find("Canvas").GetComponent<CanvasLogic>().HideHUD();
-            transform.Find("MainCamera").Find("FPSAnimationsObject").gameObject.SetActive(false);
             PlayerDeath();
         }
     }
-    public void PlayerDeath() { 
+    public void PlayerDeath() {
         //transform.Find("FPSAnimationsObject").gameObject.SetActive(false);
+        GameObject.Find("Canvas").GetComponent<CanvasLogic>().HideHUD();
+        transform.Find("MainCamera").Find("FPSAnimationsObject").gameObject.SetActive(false);
+        transform.gameObject.GetComponent<Movement>().enabled = false;
         Invoke("PlayerRespawn", 4.0f);
     }
     public void PlayerRespawn() {
@@ -52,6 +53,7 @@ public class HealthSystem : MonoBehaviour
 
         GameObject.Find("Canvas").GetComponent<CanvasLogic>().ShowHUD();
         transform.Find("MainCamera").Find("FPSAnimationsObject").gameObject.SetActive(true);
+        transform.gameObject.GetComponent<Movement>().enabled = true;
         //transform.Find("FPSAnimationsObject").gameObject.SetActive(true);
         transform.position = spawnPos;
 
