@@ -12,6 +12,8 @@ public class LevelLogic : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
         client = FindObjectOfType<Client>().GetComponent<Client>();
 
         player = Instantiate(playerPrefab, new Vector3(0, 2, 0), Quaternion.identity);
