@@ -25,6 +25,7 @@ public class HealthSystem : MonoBehaviour
 
     public void SetHealth(float newHealth) { 
         if(newHealth < 0) health = 0;
+        else health = newHealth;
         GameObject.Find("Canvas").GetComponent<CanvasLogic>().SetHealth((int) Mathf.Round(health));
         if(health <= 0) { 
             GameObject.Find("Canvas").GetComponent<CanvasLogic>().HideHUD();
