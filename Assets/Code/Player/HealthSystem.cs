@@ -39,6 +39,18 @@ public class HealthSystem : MonoBehaviour
         Invoke("PlayerRespawn", 4.0f);
     }
     public void PlayerRespawn() {
+        WeaponSystem ws = gameObject.GetComponent<WeaponSystem>();
+
+        ws.slotAmmo[0] = 30;
+        ws.slotAmmo[1] = 10;
+        ws.slotAmmo[2] = 2;
+
+        ws.maxAmmo[0] = 120;
+        ws.maxAmmo[1] = 70;
+        ws.maxAmmo[2] = 30;
+
+        ws.ChangeWeapon(0);
+
         GameObject.Find("Canvas").GetComponent<CanvasLogic>().ShowHUD();
         transform.Find("MainCamera").Find("FPSAnimationsObject").gameObject.SetActive(true);
         transform.gameObject.GetComponent<Movement>().enabled = true;
