@@ -33,11 +33,13 @@ public class Bullet : MonoBehaviour
             }
             else if (other.tag == "Player" && client.IsHost)
             {
-                string playerId = client.playerId;
-                Packet apacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_DAMAGE);
-                apacket.Write(playerId);
-                apacket.Write(damage);
-                client.Send(apacket);
+                if(client.playerId != creatorId) { 
+                    string playerId = client.playerId;
+                    Packet apacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_DAMAGE);
+                    apacket.Write(playerId);
+                    apacket.Write(damage);
+                    client.Send(apacket);
+                }
             }
             Destroy(gameObject);
         }

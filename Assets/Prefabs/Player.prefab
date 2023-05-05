@@ -347,7 +347,7 @@ MonoBehaviour:
   bullet: {fileID: 383235577832844704, guid: 5094691bacca0eb49a3efe3f4a6986c3, type: 3}
   cam: {fileID: 8866188631761620779}
   ShotParticle: {fileID: 0}
-  speed: 70
+  speed: 200
 --- !u!114 &1649435267211783577
 MonoBehaviour:
   m_ObjectHideFlags: 0

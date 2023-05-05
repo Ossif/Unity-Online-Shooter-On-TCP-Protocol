@@ -52,6 +52,7 @@ public class Shoot : MonoBehaviour
                 GameObject insBull = Instantiate(bullet, vec, Quaternion.identity);
                 insBull.GetComponent<Rigidbody>().velocity = cam.transform.forward * speed;
                 insBull.GetComponent<Bullet>().damage = weaponList[index].damage;
+                insBull.GetComponent<Bullet>().creatorId = FindObjectOfType<Client>().GetComponent<Client>().playerId;
                 if(client != null){
                     Packet packet = new Packet((int) PacketHeaders.WorldCommand.CMSG_CREATE_BULLET);
                 
@@ -85,6 +86,7 @@ public class Shoot : MonoBehaviour
                     GameObject insBull = Instantiate(bullet, vec, cam.transform.rotation * rotationX * rotationY);
                     insBull.GetComponent<Rigidbody>().velocity = insBull.transform.forward * speed;
                     insBull.GetComponent<Bullet>().damage = weaponList[index].damage;
+                    insBull.GetComponent<Bullet>().creatorId = FindObjectOfType<Client>().GetComponent<Client>().playerId;
         
                     if(client != null){
                         Packet packet = new Packet((int) PacketHeaders.WorldCommand.CMSG_CREATE_BULLET);
