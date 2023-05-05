@@ -38,6 +38,8 @@ public class Server : MonoBehaviour
         public string PlayerName;
         public float[] lastPos = new float[4];
         public bool authorized = false;
+
+        public float health = 100.0f;
     }
 
     public int port = 6321;
@@ -99,6 +101,7 @@ public class Server : MonoBehaviour
         while (true)
         {
             ServerClient client = new ServerClient(await server.AcceptTcpClientAsync());
+            client.health = 100.0f;
             clients.TryAdd(client, null);
             Debug.Log($"Client connected: {client.tcp.Client.RemoteEndPoint}");
             client.stream = client.tcp.GetStream();
@@ -254,11 +257,18 @@ public class Server : MonoBehaviour
                 {
                     int playerid = packet.ReadInt();
                     c.PlayerName = packet.ReadString();
-                    Debug.Log($"SERVER: Игрок {c.PlayerName} подключился к серверу");
+                    Debug.Log($"SERVER: Игрок {c.PlayerName} подSMSG_PLAYER_DAMAGEключился к серверу");
                     Debug.Log("SERVER: Начинаем игру!");
 
                     Packet apacket = new Packet((int)WorldCommand.SMSG_START_GAME);
-                    apacket.Write(1);
+
+                    apacket.Write(c.tcp.Client.RemoteEndPoint.ToString());
+                    foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
+                    {
+                        if(c.tcp == client.tcp) apacket.Write(1);
+                        else apacket.Write(0);
+                        break;
+                    }
                     c.stream.WriteAsync(apacket.GetBytes());
                     break;
                 }
@@ -391,6 +401,9 @@ public class Server : MonoBehaviour
                     responcePacket.Write((float)packet.ReadFloat());
                     responcePacket.Write((float)packet.ReadFloat());
 
+                    //Урон
+                    responcePacket.Write((float) packet.ReadFloat());
+
                     foreach (ServerClient client in clients.Keys)
                     {
                         if (c == client) continue;
@@ -401,6 +414,40 @@ public class Server : MonoBehaviour
 
                     break;
                 }
+            case (WorldCommand.CMSG_PLAYER_DAMAGE): //Информация о дамаге
+                {
+                    string playerId = packet.ReadString();
+                    float damage = packet.ReadFloat();
+                    //Debug.Log($"Информация о полученном уроне: {packet.ReadString()}; {packet.ReadFloat()}");
+                    foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
+                    {
+                        if(client.tcp.Client.RemoteEndPoint.ToString() == playerId){
+                            Debug.Log($"SERVER: received info about damage: {playerId}");
+                            client.health -= damage;
+                            Packet apacket = new Packet((int)WorldCommand.SMSG_PLAYER_DAMAGE);
+                            apacket.Write((float) client.health);
+                            client.stream.WriteAsync(apacket.GetBytes());
+                            break;
+                        }
+                    }
+                    break;
+                }
+            case (WorldCommand.CMSG_PLAYER_RESTORE_HEALTH): //восстановление здоровья
+            {
+                string playerId = packet.ReadString();
+                float health = packet.ReadFloat();
+                Debug.Log($"{playerId} - test");
+                foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
+                {
+                    Debug.Log($"{client.tcp.Client.RemoteEndPoint.ToString()} - try");
+                    if(client.tcp.Client.RemoteEndPoint.ToString() == playerId){ 
+                        client.health = health;
+                        Debug.Log($"\t{client.tcp.Client.RemoteEndPoint.ToString()} - success");
+                        break;
+                    }
+                }
+                break;
+            }
         }
     }
 

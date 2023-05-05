@@ -51,7 +51,7 @@ public class Shoot : MonoBehaviour
             if(weaponList[index].weaponId != WeaponEnumIds.WeaponId.SAWNED_OFF){ 
                 GameObject insBull = Instantiate(bullet, vec, Quaternion.identity);
                 insBull.GetComponent<Rigidbody>().velocity = cam.transform.forward * speed;
-        
+                insBull.GetComponent<Bullet>().damage = weaponList[index].damage;
                 if(client != null){
                     Packet packet = new Packet((int) PacketHeaders.WorldCommand.CMSG_CREATE_BULLET);
                 
@@ -71,6 +71,8 @@ public class Shoot : MonoBehaviour
                     packet.Write((float) bulletSpeed.x);
                     packet.Write((float) bulletSpeed.y);
                     packet.Write((float) bulletSpeed.z);
+
+                    packet.Write((float) weaponList[index].damage);
                 
                     client.Send(packet);
                 }
@@ -82,6 +84,7 @@ public class Shoot : MonoBehaviour
 
                     GameObject insBull = Instantiate(bullet, vec, cam.transform.rotation * rotationX * rotationY);
                     insBull.GetComponent<Rigidbody>().velocity = insBull.transform.forward * speed;
+                    insBull.GetComponent<Bullet>().damage = weaponList[index].damage;
         
                     if(client != null){
                         Packet packet = new Packet((int) PacketHeaders.WorldCommand.CMSG_CREATE_BULLET);
@@ -102,6 +105,8 @@ public class Shoot : MonoBehaviour
                         packet.Write((float) bulletSpeed.x);
                         packet.Write((float) bulletSpeed.y);
                         packet.Write((float) bulletSpeed.z);
+
+                        packet.Write((float) weaponList[index].damage);
                 
                         client.Send(packet);
                     }

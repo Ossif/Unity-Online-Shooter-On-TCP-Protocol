@@ -20,6 +20,10 @@ namespace PacketHeaders
         SMSG_CREATE_PLAYERS = 9,
 
         CMSG_CREATE_BULLET = 10,
-        SMSG_CREATE_BULLET = 11
+        SMSG_CREATE_BULLET = 11,
+
+        CMSG_PLAYER_DAMAGE = 12,
+        SMSG_PLAYER_DAMAGE = 13,
+        CMSG_PLAYER_RESTORE_HEALTH = 14
     }
 }

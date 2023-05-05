@@ -10,6 +10,8 @@ public class CanvasLogic : MonoBehaviour
     public TextMeshProUGUI  ammoRight;
     public TextMeshProUGUI  ammoTotal;
 
+    public TextMeshProUGUI  health;
+
     public void SetAmmoLeft(int var){
         ammoLeft.text = var.ToString();
     }
@@ -20,6 +22,26 @@ public class CanvasLogic : MonoBehaviour
 
     public void SetAmmoTotal(int var){
         ammoTotal.text = var.ToString();
+    }
+
+    public void SetHealth(int var){
+        health.text = var.ToString();
+    }
+    public void HideHUD(){
+        transform.Find("AmmoLeft").gameObject.SetActive(false);
+        transform.Find("AmmoRight").gameObject.SetActive(false);
+        transform.Find("AmmoTotal").gameObject.SetActive(false);
+        transform.Find("AmmoStr").gameObject.SetActive(false);
+        transform.Find("Cross").gameObject.SetActive(false);
+        transform.Find("Health").gameObject.SetActive(false);
+    }
+    public void ShowHUD(){
+        transform.Find("AmmoLeft").gameObject.SetActive(true);
+        transform.Find("AmmoRight").gameObject.SetActive(true);
+        transform.Find("AmmoTotal").gameObject.SetActive(true);
+        transform.Find("AmmoStr").gameObject.SetActive(true);
+        transform.Find("Cross").gameObject.SetActive(true);
+        transform.Find("Health").gameObject.SetActive(true);
     }
 
     // Start is called before the first frame update

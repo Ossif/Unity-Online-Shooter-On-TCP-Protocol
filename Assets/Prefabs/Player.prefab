@@ -177,6 +177,7 @@ GameObject:
   - component: {fileID: 5133388568540746660}
   - component: {fileID: 3036624323170665951}
   - component: {fileID: 993722691079666622}
+  - component: {fileID: 1649435267211783577}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -347,6 +348,20 @@ MonoBehaviour:
   cam: {fileID: 8866188631761620779}
   ShotParticle: {fileID: 0}
   speed: 70
+--- !u!114 &1649435267211783577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8866188630672528427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 544e6a206587dff448a29e530d285550, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  health: 100
+  spawnPos: {x: 0, y: 3, z: 0}
 --- !u!1 &8866188631274992930
 GameObject:
   m_ObjectHideFlags: 0
@@ -442,7 +457,7 @@ GameObject:
   - component: {fileID: 8866188631761620779}
   - component: {fileID: 8866188631761620778}
   m_Layer: 0
-  m_Name: Main Camera
+  m_Name: MainCamera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

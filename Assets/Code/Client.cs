@@ -18,7 +18,7 @@ public class Client : MonoBehaviour
     private ConcurrentQueue<Tuple<PacketDecryptor>> messageQueue = new ConcurrentQueue<Tuple<PacketDecryptor>>(); //Packet queue
     public int port = 6321;
     public bool socketReady;
-    private TcpClient socket;
+    public TcpClient socket;
     public NetworkStream stream;
     byte[] buffer;
     private static int HeaderSize = 6; //(UInt16(2) - PacketID, Uint32(4) - PacketSize)
@@ -31,6 +31,7 @@ public class Client : MonoBehaviour
     //От ФИМЫ
     public string ClientName;
     public bool IsHost;
+    public string playerId;
 
     static ConcurrentDictionary<string, GameObject> enemies = new ConcurrentDictionary<string, GameObject>();
 
@@ -195,6 +196,11 @@ public class Client : MonoBehaviour
             }
             case WorldCommand.SMSG_START_GAME: //Вход в игровой мир
             {
+                playerId = InComePacket.ReadString();
+                int hostInt = InComePacket.ReadInt();
+                if(hostInt == 1)IsHost = true;
+                else IsHost = false;
+                Debug.Log($"IsPlayerHost: {IsHost}");
                 GameObject.Find("MenuLogic").GetComponent<MenuLogic>().StartGame();
                 break;
             }
@@ -334,11 +340,21 @@ public class Client : MonoBehaviour
 
                 Vector3 speed = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
 
+                float damage = InComePacket.ReadFloat();
+
                 GameObject bullet = Instantiate(bulletPrefab, position, Quaternion.identity);
                 bullet.GetComponent<Bullet>().creatorId = objectId;
                 bullet.transform.rotation = rotation;
                 bullet.GetComponent<Rigidbody>().velocity = speed;
+                bullet.GetComponent<Bullet>().damage = damage;
 
+                break;
+            }
+        
+            case WorldCommand.SMSG_PLAYER_DAMAGE: { 
+                Debug.Log($"CLIENT: received info about damage");
+                float health = InComePacket.ReadFloat();
+                GameObject.Find("Player(Clone)").GetComponent<HealthSystem>().SetHealth(health);
                 break;
             }
         }
