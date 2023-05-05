@@ -8,6 +8,7 @@ public class Movement : MonoBehaviour
     private CharacterController cc;
     private Rigidbody rb;
 
+    public bool EnabledMovement = true;
     public float Speed = 0.3f;
     public float JumpForce = 1f;
     public float Gravity = 9.8f;
@@ -19,6 +20,7 @@ public class Movement : MonoBehaviour
     void Start()
     {
         cc = gameObject.GetComponent<CharacterController>();
+        EnabledMovement = true;
     }
 
     void FixedUpdate()
@@ -28,9 +30,12 @@ public class Movement : MonoBehaviour
         Vector3 horV = new Vector3();
         Vector3 verV = new Vector3();
 
-        horV = transform.right * Speed * Input.GetAxis("Horizontal");
-        verV = transform.forward * Speed * Input.GetAxis("Vertical");
-        
+        if (EnabledMovement == true)
+        {
+            horV = transform.right * Speed * Input.GetAxis("Horizontal");
+            verV = transform.forward * Speed * Input.GetAxis("Vertical");
+        }
+
         float movementDirectionY = actualVel.y;
         actualVel = verV + horV;
         
@@ -38,10 +43,20 @@ public class Movement : MonoBehaviour
         {
             actualVel.y = JumpForce;
         }
-        else {
+        else if(!cc.isGrounded)
+        {
             actualVel.y = movementDirectionY;
         }
         actualVel.y -= Gravity * Time.deltaTime;
         cc.Move(actualVel * Time.deltaTime);
+        
+    }
+
+    public void SetPlayerPos(Vector3 newpos)
+    {
+
+        cc.enabled = false;
+        this.transform.position = newpos;
+        cc.enabled = true;
     }
 }

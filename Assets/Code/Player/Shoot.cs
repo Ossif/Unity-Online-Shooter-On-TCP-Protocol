@@ -11,13 +11,18 @@ public class Shoot : MonoBehaviour
     public ParticleSystem ShotParticle;
     public float speed;
     private float TimeToNextShot;
-
+    public float maxAngle = 30f;
     private Client client = null;
 
     private WeaponSystem ws;
 
     public List<Weapon> weaponList = new List<Weapon>();
-
+    #nullable enable
+    struct PlayerDamage
+    {
+        public string? playerid;
+        public float damage;
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -43,6 +48,105 @@ public class Shoot : MonoBehaviour
             /*TimeToNextShot = Time.time + 1f / ShotRate;
             ShotParticle.Play();
             ShotAudioSource.PlayOneShot(ShotClip);*/
+
+            ws.handsAnimator.SetTrigger("H_" + weaponList[index].shotAnim);
+            ws.weaponObject.transform.Find("model").GetComponent<Animator>().SetTrigger("shot");
+
+            Vector3 vec = cam.transform.position + cam.transform.forward;
+            if(weaponList[index].weaponId != WeaponEnumIds.WeaponId.SAWNED_OFF)
+            {
+                Ray ray = new Ray(cam.transform.position, cam.transform.forward);
+                RaycastHit hit;
+
+                // Проверяем, столкнулся ли луч с каким-либо объектом
+                if (Physics.Raycast(ray, out hit))
+                {
+                    // Получаем информацию об объекте, с которым столкнулся луч
+                    if (hit.collider.gameObject.tag == "Enemy")
+                    {
+                        EnemyInfo enemny = hit.collider.transform.GetComponent<EnemyInfo>();
+                        Debug.Log($"Попал в игрока {enemny.PlayerName}");
+                        Packet packet = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_GIVE_DAMAGE);
+                        packet.Write(enemny.playerId);
+                        packet.Write(weaponList[index].damage);
+                        client.Send(packet);
+                    }
+                }
+            }
+            else
+            {
+                PlayerDamage[] playerDamages = new PlayerDamage[5];
+                int counter = 0;
+                for(int i = 0; i < 5; i++)
+                {
+                    playerDamages[0].playerid = null;
+                }
+                for (int i = 0; i < 5; i ++)
+                {
+                    Vector3 direction = Quaternion.Euler(Random.Range(-maxAngle, maxAngle), Random.Range(-maxAngle, maxAngle), 0) * cam.transform.forward;
+                    Ray ray = new Ray(cam.transform.position, direction);
+                    RaycastHit hit;
+
+                    // Проверяем, столкнулся ли луч с каким-либо объектом
+                    if (Physics.Raycast(ray, out hit))
+                    {
+                        // Получаем информацию об объекте, с которым столкнулся луч
+                        if (hit.collider.gameObject.tag == "Enemy")
+                        {
+                            EnemyInfo enemny = hit.collider.transform.GetComponent<EnemyInfo>();
+                            for (int a = 0; a < 5; a++)
+                            {
+                                if (playerDamages[a].playerid == null)
+                                {
+                                    playerDamages[a].playerid = enemny.playerId;
+                                    playerDamages[a].damage = weaponList[index].damage;
+                                    counter++;
+                                    break;
+                                }
+                                if(playerDamages[a].playerid == enemny.playerId)
+                                {
+                                    playerDamages[a].damage += weaponList[index].damage;
+                                }
+                            }
+                        }
+                    }
+
+                }
+                if(counter > 0)
+                {
+                    for (int i = 0; i < counter; i++)
+                    {
+                        Packet packet = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_GIVE_DAMAGE);
+                        packet.Write(playerDamages[i].playerid);
+                        packet.Write(playerDamages[i].damage);
+                        client.Send(packet);
+                    }
+                }
+            }
+            switch (weaponList[index].weaponId){ 
+                case WeaponEnumIds.WeaponId.PISTOL:{
+                    ws.AS.PlayOneShot(ws.PistolShotClip);
+                    break;
+                }
+                case WeaponEnumIds.WeaponId.AK:{
+                    ws.AS.PlayOneShot(ws.AKShotClip);
+                    break;
+                }
+                case WeaponEnumIds.WeaponId.SAWNED_OFF:{
+                    ws.AS.PlayOneShot(ws.SOShotClip);
+                    break;
+                }
+            }        
+        }
+    }   
+    /*public void CreateBullet(int index){ 
+        if(TimeToNextShot >= weaponList[index].shotTime){
+            TimeToNextShot = 0;
+            ws.slotAmmo[ws.currentSlot] --;
+            ws.canvasController.SetAmmoLeft(ws.slotAmmo[ws.currentSlot]);
+            /*TimeToNextShot = Time.time + 1f / ShotRate;
+            ShotParticle.Play();
+            ShotAudioSource.PlayOneShot(ShotClip);
 
             ws.handsAnimator.SetTrigger("H_" + weaponList[index].shotAnim);
             ws.weaponObject.transform.Find("model").GetComponent<Animator>().SetTrigger("shot");
@@ -129,7 +233,7 @@ public class Shoot : MonoBehaviour
                 }
             }        
         }
-    }
+    }*/
 
     // Update is called once per frame
     void Update()
@@ -153,6 +257,7 @@ public class Shoot : MonoBehaviour
             { 
                 if(Input.GetKey(KeyCode.Mouse0)) {
                     CreateBullet(index);
+                    
                 }
                 if(TimeToNextShot <= weaponList[index].shotTime) TimeToNextShot += Time.deltaTime;
             }

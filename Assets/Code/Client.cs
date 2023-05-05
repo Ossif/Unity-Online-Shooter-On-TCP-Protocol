@@ -253,6 +253,7 @@ public class Client : MonoBehaviour
                     GameObject go = Instantiate(playerPrefab, position, Quaternion.identity);
                     go.transform.rotation = rotation;
                     go.GetComponent<EnemyInfo>().playerId = id;
+                    go.GetComponent<EnemyInfo>().PlayerName = PlayerName;
                     go.transform.Find("NickName").GetComponent<TMP_Text>().text = PlayerName;
                     
                     enemies.TryAdd(id, go);
@@ -351,7 +352,7 @@ public class Client : MonoBehaviour
                 break;
             }
         
-            case WorldCommand.SMSG_PLAYER_DAMAGE: { 
+            case WorldCommand.SMSG_PLAYER_TAKE_DAMAGE: { 
                 Debug.Log($"CLIENT: received info about damage");
                 float health = InComePacket.ReadFloat();
                 GameObject.Find("Player(Clone)").GetComponent<HealthSystem>().SetHealth(health);

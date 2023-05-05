@@ -26,17 +26,15 @@ public class Bullet : MonoBehaviour
             if (other.tag == "Enemy" && client.IsHost)
             {
                 string playerId = other.GetComponent<EnemyInfo>().playerId;
-                Packet apacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_DAMAGE);
+                Packet apacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_GIVE_DAMAGE);
                 apacket.Write(playerId);
                 apacket.Write(damage);
                 client.Send(apacket);
             }
-            else if (other.tag == "Player" && client.IsHost)
+            else if (other.tag == "Player" && creatorId != client.playerId)
             {
                 if(client.playerId != creatorId) { 
-                    string playerId = client.playerId;
-                    Packet apacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_DAMAGE);
-                    apacket.Write(playerId);
+                    Packet apacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_TAKE_DAMAGE);
                     apacket.Write(damage);
                     client.Send(apacket);
                 }

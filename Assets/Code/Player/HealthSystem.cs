@@ -18,14 +18,9 @@ public class HealthSystem : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-    }
-
-    public void SetHealth(float newHealth) { 
-        if(newHealth < 0) health = 0;
-        else health = newHealth;
+    public void SetHealth(float newHealth) {
+        Debug.Log($"Player {client.name} take damage. HP now: {newHealth}");
+        health = newHealth;
         GameObject.Find("Canvas").GetComponent<CanvasLogic>().SetHealth((int) Mathf.Round(health));
         if(health <= 0) { 
             PlayerDeath();
@@ -35,10 +30,19 @@ public class HealthSystem : MonoBehaviour
         //transform.Find("FPSAnimationsObject").gameObject.SetActive(false);
         GameObject.Find("Canvas").GetComponent<CanvasLogic>().HideHUD();
         transform.Find("MainCamera").Find("FPSAnimationsObject").gameObject.SetActive(false);
-        transform.gameObject.GetComponent<Movement>().enabled = false;
+        transform.gameObject.GetComponent<Movement>().EnabledMovement = false;
         Invoke("PlayerRespawn", 4.0f);
     }
     public void PlayerRespawn() {
+        transform.gameObject.GetComponent<Movement>().EnabledMovement = true;
+        transform.gameObject.GetComponent<Movement>().SetPlayerPos(spawnPos);
+        
+        
+        GameObject.Find("Canvas").GetComponent<CanvasLogic>().ShowHUD();
+        transform.Find("MainCamera").Find("FPSAnimationsObject").gameObject.SetActive(true);
+
+        transform.Find("MainCamera").transform.Find("FPSAnimationsObject").gameObject.SetActive(true);
+        
         WeaponSystem ws = gameObject.GetComponent<WeaponSystem>();
 
         ws.slotAmmo[0] = 30;
@@ -50,18 +54,20 @@ public class HealthSystem : MonoBehaviour
         ws.maxAmmo[2] = 30;
 
         ws.ChangeWeapon(0);
-
-        GameObject.Find("Canvas").GetComponent<CanvasLogic>().ShowHUD();
-        transform.Find("MainCamera").Find("FPSAnimationsObject").gameObject.SetActive(true);
-        transform.gameObject.GetComponent<Movement>().enabled = true;
-        //transform.Find("FPSAnimationsObject").gameObject.SetActive(true);
-        transform.position = spawnPos;
-
         Packet apacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_RESTORE_HEALTH);
-        apacket.Write((string) client.playerId);
         apacket.Write((float) 100.0f);
         client.Send(apacket);
         health = 100;
         SetHealth(100);
+    }
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("DeadZone"))
+        {
+            SetHealth(0);
+            /*Packet apacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_TAKE_DAMAGE);
+            apacket.Write(1000f);
+            client.Send(apacket);*/
+        }
     }
 }

@@ -257,7 +257,7 @@ public class Server : MonoBehaviour
                 {
                     int playerid = packet.ReadInt();
                     c.PlayerName = packet.ReadString();
-                    Debug.Log($"SERVER: Игрок {c.PlayerName} подSMSG_PLAYER_DAMAGEключился к серверу");
+                    Debug.Log($"SERVER: Игрок {c.PlayerName} подключился к серверу");
                     Debug.Log("SERVER: Начинаем игру!");
 
                     Packet apacket = new Packet((int)WorldCommand.SMSG_START_GAME);
@@ -414,30 +414,39 @@ public class Server : MonoBehaviour
 
                     break;
                 }
-            case (WorldCommand.CMSG_PLAYER_DAMAGE): //Информация о дамаге
+            
+            case (WorldCommand.CMSG_PLAYER_TAKE_DAMAGE): //Информация о дамаге
                 {
-                    string playerId = packet.ReadString();
                     float damage = packet.ReadFloat();
-                    //Debug.Log($"Информация о полученном уроне: {packet.ReadString()}; {packet.ReadFloat()}");
-                    foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
+
+                    break;
+                }
+            case (WorldCommand.CMSG_PLAYER_GIVE_DAMAGE): //Информация о дамаге
+                {
+                    string VictimID = packet.ReadString();
+                    float damage = packet.ReadFloat();
+
+                    //Debug.Log($"SERVER: received info about damage: {}");
+                    foreach (ServerClient client in clients.Keys)
                     {
-                        if(client.tcp.Client.RemoteEndPoint.ToString() == playerId){
-                            Debug.Log($"SERVER: received info about damage: {playerId}");
+                        if (client.tcp.Client.RemoteEndPoint.ToString() == VictimID)
+                        {
                             client.health -= damage;
-                            Packet apacket = new Packet((int)WorldCommand.SMSG_PLAYER_DAMAGE);
-                            apacket.Write((float) client.health);
+                            Packet apacket = new Packet((int)WorldCommand.SMSG_PLAYER_TAKE_DAMAGE);
+                            apacket.Write((float)client.health);
                             client.stream.WriteAsync(apacket.GetBytes());
                             break;
                         }
                     }
+
                     break;
                 }
             case (WorldCommand.CMSG_PLAYER_RESTORE_HEALTH): //восстановление здоровья
             {
-                string playerId = packet.ReadString();
+                string playerId = c.tcp.Client.RemoteEndPoint.ToString();
                 float health = packet.ReadFloat();
                 Debug.Log($"{playerId} - test");
-                foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
+                foreach (ServerClient client in clients.Keys)
                 {
                     Debug.Log($"{client.tcp.Client.RemoteEndPoint.ToString()} - try");
                     if(client.tcp.Client.RemoteEndPoint.ToString() == playerId){ 
