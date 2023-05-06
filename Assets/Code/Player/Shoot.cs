@@ -11,7 +11,7 @@ public class Shoot : MonoBehaviour
     public ParticleSystem ShotParticle;
     public float speed;
     private float TimeToNextShot;
-    public float maxAngle = 30f;
+    public float maxAngle = 15f;
     private Client client = null;
 
     private WeaponSystem ws;
@@ -51,6 +51,7 @@ public class Shoot : MonoBehaviour
 
             ws.handsAnimator.SetTrigger("H_" + weaponList[index].shotAnim);
             ws.weaponObject.transform.Find("model").GetComponent<Animator>().SetTrigger("shot");
+            ws.weaponObject.transform.Find("model").Find("Bone").Find("Body").Find("MuzzleFlash").GetComponent<ParticleSystem>().Play();
 
             Vector3 vec = cam.transform.position + cam.transform.forward;
             if(weaponList[index].weaponId != WeaponEnumIds.WeaponId.SAWNED_OFF)
@@ -106,11 +107,12 @@ public class Shoot : MonoBehaviour
                                 if(playerDamages[a].playerid == enemny.playerId)
                                 {
                                     playerDamages[a].damage += weaponList[index].damage;
+                                    break;
                                 }
                             }
                         }
                     }
-
+                    Debug.DrawRay(cam.transform.position + cam.transform.forward, direction * 5, Color.green, 5);
                 }
                 if(counter > 0)
                 {
@@ -120,6 +122,7 @@ public class Shoot : MonoBehaviour
                         packet.Write(playerDamages[i].playerid);
                         packet.Write(playerDamages[i].damage);
                         client.Send(packet);
+                        Debug.Log($"damage {playerDamages[i].damage} to {playerDamages[i].playerid}");
                     }
                 }
             }
