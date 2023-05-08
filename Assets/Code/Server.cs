@@ -426,8 +426,6 @@ public class Server : MonoBehaviour
                     responcePacket.Write((float)packet.ReadFloat());
                     responcePacket.Write((float)packet.ReadFloat());
 
-                    //Урон
-                    responcePacket.Write((float) packet.ReadFloat());
 
                     foreach (ServerClient client in clients.Keys)
                     {
@@ -439,7 +437,6 @@ public class Server : MonoBehaviour
 
                     break;
                 }
-            
             case (WorldCommand.CMSG_PLAYER_TAKE_DAMAGE): //Информация о дамаге
                 {
                     float damage = packet.ReadFloat();

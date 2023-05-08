@@ -17,6 +17,7 @@ public class Shoot : MonoBehaviour
     private WeaponSystem ws;
     private AudioSource AS;
     public AudioClip GiveDamageSound;
+    public GameObject TrailEffectBullet;
     public List<Weapon> weaponList = new List<Weapon>();
     #nullable enable
     struct PlayerDamage
@@ -53,14 +54,17 @@ public class Shoot : MonoBehaviour
 
             ws.handsAnimator.SetTrigger("H_" + weaponList[index].shotAnim);
             ws.weaponObject.transform.Find("model").GetComponent<Animator>().SetTrigger("shot");
-            ws.weaponObject.transform.Find("model").Find("Bone").Find("Body").Find("MuzzleFlash").GetComponent<ParticleSystem>().Play();
+            Transform MuzzleFlash = ws.weaponObject.transform.Find("model").Find("Bone").Find("Body").Find("MuzzleFlash");
+            MuzzleFlash.GetComponent<ParticleSystem>().Play();
 
             Vector3 vec = cam.transform.position + cam.transform.forward;
             if(weaponList[index].weaponId != WeaponEnumIds.WeaponId.SAWNED_OFF)
             {
                 Ray ray = new Ray(cam.transform.position, cam.transform.forward);
                 RaycastHit hit;
-
+                GameObject bullet = Instantiate(TrailEffectBullet, MuzzleFlash.position, cam.transform.rotation);
+                bullet.transform.GetComponent<Bullet>().creatorId = client.playerId;
+                bullet.transform.GetComponent<ConstantForce>().force = cam.transform.forward * 5000;
                 // Проверяем, столкнулся ли луч с каким-либо объектом
                 if (Physics.Raycast(ray, out hit))
                 {
@@ -75,7 +79,13 @@ public class Shoot : MonoBehaviour
                         packet.Write(weaponList[index].damage);
                         client.Send(packet);
                     }
+                    Rigidbody rb = hit.collider.GetComponent<Rigidbody>();
+                    if (rb != null && hit.collider.gameObject.tag != "Enemy")
+                    {
+                        rb.AddForceAtPosition((hit.point - transform.position).normalized * 100, hit.point, ForceMode.Impulse);
+                    }
                 }
+
             }
             else
             {
@@ -90,7 +100,9 @@ public class Shoot : MonoBehaviour
                     Vector3 direction = Quaternion.Euler(Random.Range(-maxAngle, maxAngle), Random.Range(-maxAngle, maxAngle), 0) * cam.transform.forward;
                     Ray ray = new Ray(cam.transform.position, direction);
                     RaycastHit hit;
-
+                    GameObject bullet = Instantiate(TrailEffectBullet, MuzzleFlash.position, cam.transform.rotation);
+                    bullet.transform.GetComponent<Bullet>().creatorId = client.playerId;
+                    bullet.transform.GetComponent<ConstantForce>().force = cam.transform.forward * 5000;
                     // Проверяем, столкнулся ли луч с каким-либо объектом
                     if (Physics.Raycast(ray, out hit))
                     {
@@ -114,8 +126,14 @@ public class Shoot : MonoBehaviour
                                 }
                             }
                         }
+                        Rigidbody rb = hit.collider.GetComponent<Rigidbody>();
+                        if (rb != null && hit.collider.gameObject.tag != "Enemy")
+                        {
+                            rb.AddForceAtPosition((hit.point - transform.position).normalized * 500, hit.point, ForceMode.Impulse);
+                        }
                     }
                     Debug.DrawRay(cam.transform.position + cam.transform.forward, direction * 5, Color.green, 5);
+
                 }
                 if(counter > 0)
                 {

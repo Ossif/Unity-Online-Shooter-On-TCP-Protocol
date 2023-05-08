@@ -166,8 +166,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.29955006, y: 0.1926291, z: 0.39633217}
-  m_Center: {x: -0.016751692, y: 0.027528286, z: 0.051255733}
+  m_Size: {x: 0.36, y: 0.1926291, z: 0.39633217}
+  m_Center: {x: 0.01, y: -0.04, z: -0.04}
 --- !u!1 &897436465243994051
 GameObject:
   m_ObjectHideFlags: 0
@@ -448,7 +448,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.1221527
+  m_Radius: 0.09
   m_Height: 0.4886108
   m_Direction: 1
   m_Center: {x: 0, y: 0.2443054, z: 0}
@@ -560,8 +560,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.29721838, y: 0.6133068, z: 0.4068297}
-  m_Center: {x: 0.0028165132, y: 0.30665362, z: 0.026540935}
+  m_Size: {x: 0.27, y: 0.5, z: 0.3}
+  m_Center: {x: 0.0028165132, y: 0.22, z: 0.026540935}
 --- !u!144 &2028606575
 CharacterJoint:
   m_ObjectHideFlags: 0
@@ -581,11 +581,11 @@ CharacterJoint:
     spring: 0
     damper: 0
   m_LowTwistLimit:
-    limit: -20
+    limit: -39.665466
     bounciness: 0
     contactDistance: 0
   m_HighTwistLimit:
-    limit: 20
+    limit: 41.44784
     bounciness: 0
     contactDistance: 0
   m_SwingLimitSpring:
@@ -732,7 +732,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.1598965
+  m_Radius: 0.12
   m_Height: 0.5329883
   m_Direction: 1
   m_Center: {x: 0, y: 0.26649415, z: 0}
@@ -755,11 +755,11 @@ CharacterJoint:
     spring: 0
     damper: 0
   m_LowTwistLimit:
-    limit: -20
+    limit: -1.1145203
     bounciness: 0
     contactDistance: 0
   m_HighTwistLimit:
-    limit: 70
+    limit: 83.11282
     bounciness: 0
     contactDistance: 0
   m_SwingLimitSpring:
@@ -843,7 +843,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.14496857
+  m_Radius: 0.09
   m_Height: 0.5798743
   m_Direction: 1
   m_Center: {x: 0, y: 0.28993714, z: 0}
@@ -866,7 +866,7 @@ CharacterJoint:
     spring: 0
     damper: 0
   m_LowTwistLimit:
-    limit: -80
+    limit: -86.88458
     bounciness: 0
     contactDistance: 0
   m_HighTwistLimit:
@@ -877,7 +877,7 @@ CharacterJoint:
     spring: 0
     damper: 0
   m_Swing1Limit:
-    limit: 0
+    limit: 17.150711
     bounciness: 0
     contactDistance: 0
   m_Swing2Limit:
@@ -1257,7 +1257,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.1452317
+  m_Radius: 0.09
   m_Height: 0.5809268
   m_Direction: 1
   m_Center: {x: 0, y: 0.2904634, z: 0}
@@ -1280,7 +1280,7 @@ CharacterJoint:
     spring: 0
     damper: 0
   m_LowTwistLimit:
-    limit: -80
+    limit: -90.7388
     bounciness: 0
     contactDistance: 0
   m_HighTwistLimit:
@@ -1291,7 +1291,7 @@ CharacterJoint:
     spring: 0
     damper: 0
   m_Swing1Limit:
-    limit: 0
+    limit: 14.897114
     bounciness: 0
     contactDistance: 0
   m_Swing2Limit:
@@ -1368,7 +1368,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.15990685
+  m_Radius: 0.12
   m_Height: 0.5330228
   m_Direction: 1
   m_Center: {x: 0, y: 0.2665114, z: 0}
@@ -1391,18 +1391,18 @@ CharacterJoint:
     spring: 0
     damper: 0
   m_LowTwistLimit:
-    limit: -20
+    limit: 4.9339814
     bounciness: 0
     contactDistance: 0
   m_HighTwistLimit:
-    limit: 70
+    limit: 87.03344
     bounciness: 0
     contactDistance: 0
   m_SwingLimitSpring:
     spring: 0
     damper: 0
   m_Swing1Limit:
-    limit: 30
+    limit: 22.651472
     bounciness: 0
     contactDistance: 0
   m_Swing2Limit:
@@ -1542,8 +1542,8 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.070204705
-  m_Center: {x: 0, y: 0.070204705, z: 0}
+  m_Radius: 0.23984317
+  m_Center: {x: -0.010000005, y: 0.19044319, z: -0.0000000024400508}
 --- !u!144 &1189530566
 CharacterJoint:
   m_ObjectHideFlags: 0
@@ -1961,7 +1961,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.12213525
+  m_Radius: 0.06
   m_Height: 0.488541
   m_Direction: 1
   m_Center: {x: 0, y: 0.2442705, z: 0}

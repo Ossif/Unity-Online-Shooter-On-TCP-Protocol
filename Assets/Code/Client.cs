@@ -345,7 +345,6 @@ public class Client : MonoBehaviour
                 bullet.GetComponent<Bullet>().creatorId = objectId;
                 bullet.transform.rotation = rotation;
                 bullet.GetComponent<Rigidbody>().velocity = speed;
-                bullet.GetComponent<Bullet>().damage = damage;
                 bullet.GetComponent<Bullet>().creatorId = objectId;
                 break;
             }

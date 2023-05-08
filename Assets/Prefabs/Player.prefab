@@ -351,6 +351,7 @@ MonoBehaviour:
   speed: 200
   maxAngle: 15
   GiveDamageSound: {fileID: 8300000, guid: e5d5f6e718522eb4f8075d59ffeb2815, type: 3}
+  TrailEffectBullet: {fileID: 8080948163780936430, guid: 30b8be2e27a995d43b75f164e0bce453, type: 3}
 --- !u!114 &1649435267211783577
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -364,7 +365,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 100
-  spawnPos: {x: 0, y: 3, z: 0}
 --- !u!1 &8866188631274992930
 GameObject:
   m_ObjectHideFlags: 0

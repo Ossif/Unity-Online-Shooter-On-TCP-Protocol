@@ -7,50 +7,26 @@ public class Bullet : MonoBehaviour
 {
     private Client client;
     public string creatorId;
-    public float damage;
     // Start is called before the first frame update
     void Start()
     {
-        Invoke("DestroyBullet", 10.0f);
-        try{ 
-            client = FindObjectOfType<Client>().GetComponent<Client>();
-        }    
-        catch{ 
-            
-        }
+        Invoke("DestroyBullet", 2.0f);
+        client = FindObjectOfType<Client>().GetComponent<Client>();
     }
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.tag != "bullet"){
-            if (other.tag == "Enemy" && client.IsHost)
-            {
-                string playerId = other.GetComponent<EnemyInfo>().playerId;
-                Packet apacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_GIVE_DAMAGE);
-                apacket.Write(playerId);
-                apacket.Write(damage);
-                client.Send(apacket);
-            }
-            else if (other.tag == "Player" && creatorId != client.playerId)
-            {
-                if(client.playerId != creatorId) { 
-                    Packet apacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_TAKE_DAMAGE);
-                    apacket.Write(damage);
-                    client.Send(apacket);
-                }
-            }
-            Destroy(gameObject);
+        if (other.tag == "Player" && client.playerId != creatorId){
+            Destroy(this.gameObject);
+        }
+        else if(other.tag != "Player" && other.transform.GetComponent<Bullet>() == null)
+        {
+            Destroy(this.gameObject);
         }
     }
 
     void DestroyBullet()
     {
         Destroy(gameObject);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
