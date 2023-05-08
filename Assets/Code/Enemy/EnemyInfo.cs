@@ -1,14 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using WeaponEnumIds;
 
 public class EnemyInfo : MonoBehaviour
 {
     public string playerId;
     public string PlayerName;
     public int playerAnimId = 0;
+    public WeaponId weaponId = 0;
+    public GameObject WeaponParentBone;
+    public GameObject WeaponObject = null;
     private void Start()
     {
+        WeaponParentBone = transform.Find("Armature").Find("mixamorig:Hips").Find("mixamorig:Spine").Find("mixamorig:Spine1").Find("mixamorig:Spine2").Find("mixamorig:RightShoulder").Find("mixamorig:RightArm").Find("mixamorig:RightForeArm").Find("mixamorig:RightHand").Find("mixamorig:RightHand_end").gameObject;
         RaggDollOff();
     }
 

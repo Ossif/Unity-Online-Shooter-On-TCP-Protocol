@@ -7,10 +7,17 @@ using System;
 using System.Net.Sockets;
 using PacketHeaders;
 using System.Collections.Concurrent;
+using WeaponEnumIds;
 
 public class Client : MonoBehaviour
 {
     public bool readyToWork = false;
+
+
+
+    public GameObject AK;
+    public GameObject SO;
+    public GameObject pistol;
 
 
 
@@ -282,19 +289,24 @@ public class Client : MonoBehaviour
                     switch (animId)
                     {
                         case 0:
-                            animator.Play("Idle");
+                            //animator.Play("Idle");
+                            animator.SetTrigger("idle");
                             break;
                         case 1:
-                            animator.Play("RForward");
+                            //animator.Play("RForward");
+                            animator.SetTrigger("forward");
                             break;
                         case 2:
-                            animator.Play("RBack");
+                            //animator.Play("RBack");
+                            animator.SetTrigger("back");
                             break;
                         case 3:
-                            animator.Play("RLeft");
+                            //animator.Play("RLeft");
+                            animator.SetTrigger("left");
                             break;
                         case 4:
-                            animator.Play("RRight");
+                            //animator.Play("RRight");
+                            animator.SetTrigger("right");
                             break;
 
                     }
@@ -399,6 +411,51 @@ public class Client : MonoBehaviour
                     enemies.TryRemove(objectId, out _);
                     break;
                 }
+            case WorldCommand.SMSG_PLAYER_WEAPON_INFO: { 
+
+                string objectId = InComePacket.ReadString();
+
+                foreach (GameObject obj in enemies.Values)
+                {
+                    if (obj.GetComponent<EnemyInfo>().playerId == objectId)
+                    {
+                        //Меняем оружие в руках данному игроку
+                        EnemyInfo ei = obj.GetComponent<EnemyInfo>();
+
+                        if(ei.WeaponObject != null){
+                            Destroy(ei.WeaponObject);
+                            ei.WeaponObject = null;
+                        }
+
+                        switch (InComePacket.ReadInt()) { 
+                            case ((int) WeaponId.AK): { 
+                                ei.WeaponObject = Instantiate(AK, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
+                                ei.WeaponObject.transform.parent = ei.WeaponParentBone.transform;
+                                ei.WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
+                                ei.WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
+                                //ei.WeaponObject.transform.
+                                break;
+                            }
+                            case ((int) WeaponId.PISTOL): { 
+                                ei.WeaponObject = Instantiate(pistol, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
+                                ei.WeaponObject.transform.parent = ei.WeaponParentBone.transform;
+                                ei.WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
+                                ei.WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
+                                break;
+                            }
+                            case ((int) WeaponId.SAWNED_OFF): { 
+                                ei.WeaponObject = Instantiate(SO, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
+                                ei.WeaponObject.transform.parent = ei.WeaponParentBone.transform;
+                                ei.WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
+                                ei.WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+                break;    
+            }   
         }
     }
 

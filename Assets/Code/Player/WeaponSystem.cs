@@ -39,6 +39,14 @@ public class WeaponSystem : MonoBehaviour
 
     public CanvasLogic canvasController;
     // Start is called before the first frame update
+
+    void SendInfoAboutWeapon(WeaponId wid) { 
+        Client c = FindObjectOfType<Client>().GetComponent<Client>();  
+        Packet packet = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_WEAPON_INFO);
+        packet.Write((int) wid);
+        c.Send(packet);
+    }
+
     void Start()
     { 
         canvasController = GameObject.Find("Canvas").GetComponent<CanvasLogic>();
@@ -76,7 +84,7 @@ public class WeaponSystem : MonoBehaviour
             }
         }
 
-        
+        SendInfoAboutWeapon(weaponSlots[currentSlot]);
     }
 
     public void ChangeWeapon(int slotId)
@@ -122,6 +130,8 @@ public class WeaponSystem : MonoBehaviour
         }
         handsAnimator.Play(handAnim);
         FinishReload();
+
+        SendInfoAboutWeapon(weaponSlots[currentSlot]);
     }
 
     public void SuccessReload(){

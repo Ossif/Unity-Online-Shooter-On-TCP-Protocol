@@ -45,9 +45,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   readyToWork: 0
+  AK: {fileID: 4753008828017016279, guid: caa0d0dedcab7c442971272d8f28f93c, type: 3}
+  SO: {fileID: 3265676771010083280, guid: 02f76f729272a6846a032a5ff5a607cb, type: 3}
+  pistol: {fileID: 5750334156348278792, guid: af702c503ba23704dbe3fbb00c422cf5, type: 3}
   port: 6321
   socketReady: 0
-  playerPrefab: {fileID: 80344335250525252, guid: ae77195d26c597748b046d61f9f6bad0, type: 3}
+  playerPrefab: {fileID: 2908902476576423160, guid: 8f4d8bfbfaef08b47835e16f0247656c, type: 3}
   bulletPrefab: {fileID: 383235577832844704, guid: 5094691bacca0eb49a3efe3f4a6986c3, type: 3}
   ClientName: 
   IsHost: 0
+  playerId: 
+  SpawnPos: {x: 0, y: 0, z: 0}

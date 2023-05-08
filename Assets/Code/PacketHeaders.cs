@@ -31,6 +31,9 @@ namespace PacketHeaders
         CMSG_PLAYER_RESTORE_HEALTH = 16,
         SMSG_PLAYER_DEATH = 17,
         SMSG_PLAYER_RESPAWN = 18,
-        SMSG_REMOVE_PLAYER = 19
+        SMSG_REMOVE_PLAYER = 19,
+
+        CMSG_PLAYER_WEAPON_INFO = 20,
+        SMSG_PLAYER_WEAPON_INFO = 21
     }
 }

@@ -10,6 +10,7 @@ using System.IO;
 using System.Threading;
 using System.Collections.Concurrent;
 using PacketHeaders;
+using WeaponEnumIds;
 
 enum PlayerStatus
 {
@@ -34,6 +35,8 @@ public class ServerClient
 
     public int status = (int)PlayerStatus.PLAYER_ON_FOOT;
     public float health = 100.0f;
+
+    public WeaponId weaponId = WeaponId.NONE;
 }
 public class Server : MonoBehaviour
 {
@@ -491,6 +494,20 @@ public class Server : MonoBehaviour
                     if(client.tcp.Client.RemoteEndPoint.ToString() != playerId){
                             client.stream.WriteAsync(apacket.GetBytes());
                         break;
+                    }
+                }
+                break;
+            }
+            case (WorldCommand.CMSG_PLAYER_WEAPON_INFO): { 
+                c.weaponId = (WeaponId) packet.ReadInt(); 
+
+                Packet apacket = new Packet((int)WorldCommand.SMSG_PLAYER_WEAPON_INFO);
+                apacket.Write(c.tcp.Client.RemoteEndPoint.ToString());
+                apacket.Write((int) c.weaponId);
+                foreach (ServerClient client in clients.Keys)
+                {
+                    if(client.tcp.Client.RemoteEndPoint.ToString() != c.tcp.Client.RemoteEndPoint.ToString()){
+                        client.stream.WriteAsync(apacket.GetBytes());
                     }
                 }
                 break;
