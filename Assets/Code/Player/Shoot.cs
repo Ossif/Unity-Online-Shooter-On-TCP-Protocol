@@ -15,7 +15,8 @@ public class Shoot : MonoBehaviour
     private Client client = null;
 
     private WeaponSystem ws;
-
+    private AudioSource AS;
+    public AudioClip GiveDamageSound;
     public List<Weapon> weaponList = new List<Weapon>();
     #nullable enable
     struct PlayerDamage
@@ -28,6 +29,7 @@ public class Shoot : MonoBehaviour
     {
         try{ 
             client = FindObjectOfType<Client>().GetComponent<Client>();
+            AS = this.transform.Find("Audio Source").GetComponent<AudioSource>();
         }    
         catch{ 
             
@@ -65,6 +67,7 @@ public class Shoot : MonoBehaviour
                     // Получаем информацию об объекте, с которым столкнулся луч
                     if (hit.collider.gameObject.tag == "Enemy")
                     {
+                        Invoke("GiveDamage", 0.1f);
                         EnemyInfo enemny = hit.collider.transform.GetComponent<EnemyInfo>();
                         Debug.Log($"Попал в игрока {enemny.PlayerName}");
                         Packet packet = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_GIVE_DAMAGE);
@@ -116,6 +119,7 @@ public class Shoot : MonoBehaviour
                 }
                 if(counter > 0)
                 {
+                    Invoke("GiveDamage", 0.1f);
                     for (int i = 0; i < counter; i++)
                     {
                         Packet packet = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_GIVE_DAMAGE);
@@ -238,7 +242,10 @@ public class Shoot : MonoBehaviour
         }
     }*/
 
-    // Update is called once per frame
+    void GiveDamage()
+    {
+        AS.PlayOneShot(GiveDamageSound, 1);
+    }
     void Update()
     {
         /*bool isAuto = false;

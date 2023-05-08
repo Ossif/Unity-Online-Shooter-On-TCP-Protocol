@@ -6,7 +6,6 @@ public class HealthSystem : MonoBehaviour
 {
     private Client client;
     public float health = 100.0f;
-    public Vector3 spawnPos = new Vector3(0.0f, 3.0f, 0.0f);
     // Start is called before the first frame update
     void Start()
     {
@@ -35,7 +34,7 @@ public class HealthSystem : MonoBehaviour
     }
     public void PlayerRespawn() {
         transform.gameObject.GetComponent<Movement>().EnabledMovement = true;
-        transform.gameObject.GetComponent<Movement>().SetPlayerPos(spawnPos);
+        transform.gameObject.GetComponent<Movement>().SetPlayerPos(client.SpawnPos);
         
         
         GameObject.Find("Canvas").GetComponent<CanvasLogic>().ShowHUD();

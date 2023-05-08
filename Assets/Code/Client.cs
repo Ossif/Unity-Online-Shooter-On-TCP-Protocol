@@ -32,6 +32,7 @@ public class Client : MonoBehaviour
     public string ClientName;
     public bool IsHost;
     public string playerId;
+    public Vector3 SpawnPos;
 
     static ConcurrentDictionary<string, GameObject> enemies = new ConcurrentDictionary<string, GameObject>();
 
@@ -44,8 +45,6 @@ public class Client : MonoBehaviour
     {
         DontDestroyOnLoad(gameObject);
     }
-
-
     private void Update()
     {
         Tuple<PacketDecryptor> packet = null;
@@ -64,7 +63,6 @@ public class Client : MonoBehaviour
                 stream.Write(packets);
         }
     }
-
     public async void ConnectToServer(string host, int port)//Присоединение к TCP серверу
     {
         if(socketReady)
@@ -132,7 +130,6 @@ public class Client : MonoBehaviour
             CloseSocket();
         }
     }
-
     void ReadDataCallback(IAsyncResult ar)
     {
         var state = (Tuple<NetworkStream, byte[]>)ar.AsyncState;
@@ -165,7 +162,6 @@ public class Client : MonoBehaviour
             CloseSocket();
         }
     }
-
     public void Send(Packet pack)
     {
         sendQueue.Enqueue(Tuple.Create(pack));
@@ -200,6 +196,8 @@ public class Client : MonoBehaviour
                 int hostInt = InComePacket.ReadInt();
                 if(hostInt == 1)IsHost = true;
                 else IsHost = false;
+                
+                SpawnPos = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
                 Debug.Log($"IsPlayerHost: {IsHost}");
                 GameObject.Find("MenuLogic").GetComponent<MenuLogic>().StartGame();
                 break;
@@ -352,12 +350,56 @@ public class Client : MonoBehaviour
                 break;
             }
         
-            case WorldCommand.SMSG_PLAYER_TAKE_DAMAGE: { 
+            case WorldCommand.SMSG_PLAYER_TAKE_DAMAGE: 
+            { 
                 Debug.Log($"CLIENT: received info about damage");
                 float health = InComePacket.ReadFloat();
                 GameObject.Find("Player(Clone)").GetComponent<HealthSystem>().SetHealth(health);
                 break;
             }
+            case WorldCommand.SMSG_PLAYER_DEATH:
+            {
+                string objectId = InComePacket.ReadString();
+                foreach (GameObject obj in enemies.Values)
+                {
+                    //Debug.Log(uniqueId);
+                    if (obj.GetComponent<EnemyInfo>().playerId == objectId)
+                    {
+                        obj.GetComponent<EnemyInfo>().RaggDollOn();
+                        break;
+                    }
+                }
+                break;
+            }
+            case WorldCommand.SMSG_PLAYER_RESPAWN:
+            {
+                string objectId = InComePacket.ReadString();
+                foreach (GameObject obj in enemies.Values)
+                {
+                    //Debug.Log(uniqueId);
+                    if (obj.GetComponent<EnemyInfo>().playerId == objectId)
+                    {
+                        obj.GetComponent<EnemyInfo>().RaggDollOff();
+                        break;
+                    }
+                }
+                break;
+            }
+            case WorldCommand.SMSG_REMOVE_PLAYER:
+                {
+                    string objectId = InComePacket.ReadString();
+                    
+                    foreach (GameObject obj in enemies.Values)
+                    {
+                        if (obj.GetComponent<EnemyInfo>().playerId == objectId)
+                        {
+                            Destroy(obj);
+                            break;
+                        }
+                    }
+                    enemies.TryRemove(objectId, out _);
+                    break;
+                }
         }
     }
 
@@ -377,6 +419,8 @@ public class Client : MonoBehaviour
         socket.Close();
         socketReady = false;
         SceneManager.LoadScene("Menu");
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 }
 

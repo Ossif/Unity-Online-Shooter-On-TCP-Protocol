@@ -43,8 +43,17 @@ public class Looking : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-        if(axes == RotationAxes.MouseX){
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            sensivityHor += 0.5f;
+            sensivityVer += 0.5f;
+        }
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            sensivityHor -= 0.5f;
+            sensivityVer -= 0.5f;
+        }
+        if (axes == RotationAxes.MouseX){
             transform.Rotate(0, Input.GetAxis("Mouse X") * sensivityHor, 0);
         }
         else if(axes == RotationAxes.MouseY){

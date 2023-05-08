@@ -232,6 +232,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c48281385b01db46bd0dfe1fb54757d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  EnabledMovement: 1
   Speed: 14
   JumpForce: 8
   Gravity: 20
@@ -348,6 +349,8 @@ MonoBehaviour:
   cam: {fileID: 8866188631761620779}
   ShotParticle: {fileID: 0}
   speed: 200
+  maxAngle: 15
+  GiveDamageSound: {fileID: 8300000, guid: e5d5f6e718522eb4f8075d59ffeb2815, type: 3}
 --- !u!114 &1649435267211783577
 MonoBehaviour:
   m_ObjectHideFlags: 0

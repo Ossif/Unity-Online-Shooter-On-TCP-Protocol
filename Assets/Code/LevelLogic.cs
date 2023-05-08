@@ -16,7 +16,7 @@ public class LevelLogic : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         client = FindObjectOfType<Client>().GetComponent<Client>();
 
-        player = Instantiate(playerPrefab, new Vector3(0, 2, 0), Quaternion.identity);
+        player = Instantiate(playerPrefab, client.SpawnPos, Quaternion.identity);
 
         Packet packet = new Packet((int) PacketHeaders.WorldCommand.CMSG_PLAYER_LOGIN);
         packet.Write((float)player.transform.position.x);

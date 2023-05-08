@@ -11,8 +11,33 @@ using System.Threading;
 using System.Collections.Concurrent;
 using PacketHeaders;
 
+enum PlayerStatus
+{
+    PLAYER_ON_FOOT = 0,
+    PLAYER_IS_DEATH = 1
+};
+public class ServerClient
+{
+    public TcpClient tcp;
+    public byte[] buffer;
+    public int CountGetPacketData; //Количество уже полученных байт
+    public int Remaining; //Количество запрошеных байт
+    public NetworkStream stream;
+    public ServerClient(TcpClient tcp)
+    {
+        this.tcp = tcp;
+    }
+    public string PlayerID;
+    public string PlayerName;
+    public float[] lastPos = new float[4];
+    public bool authorized = false;
+
+    public int status = (int)PlayerStatus.PLAYER_ON_FOOT;
+    public float health = 100.0f;
+}
 public class Server : MonoBehaviour
 {
+
     public static string PrintByteArray(byte[] bytes, int offset = 0)
     {
         StringBuilder sb = new StringBuilder();
@@ -22,24 +47,6 @@ public class Server : MonoBehaviour
             sb.Append(" ");
         }
         return sb.ToString();
-    }
-    public class ServerClient
-    {
-        public TcpClient tcp;
-        public byte[] buffer;
-        public int CountGetPacketData; //Количество уже полученных байт
-        public int Remaining; //Количество запрошеных байт
-        public NetworkStream stream;
-        public ServerClient(TcpClient tcp)
-        {
-            this.tcp = tcp;
-        }
-
-        public string PlayerName;
-        public float[] lastPos = new float[4];
-        public bool authorized = false;
-
-        public float health = 100.0f;
     }
 
     public int port = 6321;
@@ -51,6 +58,7 @@ public class Server : MonoBehaviour
     static ConcurrentDictionary<ServerClient, object> clients = new ConcurrentDictionary<ServerClient, object>();
     private Queue<Tuple<ServerClient, PacketDecryptor>> messageQueue = new Queue<Tuple<ServerClient, PacketDecryptor>>(); //Packet queue
     public StreamWriter sw = null;
+    Dictionary<int, ServerCommands> teams = new Dictionary<int, ServerCommands>();
 
     /*public static void Main()
     {
@@ -80,6 +88,11 @@ public class Server : MonoBehaviour
             serverStarted = true;
 
             Debug.Log("SERVER начал работу.");
+            //Создаём команды
+            teams = new Dictionary<int, ServerCommands> {
+              { 0, new ServerCommands(new Vector3(0f, 2f, 0f))},
+              { 1, new ServerCommands(new Vector3(130f, 6.3f, 60f))}
+            };
         }
         catch (Exception e)
         {
@@ -113,22 +126,18 @@ public class Server : MonoBehaviour
             client.CountGetPacketData = 0;
             client.buffer = new byte[client.Remaining];
             //client.stream.BeginRead(client.buffer, 0, client.Remaining, ReadHeaderCallback, new Tuple<ServerClient>(client));
-            await client.stream.ReadAsync(client.buffer, 0, client.Remaining);
-            ReadHeaderCallback(client.buffer, client);
+            int bytesRead = await client.stream.ReadAsync(client.buffer, 0, client.Remaining);
+            ReadHeaderCallback(client.buffer, bytesRead, client);
         }
     }
-    async void ReadHeaderCallback(byte[] buffer, ServerClient client)
+    async void ReadHeaderCallback(byte[] buffer, int bytesRead, ServerClient client)
     {
         try
         {
-            int bytesRead = buffer.Length;
-
             if (bytesRead == 0)
             {
                 // Соединение было закрыто сервером
-                Debug.Log($"HEADER: Сервер разорвал соединение с {client.tcp.Client.RemoteEndPoint}");
-                client.stream.Close();
-                clients.TryRemove(client, out _);
+                DisconnectPlayer(client);
                 return;
             }
             printf($"{PrintByteArray(client.buffer)}");
@@ -138,8 +147,8 @@ public class Server : MonoBehaviour
                 Debug.Log($"Ошибка сети, количество байт не соответствует запрошенному значению. Запрошено байт: {client.Remaining}, получено: {bytesRead}");
                 //Пытаемся запросить байты по новой
                 client.buffer = new byte[client.Remaining];
-                await client.stream.ReadAsync(client.buffer, 0, client.Remaining);
-                ReadHeaderCallback(client.buffer, client);
+                int byteRead = await client.stream.ReadAsync(client.buffer, 0, client.Remaining);
+                ReadHeaderCallback(client.buffer, byteRead, client);
                 return;
             }
 
@@ -150,8 +159,8 @@ public class Server : MonoBehaviour
                 printf($"Ошибка сети, получен пакет некорректной длинны. Длинна {headerSize}, байт код: {PrintByteArray(client.buffer)}");
                 Debug.Log($"Ошибка сети, получен пакет некорректной длинны. Длинна {headerSize}, байт код: {PrintByteArray(client.buffer)}");
                 client.buffer = new byte[client.Remaining];
-                await client.stream.ReadAsync(client.buffer, 0, client.Remaining);
-                ReadHeaderCallback(client.buffer, client);
+                int byteRead = await client.stream.ReadAsync(client.buffer, 0, client.Remaining);
+                ReadHeaderCallback(client.buffer, byteRead, client);
             }
 
             client.CountGetPacketData += bytesRead;
@@ -160,8 +169,8 @@ public class Server : MonoBehaviour
                 client.Remaining = headerSize;
                 Array.Resize(ref client.buffer, client.CountGetPacketData + client.Remaining);
                 //client.stream.BeginRead(client.buffer, client.CountGetPacketData, client.Remaining, ReadDataCallback, new Tuple<ServerClient>(client));
-                await client.stream.ReadAsync(client.buffer, client.CountGetPacketData, client.Remaining);
-                ReadDataCallback(client.buffer, client);
+                int byteRead = await client.stream.ReadAsync(client.buffer, client.CountGetPacketData, client.Remaining);
+                ReadDataCallback(client.buffer, byteRead, client);
             }
             catch (Exception ex)
             {
@@ -173,32 +182,19 @@ public class Server : MonoBehaviour
         catch (Exception ex)
         {
             Debug.Log($"Error: {ex.Message}");
-            client.stream.Close();
-            clients.TryRemove(client, out _);
+            DisconnectPlayer(client);
         }
     }
-    async void ReadDataCallback(byte[] buffer, ServerClient client)
+    async void ReadDataCallback(byte[] buffer, int bytesRead, ServerClient client)
     {
         try
         {
-            int bytesRead = buffer.Length;
-
             if (bytesRead == 0)
             {
-                // Соединение было закрыто сервером
-                Debug.Log($"DATA: Сервер разорвал соединение с {client.tcp.Client.RemoteEndPoint}");
-                client.stream.Close();
-                clients.TryRemove(client, out _);
+                DisconnectPlayer(client);
                 return;
             }
             printf($"{PrintByteArray(client.buffer)}");
-            /*           if (bytesRead != client.Remaining) //Если количество байт которое мы получили не соответствует тому, которое мы запросили
-                       {
-                           Debug.Log($"Ошибка сети, количество байт не соответствует запрошенному значению. Запрошено байт: {client.Remaining}, получено: {bytesRead}");
-                           //Пытаемся запросить байты по новой
-                           client.stream.BeginRead(client.buffer, client.CountGetPacketData, client.Remaining, ReadDataCallback, new Tuple<ServerClient>(client));
-                           return;
-                       }*/
 
             PacketDecryptor packet = new PacketDecryptor(client.buffer);
             client.CountGetPacketData = 0;
@@ -207,18 +203,31 @@ public class Server : MonoBehaviour
 
             client.Remaining = HeaderSize;
             client.buffer = new byte[client.Remaining];
-            //client.stream.BeginRead(client.buffer, 0, client.Remaining, ReadHeaderCallback, new Tuple<ServerClient>(client));
-            await client.stream.ReadAsync(client.buffer, 0, client.Remaining);
-            ReadHeaderCallback(client.buffer, client);
+            int byteRead = await client.stream.ReadAsync(client.buffer, 0, client.Remaining);
+            ReadHeaderCallback(client.buffer, byteRead, client);
             //Debug.Log("Packet get, find new");
             //
         }
         catch (Exception ex)
         {
             Debug.Log($"Error: {ex.Message}");
-            client.stream.Close();
-            clients.TryRemove(client, out _);
+            DisconnectPlayer(client);
         }
+    }
+    private void DisconnectPlayer(ServerClient c)
+    {
+        // Соединение было закрыто сервером
+        Debug.Log($"DATA: Сервер разорвал соединение с {c.tcp.Client.RemoteEndPoint}");
+        c.stream.Close();
+        clients.TryRemove(c, out _);
+        Packet packet = new Packet((int)WorldCommand.SMSG_REMOVE_PLAYER);
+        packet.Write(c.PlayerID);
+        foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
+        {
+            client.stream.WriteAsync(packet.GetBytes());
+            break;
+        }
+        return;
     }
     private void QueueUpdate()
     {
@@ -257,8 +266,21 @@ public class Server : MonoBehaviour
                 {
                     int playerid = packet.ReadInt();
                     c.PlayerName = packet.ReadString();
+                    c.PlayerID = c.tcp.Client.RemoteEndPoint.ToString();
                     Debug.Log($"SERVER: Игрок {c.PlayerName} подключился к серверу");
                     Debug.Log("SERVER: Начинаем игру!");
+
+                    int minCount = int.MaxValue;
+                    ServerCommands minTeam = null;
+                    foreach (var team in teams.Values)
+                    {
+                        if (team.CommandPlayers.Count < minCount)
+                        {
+                            minCount = team.CommandPlayers.Count;
+                            minTeam = team;
+                        }
+                    }
+                    minTeam.CommandPlayers.Add(c);
 
                     Packet apacket = new Packet((int)WorldCommand.SMSG_START_GAME);
 
@@ -267,6 +289,9 @@ public class Server : MonoBehaviour
                     {
                         if(c.tcp == client.tcp) apacket.Write(1);
                         else apacket.Write(0);
+                        apacket.Write((float)minTeam.spawnPoint.x);
+                        apacket.Write((float)minTeam.spawnPoint.y);
+                        apacket.Write((float)minTeam.spawnPoint.z);
                         break;
                     }
                     c.stream.WriteAsync(apacket.GetBytes());
@@ -427,14 +452,29 @@ public class Server : MonoBehaviour
                     float damage = packet.ReadFloat();
 
                     //Debug.Log($"SERVER: received info about damage: {}");
-                    foreach (ServerClient client in clients.Keys)
+                    foreach (ServerClient client in clients.Keys) //Проходимся по всем клиентам
                     {
-                        if (client.tcp.Client.RemoteEndPoint.ToString() == VictimID)
+                        if (client.tcp.Client.RemoteEndPoint.ToString() == VictimID) //Если клиент является тем, кому нанесли урон
                         {
-                            client.health -= damage;
-                            Packet apacket = new Packet((int)WorldCommand.SMSG_PLAYER_TAKE_DAMAGE);
-                            apacket.Write((float)client.health);
-                            client.stream.WriteAsync(apacket.GetBytes());
+                            if (client.status != (int)PlayerStatus.PLAYER_IS_DEATH) //Если этот клиент жив
+                            {
+                                client.health -= damage; //снимаем хп
+                                Packet apacket = new Packet((int)WorldCommand.SMSG_PLAYER_TAKE_DAMAGE); //Формируем пакет с текущим количеством хп
+                                apacket.Write((float)client.health);
+                                client.stream.WriteAsync(apacket.GetBytes());
+
+                                if (client.health <= 0) //Если ХП у игрока не осталось
+                                {
+                                    Packet deathPacket = new Packet((int)WorldCommand.SMSG_PLAYER_DEATH); //формируем пакет смерти и отправляем всем игрокам кроме того, кто помер
+                                    deathPacket.Write(VictimID);
+                                    client.status = (int)PlayerStatus.PLAYER_IS_DEATH;
+                                    foreach (ServerClient cli in clients.Keys)
+                                    {
+                                        if (cli.tcp.Client.RemoteEndPoint.ToString() != VictimID)
+                                            cli.stream.WriteAsync(deathPacket.GetBytes());
+                                    }
+                                }
+                            }
                             break;
                         }
                     }
@@ -445,13 +485,14 @@ public class Server : MonoBehaviour
             {
                 string playerId = c.tcp.Client.RemoteEndPoint.ToString();
                 float health = packet.ReadFloat();
-                Debug.Log($"{playerId} - test");
+                c.health = health;
+                c.status = (int)PlayerStatus.PLAYER_ON_FOOT;
+                Packet apacket = new Packet((int)WorldCommand.SMSG_PLAYER_RESPAWN);
+                apacket.Write(playerId);
                 foreach (ServerClient client in clients.Keys)
                 {
-                    Debug.Log($"{client.tcp.Client.RemoteEndPoint.ToString()} - try");
-                    if(client.tcp.Client.RemoteEndPoint.ToString() == playerId){ 
-                        client.health = health;
-                        Debug.Log($"\t{client.tcp.Client.RemoteEndPoint.ToString()} - success");
+                    if(client.tcp.Client.RemoteEndPoint.ToString() != playerId){
+                            client.stream.WriteAsync(apacket.GetBytes());
                         break;
                     }
                 }
@@ -464,5 +505,6 @@ public class Server : MonoBehaviour
     {
         if(serverStarted)server.Stop();
         if(serverThread != null) serverThread.Abort();
+        Destroy(this);
     }
 }
