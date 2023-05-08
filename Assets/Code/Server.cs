@@ -493,7 +493,6 @@ public class Server : MonoBehaviour
                 {
                     if(client.tcp.Client.RemoteEndPoint.ToString() != playerId){
                             client.stream.WriteAsync(apacket.GetBytes());
-                        break;
                     }
                 }
                 break;
