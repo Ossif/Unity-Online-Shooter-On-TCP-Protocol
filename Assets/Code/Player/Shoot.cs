@@ -102,7 +102,7 @@ public class Shoot : MonoBehaviour
                     RaycastHit hit;
                     GameObject bullet = Instantiate(TrailEffectBullet, MuzzleFlash.position, cam.transform.rotation);
                     bullet.transform.GetComponent<Bullet>().creatorId = client.playerId;
-                    bullet.transform.GetComponent<ConstantForce>().force = cam.transform.forward * 5000;
+                    bullet.transform.GetComponent<ConstantForce>().force = direction * 5000;
                     // Проверяем, столкнулся ли луч с каким-либо объектом
                     if (Physics.Raycast(ray, out hit))
                     {
