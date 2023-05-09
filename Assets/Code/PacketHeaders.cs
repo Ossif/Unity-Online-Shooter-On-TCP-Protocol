@@ -38,5 +38,8 @@ namespace PacketHeaders
 
         SMSG_CREATE_PICKUP = 22,
         SMSG_CREATE_PICKUP_COMPRESS = 23
+
+        CMSG_CREATE_BULLET_EFFECT = 24,
+        SMSG_CREATE_BULLET_EFFECT = 25
     }
 }

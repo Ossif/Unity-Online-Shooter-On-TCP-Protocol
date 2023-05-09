@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &4638908677949621108
+--- !u!1 &3061371792230994980
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,8 +8,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 3530615993983580739}
-  - component: {fileID: 1884678611136456869}
+  - component: {fileID: 74732593349401522}
+  - component: {fileID: 315349162582268344}
   m_Layer: 0
   m_Name: Audio Source
   m_TagString: Untagged
@@ -17,28 +17,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &3530615993983580739
+--- !u!4 &74732593349401522
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4638908677949621108}
+  m_GameObject: {fileID: 3061371792230994980}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.348, z: 1.106}
+  m_LocalPosition: {x: 0, y: 1.295, z: 0.932}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8866188630672528429}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!82 &1884678611136456869
+--- !u!82 &315349162582268344
 AudioSource:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4638908677949621108}
+  m_GameObject: {fileID: 3061371792230994980}
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
@@ -199,7 +199,7 @@ Transform:
   m_Children:
   - {fileID: 8866188631761620780}
   - {fileID: 8866188631274992931}
-  - {fileID: 3530615993983580739}
+  - {fileID: 74732593349401522}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -315,7 +315,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AK_cartridge: {fileID: 4361209956758616561, guid: 50258e38ac3dfe046a69095e45b8f093, type: 3}
   we: {fileID: 0}
-  AS: {fileID: 1884678611136456869}
+  AS: {fileID: 315349162582268344}
   EmptyAmmo: {fileID: 8300000, guid: 9149461fcad64454692b15938b689ef6, type: 3}
   PistolReloadClip: {fileID: 8300000, guid: 2462f478c7bee6c48a519b1123c2e6b7, type: 3}
   PistolShotClip: {fileID: 8300000, guid: 362f61e14b253a64cb971c8441c94633, type: 3}

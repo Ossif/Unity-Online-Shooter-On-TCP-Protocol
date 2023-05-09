@@ -35,7 +35,6 @@ public class Client : MonoBehaviour
     public GameObject playerPrefab;
     public GameObject bulletPrefab;
 
-    //От ФИМЫ
     public string ClientName;
     public bool IsHost;
     public string playerId;
@@ -44,8 +43,11 @@ public class Client : MonoBehaviour
     static ConcurrentDictionary<string, GameObject> enemies = new ConcurrentDictionary<string, GameObject>();
 
     private Animator animator;
-    //От ФИМЫ
+
     private int ClientId;
+
+    public GameObject TrailEffectBullet;
+    public AudioClip ShotClip;
 
     // Start is called before the first frame update
     private void Start()
@@ -243,6 +245,7 @@ public class Client : MonoBehaviour
                 string PlayerName;
                 Vector3 position = new Vector3();
                 Quaternion rotation = new Quaternion();
+                int weaponId;
 
                 int counter = InComePacket.ReadInt();
 
@@ -254,6 +257,7 @@ public class Client : MonoBehaviour
                     position.y = InComePacket.ReadFloat();
                     position.z = InComePacket.ReadFloat();
                     rotation.z = InComePacket.ReadFloat();
+                    weaponId = InComePacket.ReadInt();
 
                     GameObject go = Instantiate(playerPrefab, position, Quaternion.identity);
                     go.transform.rotation = rotation;
@@ -261,6 +265,34 @@ public class Client : MonoBehaviour
                     go.GetComponent<EnemyInfo>().PlayerName = PlayerName;
                     go.transform.Find("NickName").GetComponent<TMP_Text>().text = PlayerName;
                     
+                    go.GetComponent<EnemyInfo>().weaponId = (WeaponId) weaponId;
+
+                    switch (weaponId) { 
+                        case ((int) WeaponId.AK): { 
+                            go.GetComponent<EnemyInfo>().WeaponObject = Instantiate(AK, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
+                            go.GetComponent<EnemyInfo>().WeaponObject.transform.parent =  go.GetComponent<EnemyInfo>().WeaponParentBone.transform;
+                            go.GetComponent<EnemyInfo>().WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
+                            go.GetComponent<EnemyInfo>().WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
+                            //ei.WeaponObject.transform.
+                            break;
+                        }
+                        case ((int) WeaponId.PISTOL): { 
+                            go.GetComponent<EnemyInfo>().WeaponObject = Instantiate(pistol, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
+                            go.GetComponent<EnemyInfo>().WeaponObject.transform.parent = go.GetComponent<EnemyInfo>().WeaponParentBone.transform;
+                            go.GetComponent<EnemyInfo>().WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
+                            go.GetComponent<EnemyInfo>().WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
+                            break;
+                        }
+                        case ((int) WeaponId.SAWNED_OFF): { 
+                            go.GetComponent<EnemyInfo>().WeaponObject = Instantiate(SO, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
+                            go.GetComponent<EnemyInfo>().WeaponObject.transform.parent =  go.GetComponent<EnemyInfo>().WeaponParentBone.transform;
+                            go.GetComponent<EnemyInfo>().WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
+                            go.GetComponent<EnemyInfo>().WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
+                            break;
+                        }
+                    }
+
+
                     enemies.TryAdd(id, go);
                 }
 
@@ -307,6 +339,9 @@ public class Client : MonoBehaviour
                         case 4:
                             //animator.Play("RRight");
                             animator.SetTrigger("right");
+                            break;
+                        case 5:
+                            animator.SetTrigger("jump");
                             break;
 
                     }
@@ -472,6 +507,30 @@ public class Client : MonoBehaviour
                     }
                 }
                 break;
+            }
+            case WorldCommand.SMSG_CREATE_BULLET_EFFECT: 
+            { 
+                Quaternion angle = new Quaternion(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                Vector3 impulse = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                string pid = InComePacket.ReadString();
+
+                foreach (GameObject obj in enemies.Values)
+                {
+                    if (obj.GetComponent<EnemyInfo>().playerId == pid) 
+                    { 
+                        GameObject effect = Instantiate(TrailEffectBullet, new Vector3(0, 0, 0), angle);
+                        effect.transform.parent = obj.GetComponent<EnemyInfo>().WeaponObject.transform.Find("model").Find("flashPlace");
+                        effect.transform.localPosition = new Vector3(0, 0, 0);
+                        effect.transform.GetComponent<Bullet>().creatorId = pid;
+                        effect.transform.GetComponent<ConstantForce>().force = impulse * 5000;
+                        Debug.Log("эффект пули создан!");
+
+                        obj.GetComponent<AudioSource>().PlayOneShot(ShotClip);
+                        obj.GetComponent<Animator>().SetTrigger("shot");
+                        break;
+                    }
+                }
+                break;    
             }
         }
     }

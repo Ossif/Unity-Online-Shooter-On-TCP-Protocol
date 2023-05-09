@@ -376,6 +376,8 @@ public class Server : MonoBehaviour
                         playersPacket.Write((float)client.lastPos[1]);
                         playersPacket.Write((float)client.lastPos[2]);
                         playersPacket.Write((float)client.lastPos[3]);
+                        playersPacket.Write((int)client.weaponId);
+                        Debug.Log($"{(int)client.weaponId}");
                     }
                     c.stream.WriteAsync(playersPacket.GetBytes());
 
@@ -541,6 +543,29 @@ public class Server : MonoBehaviour
                 Packet apacket = new Packet((int)WorldCommand.SMSG_PLAYER_WEAPON_INFO);
                 apacket.Write(c.tcp.Client.RemoteEndPoint.ToString());
                 apacket.Write((int) c.weaponId);
+                foreach (ServerClient client in clients.Keys)
+                {
+                    if(client.tcp.Client.RemoteEndPoint.ToString() != c.tcp.Client.RemoteEndPoint.ToString()){
+                        client.stream.WriteAsync(apacket.GetBytes());
+                    }
+                }
+                break;
+            }
+
+            case (WorldCommand.CMSG_CREATE_BULLET_EFFECT): {  
+                Packet apacket = new Packet((int)WorldCommand.SMSG_CREATE_BULLET_EFFECT);
+
+                apacket.Write(packet.ReadFloat());
+                apacket.Write(packet.ReadFloat());
+                apacket.Write(packet.ReadFloat());
+                apacket.Write(packet.ReadFloat());
+
+                apacket.Write(packet.ReadFloat());
+                apacket.Write(packet.ReadFloat());
+                apacket.Write(packet.ReadFloat());
+
+                apacket.Write(c.tcp.Client.RemoteEndPoint.ToString());
+
                 foreach (ServerClient client in clients.Keys)
                 {
                     if(client.tcp.Client.RemoteEndPoint.ToString() != c.tcp.Client.RemoteEndPoint.ToString()){

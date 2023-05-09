@@ -63,6 +63,11 @@ public class SendInfoAboutObject : MonoBehaviour
                 {
                     animationId = 2;
                 }
+                if (!rb.isGrounded) {
+                    
+                    animationId = 5;    
+                }
+
                 packet.Write((int)animationId);
 
                 //Определяем, какую информацию мы отправляем
