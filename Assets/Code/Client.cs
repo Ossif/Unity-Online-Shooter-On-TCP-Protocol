@@ -525,7 +525,7 @@ public class Client : MonoBehaviour
                         effect.transform.GetComponent<ConstantForce>().force = impulse * 5000;
                         Debug.Log("эффект пули создан!");
 
-                        obj.GetComponent<AudioSource>().PlayOneShot(ShotClip);
+                        obj.transform.Find("Audio Source").gameObject.GetComponent<AudioSource>().PlayOneShot(ShotClip);
                         obj.GetComponent<Animator>().SetTrigger("shot");
                         break;
                     }
