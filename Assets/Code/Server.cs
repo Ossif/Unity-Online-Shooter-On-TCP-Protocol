@@ -348,7 +348,7 @@ public class Server : MonoBehaviour
                     {
                         if (c.tcp == client.tcp) continue;
                         if (client.authorized == false) continue;
-                        c.stream.WriteAsync(responcePacket.GetBytes());
+                        client.stream.WriteAsync(responcePacket.GetBytes());
                         Debug.Log($"Тестирование - {client.tcp.Client.RemoteEndPoint.ToString()}");
                     }
 
