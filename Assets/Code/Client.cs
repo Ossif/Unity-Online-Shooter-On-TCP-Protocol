@@ -290,7 +290,7 @@ public class Client : MonoBehaviour
                     {
                         case 0:
                             //animator.Play("Idle");
-                            animator.SetTrigger("idle");
+                            animator.SetTrigger("idle2");
                             break;
                         case 1:
                             //animator.Play("RForward");

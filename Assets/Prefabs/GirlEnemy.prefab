@@ -155,7 +155,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2060698506588267086}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 35.938793}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: -1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -164,7 +164,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 40.35172, y: 0.1733337}
+  m_AnchoredPosition: {x: 0, y: 2.566}
   m_SizeDelta: {x: 2, y: 0.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &5459070469206218191
@@ -583,7 +583,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2908902476576423160}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.35, y: -0.07, z: -0.444}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -606,7 +606,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: c0c91169fafb4d742a38a0481047f6bb, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_WarningMessage: 
@@ -640,9 +640,9 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_Enabled: 0
   m_Radius: 0.48
-  m_Height: 2.4
+  m_Height: 2.3
   m_Direction: 1
-  m_Center: {x: 0, y: 1.19, z: 0}
+  m_Center: {x: 0, y: 1.07, z: 0}
 --- !u!114 &4581205501223499699
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -658,6 +658,9 @@ MonoBehaviour:
   playerId: 
   PlayerName: 
   playerAnimId: 0
+  weaponId: 0
+  WeaponParentBone: {fileID: 0}
+  WeaponObject: {fileID: 0}
 --- !u!1 &3003565306996599968
 GameObject:
   m_ObjectHideFlags: 0

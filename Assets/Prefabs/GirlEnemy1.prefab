@@ -28,7 +28,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 80344335250525252}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 40.701717, y: -2.3856664, z: 35.494793}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -83,6 +83,9 @@ MonoBehaviour:
   playerId: 
   PlayerName: 
   playerAnimId: 0
+  weaponId: 0
+  WeaponParentBone: {fileID: 0}
+  WeaponObject: {fileID: 0}
 --- !u!95 &6431343123464668820
 Animator:
   serializedVersion: 5
