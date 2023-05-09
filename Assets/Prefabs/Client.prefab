@@ -56,3 +56,5 @@ MonoBehaviour:
   IsHost: 0
   playerId: 
   SpawnPos: {x: 0, y: 0, z: 0}
+  TrailEffectBullet: {fileID: 8080948163780936430, guid: 30b8be2e27a995d43b75f164e0bce453, type: 3}
+  ShotClip: {fileID: 8300000, guid: 03b2d2e29659d6543b9c0e715fb37ecd, type: 3}

@@ -513,6 +513,29 @@ public class Server : MonoBehaviour
                 }
                 break;
             }
+
+            case (WorldCommand.CMSG_CREATE_BULLET_EFFECT): {  
+                Packet apacket = new Packet((int)WorldCommand.SMSG_CREATE_BULLET_EFFECT);
+
+                apacket.Write(packet.ReadFloat());
+                apacket.Write(packet.ReadFloat());
+                apacket.Write(packet.ReadFloat());
+                apacket.Write(packet.ReadFloat());
+
+                apacket.Write(packet.ReadFloat());
+                apacket.Write(packet.ReadFloat());
+                apacket.Write(packet.ReadFloat());
+
+                apacket.Write(c.tcp.Client.RemoteEndPoint.ToString());
+
+                foreach (ServerClient client in clients.Keys)
+                {
+                    if(client.tcp.Client.RemoteEndPoint.ToString() != c.tcp.Client.RemoteEndPoint.ToString()){
+                        client.stream.WriteAsync(apacket.GetBytes());
+                    }
+                }
+                break;
+            }
         }
     }
 

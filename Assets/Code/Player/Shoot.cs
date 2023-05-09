@@ -65,6 +65,19 @@ public class Shoot : MonoBehaviour
                 GameObject bullet = Instantiate(TrailEffectBullet, MuzzleFlash.position, cam.transform.rotation);
                 bullet.transform.GetComponent<Bullet>().creatorId = client.playerId;
                 bullet.transform.GetComponent<ConstantForce>().force = cam.transform.forward * 5000;
+
+                Packet bpacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_CREATE_BULLET_EFFECT);
+                bpacket.Write((float) cam.transform.rotation.w);
+                bpacket.Write((float) cam.transform.rotation.x);
+                bpacket.Write((float) cam.transform.rotation.y);
+                bpacket.Write((float) cam.transform.rotation.z);
+
+                bpacket.Write((float) cam.transform.forward.x);
+                bpacket.Write((float) cam.transform.forward.y);
+                bpacket.Write((float) cam.transform.forward.z);
+
+                client.Send(bpacket);
+
                 // Проверяем, столкнулся ли луч с каким-либо объектом
                 if (Physics.Raycast(ray, out hit))
                 {
@@ -103,6 +116,20 @@ public class Shoot : MonoBehaviour
                     GameObject bullet = Instantiate(TrailEffectBullet, MuzzleFlash.position, cam.transform.rotation);
                     bullet.transform.GetComponent<Bullet>().creatorId = client.playerId;
                     bullet.transform.GetComponent<ConstantForce>().force = direction * 5000;
+
+                    ///посылаем информацию о траектории пули для отображения
+                    Packet bpacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_CREATE_BULLET_EFFECT);
+                    bpacket.Write((float) cam.transform.rotation.w);
+                    bpacket.Write((float) cam.transform.rotation.x);
+                    bpacket.Write((float) cam.transform.rotation.y);
+                    bpacket.Write((float) cam.transform.rotation.z);
+
+                    bpacket.Write((float) direction.x);
+                    bpacket.Write((float) direction.y);
+                    bpacket.Write((float) direction.z);
+                    
+                    client.Send(bpacket);
+
                     // Проверяем, столкнулся ли луч с каким-либо объектом
                     if (Physics.Raycast(ray, out hit))
                     {

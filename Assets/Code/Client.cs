@@ -35,7 +35,6 @@ public class Client : MonoBehaviour
     public GameObject playerPrefab;
     public GameObject bulletPrefab;
 
-    //От ФИМЫ
     public string ClientName;
     public bool IsHost;
     public string playerId;
@@ -44,8 +43,11 @@ public class Client : MonoBehaviour
     static ConcurrentDictionary<string, GameObject> enemies = new ConcurrentDictionary<string, GameObject>();
 
     private Animator animator;
-    //От ФИМЫ
+
     private int ClientId;
+
+    public GameObject TrailEffectBullet;
+    public AudioClip ShotClip;
 
     // Start is called before the first frame update
     private void Start()
@@ -489,6 +491,33 @@ public class Client : MonoBehaviour
                 }
                 break;    
             }   
+        
+
+
+                case WorldCommand.SMSG_CREATE_BULLET_EFFECT: 
+                { 
+                    Quaternion angle = new Quaternion(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                    Vector3 impulse = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                    string pid = InComePacket.ReadString();
+
+                    foreach (GameObject obj in enemies.Values)
+                    {
+                        if (obj.GetComponent<EnemyInfo>().playerId == pid) 
+                        { 
+                            GameObject effect = Instantiate(TrailEffectBullet, new Vector3(0, 0, 0), angle);
+                            effect.transform.parent = obj.GetComponent<EnemyInfo>().WeaponObject.transform.Find("model").Find("flashPlace");
+                            effect.transform.localPosition = new Vector3(0, 0, 0);
+                            effect.transform.GetComponent<Bullet>().creatorId = pid;
+                            effect.transform.GetComponent<ConstantForce>().force = impulse * 5000;
+                            Debug.Log("эффект пули создан!");
+
+                            obj.GetComponent<AudioSource>().PlayOneShot(ShotClip);
+                            obj.GetComponent<Animator>().SetTrigger("shot");
+                            break;
+                        }
+                    }
+                    break;    
+                }
         }
     }
 

@@ -48,7 +48,8 @@ public class WeaponSystem : MonoBehaviour
     }
 
     void Start()
-    { 
+    {
+
         canvasController = GameObject.Find("Canvas").GetComponent<CanvasLogic>();
 
         handsAnimator = this.transform.Find("MainCamera").Find("FPSAnimationsObject").Find("hands").GetComponent<Animator>();
