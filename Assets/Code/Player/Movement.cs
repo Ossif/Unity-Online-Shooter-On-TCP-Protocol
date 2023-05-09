@@ -12,7 +12,7 @@ public class Movement : MonoBehaviour
     public float Speed = 0.3f;
     public float JumpForce = 1f;
     public float Gravity = 9.8f;
-    
+
     private Vector3 actualVel = Vector3.zero;
     //Анимация
     public GameObject girl;
@@ -25,8 +25,6 @@ public class Movement : MonoBehaviour
 
     void FixedUpdate()
     {
-
-        
         Vector3 horV = new Vector3();
         Vector3 verV = new Vector3();
 
@@ -38,18 +36,18 @@ public class Movement : MonoBehaviour
 
         float movementDirectionY = actualVel.y;
         actualVel = verV + horV;
-        
+
         if (cc.isGrounded && (Input.GetAxis("Jump") > 0))
         {
             actualVel.y = JumpForce;
         }
-        else if(!cc.isGrounded)
+        else if (!cc.isGrounded)
         {
             actualVel.y = movementDirectionY;
         }
         actualVel.y -= Gravity * Time.deltaTime;
         cc.Move(actualVel * Time.deltaTime);
-        
+
     }
 
     public void SetPlayerPos(Vector3 newpos)
@@ -58,5 +56,15 @@ public class Movement : MonoBehaviour
         cc.enabled = false;
         this.transform.position = newpos;
         cc.enabled = true;
+    }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.CompareTag("PickUP"))
+        {
+            Debug.Log("прыжок");
+
+        }
+
     }
 }

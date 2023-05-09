@@ -359,8 +359,7 @@ public class Client : MonoBehaviour
                 bullet.GetComponent<Rigidbody>().velocity = speed;
                 bullet.GetComponent<Bullet>().creatorId = objectId;
                 break;
-            }
-        
+            } 
             case WorldCommand.SMSG_PLAYER_TAKE_DAMAGE: 
             { 
                 Debug.Log($"CLIENT: received info about damage");
@@ -397,21 +396,22 @@ public class Client : MonoBehaviour
                 break;
             }
             case WorldCommand.SMSG_REMOVE_PLAYER:
-                {
-                    string objectId = InComePacket.ReadString();
+            {
+                string objectId = InComePacket.ReadString();
                     
-                    foreach (GameObject obj in enemies.Values)
+                foreach (GameObject obj in enemies.Values)
+                {
+                    if (obj.GetComponent<EnemyInfo>().playerId == objectId)
                     {
-                        if (obj.GetComponent<EnemyInfo>().playerId == objectId)
-                        {
-                            Destroy(obj);
-                            break;
-                        }
+                        Destroy(obj);
+                        break;
                     }
-                    enemies.TryRemove(objectId, out _);
-                    break;
                 }
-            case WorldCommand.SMSG_PLAYER_WEAPON_INFO: { 
+                enemies.TryRemove(objectId, out _);
+                break;
+            }
+            case WorldCommand.SMSG_PLAYER_WEAPON_INFO: 
+            { 
 
                 string objectId = InComePacket.ReadString();
 
@@ -455,7 +455,24 @@ public class Client : MonoBehaviour
                     }
                 }
                 break;    
-            }   
+            }
+            case WorldCommand.SMSG_CREATE_PICKUP_COMPRESS:
+            {
+                LevelLogic LG = GameObject.Find("LevelLogic").GetComponent<LevelLogic>();
+                int PickupCount = InComePacket.ReadInt(); //Получаем количество пикапов из пакета
+                for(int i = 0; i < PickupCount; i++)
+                {
+                    byte type = InComePacket.ReadByte();
+                    string modelName = InComePacket.ReadString();
+                    Vector3 pickupPos = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                    if (type == 0)
+                    {
+                        Vector3 pickupRote = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                        LG.CreatePicup(type, modelName, pickupPos, pickupRote);
+                    }
+                }
+                break;
+            }
         }
     }
 

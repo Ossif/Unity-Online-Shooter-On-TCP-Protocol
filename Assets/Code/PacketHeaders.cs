@@ -34,6 +34,9 @@ namespace PacketHeaders
         SMSG_REMOVE_PLAYER = 19,
 
         CMSG_PLAYER_WEAPON_INFO = 20,
-        SMSG_PLAYER_WEAPON_INFO = 21
+        SMSG_PLAYER_WEAPON_INFO = 21,
+
+        SMSG_CREATE_PICKUP = 22,
+        SMSG_CREATE_PICKUP_COMPRESS = 23
     }
 }

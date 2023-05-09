@@ -38,6 +38,27 @@ public class ServerClient
 
     public WeaponId weaponId = WeaponId.NONE;
 }
+
+public class ServerPickup
+{
+    public Vector3 PickupPos;
+    public Vector3 PickupRot;
+    public byte type;
+    public string ModelName;
+    public ServerPickup(Vector3 pos, byte type, string ModelName)
+    {
+        PickupPos = pos;
+        this.type = type;
+        this.ModelName = ModelName;
+    }
+    public ServerPickup(Vector3 pos, Vector3 rot, byte type, string ModelName)
+    {
+        PickupPos = pos;
+        PickupRot = rot;
+        this.type = type;
+        this.ModelName = ModelName;
+    }
+}
 public class Server : MonoBehaviour
 {
 
@@ -62,7 +83,7 @@ public class Server : MonoBehaviour
     private Queue<Tuple<ServerClient, PacketDecryptor>> messageQueue = new Queue<Tuple<ServerClient, PacketDecryptor>>(); //Packet queue
     public StreamWriter sw = null;
     Dictionary<int, ServerCommands> teams = new Dictionary<int, ServerCommands>();
-
+    public List<ServerPickup> pickups = new List<ServerPickup>();
     /*public static void Main()
     {
         Program init = new Program();
@@ -96,6 +117,7 @@ public class Server : MonoBehaviour
               { 0, new ServerCommands(new Vector3(0f, 2f, 0f))},
               { 1, new ServerCommands(new Vector3(130f, 6.3f, 60f))}
             };
+            pickups.Add(new ServerPickup(new Vector3(15f, 8.5f, 18.5f), 0, "0"));
         }
         catch (Exception e)
         {
@@ -326,7 +348,7 @@ public class Server : MonoBehaviour
                     {
                         if (c.tcp == client.tcp) continue;
                         if (client.authorized == false) continue;
-                        client.stream.WriteAsync(responcePacket.GetBytes());
+                        c.stream.WriteAsync(responcePacket.GetBytes());
                         Debug.Log($"Тестирование - {client.tcp.Client.RemoteEndPoint.ToString()}");
                     }
 
@@ -334,7 +356,7 @@ public class Server : MonoBehaviour
                     Packet playersPacket = new Packet((int)WorldCommand.SMSG_CREATE_PLAYERS);
 
                     int counter = 0;
-                    foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
+                    foreach (ServerClient client in clients.Keys)
                     {
                         if (c.tcp == client.tcp) continue;
                         if (client.authorized == false) continue;
@@ -343,7 +365,7 @@ public class Server : MonoBehaviour
 
                     playersPacket.Write((int)counter);
 
-                    foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
+                    foreach (ServerClient client in clients.Keys)//Отправляем подключившемуся игроку позицию всех остальных игроков
                     {
                         if (c.tcp == client.tcp) continue;
                         if (client.authorized == false) continue;
@@ -355,9 +377,25 @@ public class Server : MonoBehaviour
                         playersPacket.Write((float)client.lastPos[2]);
                         playersPacket.Write((float)client.lastPos[3]);
                     }
-
                     c.stream.WriteAsync(playersPacket.GetBytes());
 
+                    Packet picupPacket = new Packet((int) WorldCommand.SMSG_CREATE_PICKUP_COMPRESS);
+                    picupPacket.Write(pickups.Count);
+                    foreach(ServerPickup pic in pickups)
+                    {
+                        picupPacket.Write(pic.type);
+                        picupPacket.Write(pic.ModelName);
+                        picupPacket.Write(pic.PickupPos.x);
+                        picupPacket.Write(pic.PickupPos.y);
+                        picupPacket.Write(pic.PickupPos.z);
+                        if(pic.type == 0)
+                        {
+                            picupPacket.Write(pic.PickupRot.x);
+                            picupPacket.Write(pic.PickupRot.y);
+                            picupPacket.Write(pic.PickupRot.z);
+                        }
+                    }
+                    c.stream.WriteAsync(picupPacket.GetBytes());
                     break;
                 }
             case (WorldCommand.CMSG_OBJ_INFO): //Синхронизация объектов и игроков

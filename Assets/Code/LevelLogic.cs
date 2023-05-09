@@ -9,11 +9,13 @@ public class LevelLogic : MonoBehaviour
     private Client client = null;
 
     private GameObject player;
+    public GameObject[] pickups;
     // Start is called before the first frame update
     void Start()
     {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+        pickups = Resources.LoadAll<GameObject>("Pickups");
         client = FindObjectOfType<Client>().GetComponent<Client>();
 
         player = Instantiate(playerPrefab, client.SpawnPos, Quaternion.identity);
@@ -27,5 +29,31 @@ public class LevelLogic : MonoBehaviour
 
         client.Send(packet);
         //enemy = Instantiate(enemyPrefab, new Vector3(0, 2, 0), Quaternion.identity);
+    }
+    public void CreatePicup(byte type, string ModelName, Vector3 pos)
+    {
+        foreach(GameObject go in pickups)
+        {
+            if(go.name == ModelName)
+            {
+                GameObject pickup = Instantiate(go, pos, Quaternion.identity);
+                pickups pic = pickup.AddComponent<pickups>();
+                pic.type = type;
+            }
+        }
+    }
+    public void CreatePicup(byte type, string ModelName, Vector3 pos, Vector3 rot)
+    {
+        foreach(GameObject go in pickups)
+        {
+            if(go.name == ModelName)
+            {
+                GameObject pickup = Instantiate(go, pos, Quaternion.Euler(rot));
+                pickups pic = pickup.AddComponent<pickups>();
+                //pickup.AddComponent<Rigidbody>().isKinematic = true;
+
+                pic.type = type;
+            }
+        }
     }
 }

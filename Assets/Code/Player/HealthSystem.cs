@@ -68,5 +68,12 @@ public class HealthSystem : MonoBehaviour
             apacket.Write(1000f);
             client.Send(apacket);*/
         }
+        else if(other.CompareTag("PickUP"))
+        {
+            if (other.transform.GetComponentInParent<pickups>().type == 0)
+            {
+                
+            }
+        }
     }
 }
