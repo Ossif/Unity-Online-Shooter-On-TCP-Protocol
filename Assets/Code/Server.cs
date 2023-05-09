@@ -354,6 +354,8 @@ public class Server : MonoBehaviour
                         playersPacket.Write((float)client.lastPos[1]);
                         playersPacket.Write((float)client.lastPos[2]);
                         playersPacket.Write((float)client.lastPos[3]);
+                        playersPacket.Write((int)client.weaponId);
+                        Debug.Log($"{(int)client.weaponId}");
                     }
 
                     c.stream.WriteAsync(playersPacket.GetBytes());
