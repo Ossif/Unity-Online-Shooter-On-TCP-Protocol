@@ -351,7 +351,6 @@ public class Server : MonoBehaviour
                         client.stream.WriteAsync(responcePacket.GetBytes());
                         Debug.Log($"Тестирование - {client.tcp.Client.RemoteEndPoint.ToString()}");
                     }
-
                     //
                     Packet playersPacket = new Packet((int)WorldCommand.SMSG_CREATE_PLAYERS);
 

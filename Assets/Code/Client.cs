@@ -519,11 +519,9 @@ public class Client : MonoBehaviour
                     if (obj.GetComponent<EnemyInfo>().playerId == pid) 
                     { 
                         GameObject effect = Instantiate(TrailEffectBullet, new Vector3(0, 0, 0), angle);
-                        effect.transform.parent = obj.GetComponent<EnemyInfo>().WeaponObject.transform.Find("model").Find("flashPlace");
-                        effect.transform.localPosition = new Vector3(0, 0, 0);
+                        effect.transform.localPosition = obj.GetComponent<EnemyInfo>().WeaponObject.transform.Find("model").Find("flashPlace").transform.position;
                         effect.transform.GetComponent<Bullet>().creatorId = pid;
                         effect.transform.GetComponent<ConstantForce>().force = impulse * 5000;
-                        Debug.Log("эффект пули создан!");
 
                         obj.transform.Find("Audio Source").gameObject.GetComponent<AudioSource>().PlayOneShot(ShotClip);
                         obj.GetComponent<Animator>().SetTrigger("shot");
