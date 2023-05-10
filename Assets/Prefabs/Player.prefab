@@ -218,8 +218,8 @@ MonoBehaviour:
   axes: 0
   sensivityHor: 9
   sensivityVer: 9
-  minVert: -89
-  maxVert: 89
+  minVert: -90
+  maxVert: 90
 --- !u!114 &5454742425673392110
 MonoBehaviour:
   m_ObjectHideFlags: 0
