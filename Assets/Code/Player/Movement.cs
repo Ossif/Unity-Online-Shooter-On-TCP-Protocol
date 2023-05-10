@@ -53,12 +53,11 @@ public class Movement : MonoBehaviour
         {
             actualVel.y = movementDirectionY;
         }
-        else{
-             //
-        }
         actualVel.y -= Gravity * Time.deltaTime;
 
         if (isImpulsed) { 
+            if(Mathf.Abs(actualVel.x + impulseDirection.x) < Mathf.Abs(impulseDirection.x))impulseDirection.x = actualVel.x + impulseDirection.x;
+            if(Mathf.Abs(actualVel.z + impulseDirection.z) < Mathf.Abs(impulseDirection.z))impulseDirection.z = actualVel.z + impulseDirection.z;  
             actualVel += impulseDirection;
             impulseDirection.y = 0;
         }
