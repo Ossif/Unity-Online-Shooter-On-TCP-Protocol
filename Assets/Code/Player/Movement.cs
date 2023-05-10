@@ -17,6 +17,11 @@ public class Movement : MonoBehaviour
     //Анимация
     public GameObject girl;
 
+    //Трамплин
+    private Vector3 impulseDirection = Vector3.zero;
+    private bool isImpulsed = false;
+    private bool preventCollisionFlag = true;
+
     void Start()
     {
         cc = gameObject.GetComponent<CharacterController>();
@@ -35,6 +40,9 @@ public class Movement : MonoBehaviour
         }
 
         float movementDirectionY = actualVel.y;
+        float movementDirectionX = actualVel.x;
+        float movementDirectionZ = actualVel.z;
+
         actualVel = verV + horV;
 
         if (cc.isGrounded && (Input.GetAxis("Jump") > 0))
@@ -45,7 +53,16 @@ public class Movement : MonoBehaviour
         {
             actualVel.y = movementDirectionY;
         }
+        else{
+             //
+        }
         actualVel.y -= Gravity * Time.deltaTime;
+
+        if (isImpulsed) { 
+            actualVel += impulseDirection;
+            impulseDirection.y = 0;
+        }
+
         cc.Move(actualVel * Time.deltaTime);
 
     }
@@ -66,5 +83,39 @@ public class Movement : MonoBehaviour
 
         }
 
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit) {
+
+        if(hit.gameObject.tag == "Trampline") { 
+            if(isImpulsed == false) { 
+                SetImpulse(hit.gameObject.GetComponent<Trampline>().impulseDirection, hit.gameObject.GetComponent<Trampline>().disableTime);
+            }    
+        }
+        else { 
+            if(preventCollisionFlag)
+                isImpulsed = false;
+        }
+    }
+
+    public void SetImpulse(Vector3 impulse, float disableTime) { 
+        impulseDirection = impulse;
+        isImpulsed = true;
+        preventCollisionFlag = false;
+
+        Invoke("PreventCollision", 0.1f);
+        if(disableTime > 0) { 
+            EnabledMovement = false;
+            Invoke("EnableMovement", disableTime);    
+        }
+    }
+
+    public void PreventCollision() { 
+        preventCollisionFlag = true;    
+    }
+
+    public void EnableMovement() {
+            EnabledMovement = true;
+            //isImpulsed = false;
     }
 }

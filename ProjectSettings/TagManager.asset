@@ -8,6 +8,7 @@ TagManager:
   - Enemy
   - DeadZone
   - PickUP
+  - Trampline
   layers:
   - Default
   - TransparentFX
