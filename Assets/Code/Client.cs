@@ -176,7 +176,6 @@ public class Client : MonoBehaviour
         sendQueue.Enqueue(Tuple.Create(pack));
         return;
     }
-
     //Получение данных от сервера
     private void OnIncomingData(PacketDecryptor InComePacket)
     {
@@ -185,351 +184,384 @@ public class Client : MonoBehaviour
         switch ((WorldCommand) packetid)
         {
             case WorldCommand.SMSG_OFFER_ENTER: //Сервер предлагает авторизоваться
-            {
-                string NickName = PlayerPrefs.GetString("PlayerNick");
-                int playerid = InComePacket.ReadInt();
-                Debug.Log("CLIENT: На клиент передали его id - " + playerid);
+                {
+                    string NickName = PlayerPrefs.GetString("PlayerNick");
+                    int playerid = InComePacket.ReadInt();
+                    Debug.Log("CLIENT: На клиент передали его id - " + playerid);
                 
-                Packet packet = new Packet((int) WorldCommand.CMSG_OFFER_ENTER_ANSWER);
-                packet.Write(playerid);
-                packet.Write(NickName);
-                Send(packet);
+                    Packet packet = new Packet((int) WorldCommand.CMSG_OFFER_ENTER_ANSWER);
+                    packet.Write(playerid);
+                    packet.Write(NickName);
+                    Send(packet);
 
-                ClientId = playerid;
-                readyToWork = true;
-                break;
-            }
+                    ClientId = playerid;
+                    readyToWork = true;
+                    break;
+                }
             case WorldCommand.SMSG_START_GAME: //Вход в игровой мир
-            {
-                playerId = InComePacket.ReadString();
-                int hostInt = InComePacket.ReadInt();
-                if(hostInt == 1)IsHost = true;
-                else IsHost = false;
+                {
+                    playerId = InComePacket.ReadString();
+                    int hostInt = InComePacket.ReadInt();
+                    if(hostInt == 1)IsHost = true;
+                    else IsHost = false;
                 
-                SpawnPos = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
-                Debug.Log($"IsPlayerHost: {IsHost}");
-                GameObject.Find("MenuLogic").GetComponent<MenuLogic>().StartGame();
-                break;
-            }
+                    SpawnPos = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                    Debug.Log($"IsPlayerHost: {IsHost}");
+                    GameObject.Find("MenuLogic").GetComponent<MenuLogic>().StartGame();
+                    break;
+                }
             case WorldCommand.SMSG_PLAYER_LOGIN: //Создание вновь подключившегося игрока
-            {
+                {
                 
-                string uniqueId;
-                string PlayerName;
-                Vector3 position = new Vector3();
-                float rot;
+                    string uniqueId;
+                    string PlayerName;
+                    Vector3 position = new Vector3();
+                    float rot;
 
-                uniqueId = InComePacket.ReadString();
-                PlayerName = InComePacket.ReadString();
-
-                position.x = InComePacket.ReadFloat();
-                position.y = InComePacket.ReadFloat();
-                position.z = InComePacket.ReadFloat();
-
-                rot = InComePacket.ReadFloat();
-
-                GameObject newPlayer = Instantiate(playerPrefab, position, Quaternion.identity);
-
-                Quaternion rotation = newPlayer.transform.rotation;
-                rotation.z = rot;
-                newPlayer.transform.rotation = rotation;
-                newPlayer.GetComponent<EnemyInfo>().playerId = uniqueId;
-                newPlayer.transform.Find("NickName").GetComponent<TMP_Text>().text = PlayerName;
-
-                enemies.TryAdd(uniqueId, newPlayer);
-                break;
-            }
-            case WorldCommand.SMSG_CREATE_PLAYERS: //Создание игорьков при подключении
-            {
-                string id;
-                string PlayerName;
-                Vector3 position = new Vector3();
-                Quaternion rotation = new Quaternion();
-                int weaponId;
-
-                int counter = InComePacket.ReadInt();
-
-                for (int i = 0; i < counter; i ++){
-
-                    id = InComePacket.ReadString();
+                    uniqueId = InComePacket.ReadString();
                     PlayerName = InComePacket.ReadString();
+
                     position.x = InComePacket.ReadFloat();
                     position.y = InComePacket.ReadFloat();
                     position.z = InComePacket.ReadFloat();
-                    rotation.z = InComePacket.ReadFloat();
-                    weaponId = InComePacket.ReadInt();
 
-                    GameObject go = Instantiate(playerPrefab, position, Quaternion.identity);
-                    go.transform.rotation = rotation;
-                    go.GetComponent<EnemyInfo>().playerId = id;
-                    go.GetComponent<EnemyInfo>().PlayerName = PlayerName;
-                    go.transform.Find("NickName").GetComponent<TMP_Text>().text = PlayerName;
+                    rot = InComePacket.ReadFloat();
+
+                    GameObject newPlayer = Instantiate(playerPrefab, position, Quaternion.identity);
+
+                    Quaternion rotation = newPlayer.transform.rotation;
+                    rotation.z = rot;
+                    newPlayer.transform.rotation = rotation;
+                    newPlayer.GetComponent<EnemyInfo>().playerId = uniqueId;
+                    newPlayer.transform.Find("NickName").GetComponent<TMP_Text>().text = PlayerName;
+
+                    enemies.TryAdd(uniqueId, newPlayer);
+                    break;
+                }
+            case WorldCommand.SMSG_CREATE_PLAYERS: //Создание игорьков при подключении
+                {
+                    string id;
+                    string PlayerName;
+                    Vector3 position = new Vector3();
+                    Quaternion rotation = new Quaternion();
+                    int weaponId;
+
+                    int counter = InComePacket.ReadInt();
+
+                    for (int i = 0; i < counter; i ++){
+
+                        id = InComePacket.ReadString();
+                        PlayerName = InComePacket.ReadString();
+                        position.x = InComePacket.ReadFloat();
+                        position.y = InComePacket.ReadFloat();
+                        position.z = InComePacket.ReadFloat();
+                        rotation.z = InComePacket.ReadFloat();
+                        weaponId = InComePacket.ReadInt();
+
+                        GameObject go = Instantiate(playerPrefab, position, Quaternion.identity);
+                        go.transform.rotation = rotation;
+                        go.GetComponent<EnemyInfo>().playerId = id;
+                        go.GetComponent<EnemyInfo>().PlayerName = PlayerName;
+                        go.transform.Find("NickName").GetComponent<TMP_Text>().text = PlayerName;
                     
-                    go.GetComponent<EnemyInfo>().weaponId = (WeaponId) weaponId;
+                        go.GetComponent<EnemyInfo>().weaponId = (WeaponId) weaponId;
 
-                    switch (weaponId) { 
-                        case ((int) WeaponId.AK): { 
-                            go.GetComponent<EnemyInfo>().WeaponObject = Instantiate(AK, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
-                            go.GetComponent<EnemyInfo>().WeaponObject.transform.parent =  go.GetComponent<EnemyInfo>().WeaponParentBone.transform;
-                            go.GetComponent<EnemyInfo>().WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
-                            go.GetComponent<EnemyInfo>().WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
-                            //ei.WeaponObject.transform.
-                            break;
-                        }
-                        case ((int) WeaponId.PISTOL): { 
-                            go.GetComponent<EnemyInfo>().WeaponObject = Instantiate(pistol, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
-                            go.GetComponent<EnemyInfo>().WeaponObject.transform.parent = go.GetComponent<EnemyInfo>().WeaponParentBone.transform;
-                            go.GetComponent<EnemyInfo>().WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
-                            go.GetComponent<EnemyInfo>().WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
-                            break;
-                        }
-                        case ((int) WeaponId.SAWNED_OFF): { 
-                            go.GetComponent<EnemyInfo>().WeaponObject = Instantiate(SO, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
-                            go.GetComponent<EnemyInfo>().WeaponObject.transform.parent =  go.GetComponent<EnemyInfo>().WeaponParentBone.transform;
-                            go.GetComponent<EnemyInfo>().WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
-                            go.GetComponent<EnemyInfo>().WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
-                            break;
-                        }
-                    }
-
-
-                    enemies.TryAdd(id, go);
-                }
-
-                break;
-            }
-            case WorldCommand.SMSG_OBJ_INFO: //Синхронизация объектов и игроков
-            {
-                
-                string objectId = InComePacket.ReadString();
-                //Debug.Log(objectId);
-                GameObject enemy = null;
-                foreach (GameObject obj in enemies.Values){
-                    //Debug.Log(uniqueId);
-                    if(obj.GetComponent<EnemyInfo>().playerId == objectId) 
-                    {
-                        enemy = obj;
-                        break;
-                    }
-                }
-                if (enemy == null) break;
-                int animId = InComePacket.ReadInt();
-                if(enemy.GetComponent<EnemyInfo>().playerAnimId != animId) 
-                {
-                    animator = enemy.GetComponent<Animator>();
-                    enemy.GetComponent<EnemyInfo>().playerAnimId = animId;
-                    switch (animId)
-                    {
-                        case 0:
-                            //animator.Play("Idle");
-                            animator.SetTrigger("idle2");
-                            break;
-                        case 1:
-                            //animator.Play("RForward");
-                            animator.SetTrigger("forward");
-                            break;
-                        case 2:
-                            //animator.Play("RBack");
-                            animator.SetTrigger("back");
-                            break;
-                        case 3:
-                            //animator.Play("RLeft");
-                            animator.SetTrigger("left");
-                            break;
-                        case 4:
-                            //animator.Play("RRight");
-                            animator.SetTrigger("right");
-                            break;
-                        case 5:
-                            animator.SetTrigger("jump");
-                            break;
-
-                    }
-                }
-
-                int before = InComePacket.ReadByte();
-
-                bool Position = (before & 0b100) != 0;
-                bool Rotation = (before & 0b010) != 0;
-                bool Speed = (before & 0b001) != 0;
-
-                if(Position)
-                {
-                    Vector3 position = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
-                    enemy.transform.position = position;
-                }
-
-                if(Rotation)
-                {
-                    Vector3 q = new Vector3(0, InComePacket.ReadFloat(), 0);
-                    enemy.transform.rotation = Quaternion.Euler(q);
-                }
-
-                if(Speed)
-                {
-                    Vector3 speed = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
-                    enemy.GetComponent<Rigidbody>().velocity = speed;
-                }
-                break;
-            }
-            case WorldCommand.SMSG_CREATE_BULLET: //Создание выстрела другого игрока
-            {
-                string objectId = InComePacket.ReadString();
-
-                Vector3 position = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
-
-                Quaternion rotation = new Quaternion();
-
-                rotation.x = InComePacket.ReadFloat();
-                rotation.y = InComePacket.ReadFloat();
-                rotation.z = InComePacket.ReadFloat();
-
-                Vector3 speed = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
-
-                float damage = InComePacket.ReadFloat();
-
-                GameObject bullet = Instantiate(bulletPrefab, position, Quaternion.identity);
-                bullet.GetComponent<Bullet>().creatorId = objectId;
-                bullet.transform.rotation = rotation;
-                bullet.GetComponent<Rigidbody>().velocity = speed;
-                bullet.GetComponent<Bullet>().creatorId = objectId;
-                break;
-            } 
-            case WorldCommand.SMSG_PLAYER_TAKE_DAMAGE: 
-            { 
-                Debug.Log($"CLIENT: received info about damage");
-                float health = InComePacket.ReadFloat();
-                GameObject.Find("Player(Clone)").GetComponent<HealthSystem>().SetHealth(health);
-                break;
-            }
-            case WorldCommand.SMSG_PLAYER_DEATH:
-            {
-                string objectId = InComePacket.ReadString();
-                foreach (GameObject obj in enemies.Values)
-                {
-                    //Debug.Log(uniqueId);
-                    if (obj.GetComponent<EnemyInfo>().playerId == objectId)
-                    {
-                        obj.GetComponent<EnemyInfo>().RaggDollOn();
-                        break;
-                    }
-                }
-                break;
-            }
-            case WorldCommand.SMSG_PLAYER_RESPAWN:
-            {
-                string objectId = InComePacket.ReadString();
-                foreach (GameObject obj in enemies.Values)
-                {
-                    //Debug.Log(uniqueId);
-                    if (obj.GetComponent<EnemyInfo>().playerId == objectId)
-                    {
-                        obj.GetComponent<EnemyInfo>().RaggDollOff();
-                        break;
-                    }
-                }
-                break;
-            }
-            case WorldCommand.SMSG_REMOVE_PLAYER:
-            {
-                string objectId = InComePacket.ReadString();
-                    
-                foreach (GameObject obj in enemies.Values)
-                {
-                    if (obj.GetComponent<EnemyInfo>().playerId == objectId)
-                    {
-                        Destroy(obj);
-                        break;
-                    }
-                }
-                enemies.TryRemove(objectId, out _);
-                break;
-            }
-            case WorldCommand.SMSG_PLAYER_WEAPON_INFO: 
-            { 
-
-                string objectId = InComePacket.ReadString();
-
-                foreach (GameObject obj in enemies.Values)
-                {
-                    if (obj.GetComponent<EnemyInfo>().playerId == objectId)
-                    {
-                        //Меняем оружие в руках данному игроку
-                        EnemyInfo ei = obj.GetComponent<EnemyInfo>();
-
-                        if(ei.WeaponObject != null){
-                            Destroy(ei.WeaponObject);
-                            ei.WeaponObject = null;
-                        }
-
-                        switch (InComePacket.ReadInt()) { 
+                        switch (weaponId) { 
                             case ((int) WeaponId.AK): { 
-                                ei.WeaponObject = Instantiate(AK, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
-                                ei.WeaponObject.transform.parent = ei.WeaponParentBone.transform;
-                                ei.WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
-                                ei.WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
+                                go.GetComponent<EnemyInfo>().WeaponObject = Instantiate(AK, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
+                                go.GetComponent<EnemyInfo>().WeaponObject.transform.parent =  go.GetComponent<EnemyInfo>().WeaponParentBone.transform;
+                                go.GetComponent<EnemyInfo>().WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
+                                go.GetComponent<EnemyInfo>().WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
                                 //ei.WeaponObject.transform.
                                 break;
                             }
                             case ((int) WeaponId.PISTOL): { 
-                                ei.WeaponObject = Instantiate(pistol, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
-                                ei.WeaponObject.transform.parent = ei.WeaponParentBone.transform;
-                                ei.WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
-                                ei.WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
+                                go.GetComponent<EnemyInfo>().WeaponObject = Instantiate(pistol, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
+                                go.GetComponent<EnemyInfo>().WeaponObject.transform.parent = go.GetComponent<EnemyInfo>().WeaponParentBone.transform;
+                                go.GetComponent<EnemyInfo>().WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
+                                go.GetComponent<EnemyInfo>().WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
                                 break;
                             }
                             case ((int) WeaponId.SAWNED_OFF): { 
-                                ei.WeaponObject = Instantiate(SO, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
-                                ei.WeaponObject.transform.parent = ei.WeaponParentBone.transform;
-                                ei.WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
-                                ei.WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
+                                go.GetComponent<EnemyInfo>().WeaponObject = Instantiate(SO, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
+                                go.GetComponent<EnemyInfo>().WeaponObject.transform.parent =  go.GetComponent<EnemyInfo>().WeaponParentBone.transform;
+                                go.GetComponent<EnemyInfo>().WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
+                                go.GetComponent<EnemyInfo>().WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
                                 break;
                             }
                         }
-                        break;
+
+
+                        enemies.TryAdd(id, go);
                     }
+
+                    break;
                 }
-                break;    
-            }
-            case WorldCommand.SMSG_CREATE_PICKUP_COMPRESS:
-            {
-                LevelLogic LG = GameObject.Find("LevelLogic").GetComponent<LevelLogic>();
-                int PickupCount = InComePacket.ReadInt(); //Получаем количество пикапов из пакета
-                for(int i = 0; i < PickupCount; i++)
+            case WorldCommand.SMSG_OBJ_INFO: //Синхронизация объектов и игроков
                 {
+                
+                    string objectId = InComePacket.ReadString();
+                    //Debug.Log(objectId);
+                    GameObject enemy = null;
+                    foreach (GameObject obj in enemies.Values){
+                        //Debug.Log(uniqueId);
+                        if(obj.GetComponent<EnemyInfo>().playerId == objectId) 
+                        {
+                            enemy = obj;
+                            break;
+                        }
+                    }
+                    if (enemy == null) break;
+                    int animId = InComePacket.ReadInt();
+                    if(enemy.GetComponent<EnemyInfo>().playerAnimId != animId) 
+                    {
+                        animator = enemy.GetComponent<Animator>();
+                        enemy.GetComponent<EnemyInfo>().playerAnimId = animId;
+                        switch (animId)
+                        {
+                            case 0:
+                                //animator.Play("Idle");
+                                animator.SetTrigger("idle2");
+                                break;
+                            case 1:
+                                //animator.Play("RForward");
+                                animator.SetTrigger("forward");
+                                break;
+                            case 2:
+                                //animator.Play("RBack");
+                                animator.SetTrigger("back");
+                                break;
+                            case 3:
+                                //animator.Play("RLeft");
+                                animator.SetTrigger("left");
+                                break;
+                            case 4:
+                                //animator.Play("RRight");
+                                animator.SetTrigger("right");
+                                break;
+                            case 5:
+                                animator.SetTrigger("jump");
+                                break;
+
+                        }
+                    }
+
+                    int before = InComePacket.ReadByte();
+
+                    bool Position = (before & 0b100) != 0;
+                    bool Rotation = (before & 0b010) != 0;
+                    bool Speed = (before & 0b001) != 0;
+
+                    if(Position)
+                    {
+                        Vector3 position = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                        enemy.transform.position = position;
+                    }
+
+                    if(Rotation)
+                    {
+                        Vector3 q = new Vector3(0, InComePacket.ReadFloat(), 0);
+                        enemy.transform.rotation = Quaternion.Euler(q);
+                    }
+
+                    if(Speed)
+                    {
+                        Vector3 speed = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                        enemy.GetComponent<Rigidbody>().velocity = speed;
+                    }
+                    break;
+                }
+            case WorldCommand.SMSG_CREATE_BULLET: //Создание выстрела другого игрока
+                {
+                    string objectId = InComePacket.ReadString();
+
+                    Vector3 position = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+
+                    Quaternion rotation = new Quaternion();
+
+                    rotation.x = InComePacket.ReadFloat();
+                    rotation.y = InComePacket.ReadFloat();
+                    rotation.z = InComePacket.ReadFloat();
+
+                    Vector3 speed = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+
+                    float damage = InComePacket.ReadFloat();
+
+                    GameObject bullet = Instantiate(bulletPrefab, position, Quaternion.identity);
+                    bullet.GetComponent<Bullet>().creatorId = objectId;
+                    bullet.transform.rotation = rotation;
+                    bullet.GetComponent<Rigidbody>().velocity = speed;
+                    bullet.GetComponent<Bullet>().creatorId = objectId;
+                    break;
+                } 
+            case WorldCommand.SMSG_PLAYER_TAKE_DAMAGE: 
+                { 
+                    Debug.Log($"CLIENT: received info about damage");
+                    float health = InComePacket.ReadFloat();
+                    GameObject.Find("Player(Clone)").GetComponent<HealthSystem>().SetHealth(health);
+                    break;
+                }
+            case WorldCommand.SMSG_SET_PLAYER_HEALTH:
+                {
+                    byte type = InComePacket.ReadByte();
+                    float health = InComePacket.ReadFloat();
+                    GameObject.Find("Player(Clone)").GetComponent<HealthSystem>().SetHealth(health);
+                    if(type == 0) //Если лечение с помощью аптечки
+                    {
+                        AudioClip sound = Resources.Load<AudioClip>("Sounds/InjectionSound");
+                        GameObject.Find("Player(Clone)").transform.Find("Audio Source").transform.GetComponent<AudioSource>().PlayOneShot(sound);
+                    }
+                    break;
+                }
+            case WorldCommand.SMSG_PLAYER_DEATH:
+                {
+                    string objectId = InComePacket.ReadString();
+                    foreach (GameObject obj in enemies.Values)
+                    {
+                        //Debug.Log(uniqueId);
+                        if (obj.GetComponent<EnemyInfo>().playerId == objectId)
+                        {
+                            obj.GetComponent<EnemyInfo>().RaggDollOn();
+                            break;
+                        }
+                    }
+                    break;
+                }
+            case WorldCommand.SMSG_PLAYER_RESPAWN:
+                {
+                    string objectId = InComePacket.ReadString();
+                    foreach (GameObject obj in enemies.Values)
+                    {
+                        //Debug.Log(uniqueId);
+                        if (obj.GetComponent<EnemyInfo>().playerId == objectId)
+                        {
+                            obj.GetComponent<EnemyInfo>().RaggDollOff();
+                            break;
+                        }
+                    }
+                    break;
+                }
+            case WorldCommand.SMSG_REMOVE_PLAYER:
+                {
+                    string objectId = InComePacket.ReadString();
+                    
+                    foreach (GameObject obj in enemies.Values)
+                    {
+                        if (obj.GetComponent<EnemyInfo>().playerId == objectId)
+                        {
+                            Destroy(obj);
+                            break;
+                        }
+                    }
+                    enemies.TryRemove(objectId, out _);
+                    break;
+                }
+            case WorldCommand.SMSG_PLAYER_WEAPON_INFO: 
+                { 
+                    string objectId = InComePacket.ReadString();
+
+                    foreach (GameObject obj in enemies.Values)
+                    {
+                        if (obj.GetComponent<EnemyInfo>().playerId == objectId)
+                        {
+                            //Меняем оружие в руках данному игроку
+                            EnemyInfo ei = obj.GetComponent<EnemyInfo>();
+
+                            if(ei.WeaponObject != null){
+                                Destroy(ei.WeaponObject);
+                                ei.WeaponObject = null;
+                            }
+
+                            switch (InComePacket.ReadInt()) { 
+                                case ((int) WeaponId.AK): { 
+                                    ei.WeaponObject = Instantiate(AK, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
+                                    ei.WeaponObject.transform.parent = ei.WeaponParentBone.transform;
+                                    ei.WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
+                                    ei.WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
+                                    //ei.WeaponObject.transform.
+                                    break;
+                                }
+                                case ((int) WeaponId.PISTOL): { 
+                                    ei.WeaponObject = Instantiate(pistol, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
+                                    ei.WeaponObject.transform.parent = ei.WeaponParentBone.transform;
+                                    ei.WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
+                                    ei.WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
+                                    break;
+                                }
+                                case ((int) WeaponId.SAWNED_OFF): { 
+                                    ei.WeaponObject = Instantiate(SO, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
+                                    ei.WeaponObject.transform.parent = ei.WeaponParentBone.transform;
+                                    ei.WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
+                                    ei.WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    break;    
+                }
+            case WorldCommand.SMSG_CREATE_PICKUP_COMPRESS:
+                {
+                    LevelLogic LG = GameObject.Find("LevelLogic").GetComponent<LevelLogic>();
+                    int PickupCount = InComePacket.ReadInt(); //Получаем количество пикапов из пакета
+                    for(int i = 0; i < PickupCount; i++)
+                    {
+                        int id = InComePacket.ReadInt();
+                        byte type = InComePacket.ReadByte();
+                        string modelName = InComePacket.ReadString();
+                        Vector3 pickupPos = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                        if (type == 0)
+                        {
+                            Vector3 pickupRote = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                            LG.CreatePicup(id, type, modelName, pickupPos, pickupRote);
+                        }
+                    }
+                    break;
+                }            
+            case WorldCommand.SMSG_CREATE_PICKUP:
+                {
+                    LevelLogic LG = GameObject.Find("LevelLogic").GetComponent<LevelLogic>();
+                    int id = InComePacket.ReadInt();
                     byte type = InComePacket.ReadByte();
                     string modelName = InComePacket.ReadString();
                     Vector3 pickupPos = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
                     if (type == 0)
                     {
                         Vector3 pickupRote = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
-                        LG.CreatePicup(type, modelName, pickupPos, pickupRote);
+                        LG.CreatePicup(id, type, modelName, pickupPos, pickupRote);
                     }
+                    break;
                 }
-                break;
-            }
-            case WorldCommand.SMSG_CREATE_BULLET_EFFECT: 
-            { 
-                Quaternion angle = new Quaternion(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
-                Vector3 impulse = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
-                string pid = InComePacket.ReadString();
-
-                foreach (GameObject obj in enemies.Values)
+            case WorldCommand.SMSG_DESTROY_PICKUP:
                 {
-                    if (obj.GetComponent<EnemyInfo>().playerId == pid) 
-                    { 
-                        GameObject effect = Instantiate(TrailEffectBullet, new Vector3(0, 0, 0), angle);
-                        effect.transform.localPosition = obj.GetComponent<EnemyInfo>().WeaponObject.transform.Find("model").Find("flashPlace").transform.position;
-                        effect.transform.GetComponent<Bullet>().creatorId = pid;
-                        effect.transform.GetComponent<ConstantForce>().force = impulse * 5000;
-
-                        obj.transform.Find("Audio Source").gameObject.GetComponent<AudioSource>().PlayOneShot(ShotClip);
-                        obj.GetComponent<Animator>().SetTrigger("shot");
-                        break;
-                    }
+                    int pickupid = InComePacket.ReadInt(); //Получаем id пикапа для удаления
+                    LevelLogic LG = GameObject.Find("LevelLogic").GetComponent<LevelLogic>();
+                    LG.DestroyPickup(pickupid);
+                    break;
                 }
-                break;    
-            }
+            case WorldCommand.SMSG_CREATE_BULLET_EFFECT: 
+                { 
+                    Quaternion angle = new Quaternion(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                    Vector3 impulse = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                    string pid = InComePacket.ReadString();
+
+                    foreach (GameObject obj in enemies.Values)
+                    {
+                        if (obj.GetComponent<EnemyInfo>().playerId == pid) 
+                        { 
+                            GameObject effect = Instantiate(TrailEffectBullet, new Vector3(0, 0, 0), angle);
+                            effect.transform.localPosition = obj.GetComponent<EnemyInfo>().WeaponObject.transform.Find("model").Find("flashPlace").transform.position;
+                            effect.transform.GetComponent<Bullet>().creatorId = pid;
+                            effect.transform.GetComponent<ConstantForce>().force = impulse * 5000;
+
+                            obj.transform.Find("Audio Source").gameObject.GetComponent<AudioSource>().PlayOneShot(ShotClip);
+                            obj.GetComponent<Animator>().SetTrigger("shot");
+                            break;
+                        }
+                    }
+                    break;    
+                }
         }
     }
 

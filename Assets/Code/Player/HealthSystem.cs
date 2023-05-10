@@ -70,9 +70,12 @@ public class HealthSystem : MonoBehaviour
         }
         else if(other.CompareTag("PickUP"))
         {
+            Debug.Log("Pickup");
             if (other.transform.GetComponentInParent<pickups>().type == 0)
             {
-                
+                Packet packet = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_PICKUP_PICKUP);
+                packet.Write(other.transform.GetComponentInParent<pickups>().id);
+                client.Send(packet);
             }
         }
     }
