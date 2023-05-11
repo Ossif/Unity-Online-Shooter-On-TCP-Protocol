@@ -91,8 +91,13 @@ public class Server : MonoBehaviour
     Dictionary<int, ServerCommands> teams = new Dictionary<int, ServerCommands>();
     public List<ServerPickup> pickups = new List<ServerPickup>();
     int HealthPickUP = -1;
-    int TramplinePicUP = -1;
     long HealthRespawnTime = long.MaxValue;
+
+    int TramplinePicUP = -1;
+
+    int AmmoPickUP = -1;
+    long AmmoRespawnTime = long.MaxValue;
+
     long Gettime;
     /*public static void Main()
     {
@@ -129,6 +134,7 @@ public class Server : MonoBehaviour
               { 1, new ServerCommands(new Vector3(130f, 6.3f, 60f))}
             };
             HealthPickUP = CreatePickup(new ServerPickup(new Vector3(82f, -6.3f, 85.6f), 0, "0"));
+            AmmoPickUP = CreatePickup(new ServerPickup(new Vector3(10.5f, -13f, 75f), 0, "2"));
             TramplinePicUP = CreatePickup(new ServerPickup(new Vector3(15f, 8.505f, 18.5f), new Vector3(-90, 0, 45), 0, "1"));
             
         }
@@ -670,6 +676,15 @@ public class Server : MonoBehaviour
 
             c.stream.WriteAsync(packet.GetBytes());   
         }
+        if(pickupid == AmmoPickUP)
+        {   
+            AmmoPickUP = -1;
+            DestroyPickup(pickupid);
+            AmmoRespawnTime = Gettime + 30;
+            Packet packet = new Packet((int)WorldCommand.SMSG_ADD_PLAYER_AMMO);
+            packet.Write((byte)0);
+            c.stream.WriteAsync(packet.GetBytes());   
+        }
         else if(pickupid == TramplinePicUP)
         {
             SetPlayerVelocity(c, new Vector3(18f, 30f, 18f), 1f);
@@ -698,7 +713,6 @@ public class Server : MonoBehaviour
         }
         return pickup.id;
     }
-
     public bool DestroyPickup(int pickupid)
     {
         foreach(ServerPickup pic in pickups)
@@ -717,7 +731,6 @@ public class Server : MonoBehaviour
         }
         return false;
     }
-
     public void SetPlayerVelocity(ServerClient c, Vector3 direction, float disableMoveTime)
     {
         Packet packet = new Packet((int)WorldCommand.SMSG_SET_PLAYER_IMPYLSE);
@@ -739,7 +752,6 @@ public class Server : MonoBehaviour
         if(serverThread != null) serverThread.Abort();
         Destroy(this);
     }
-
     public void SecondTimer()
     {
         Gettime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -748,6 +760,11 @@ public class Server : MonoBehaviour
         {
             HealthRespawnTime = long.MaxValue;
             HealthPickUP = CreatePickup(new ServerPickup(new Vector3(82f, -6.3f, 85.6f), 0, "0"));
+        }
+        if (Gettime >= AmmoRespawnTime)
+        {
+            AmmoRespawnTime = long.MaxValue;
+            AmmoPickUP = CreatePickup(new ServerPickup(new Vector3(10.5f, -13f, 75f), 0, "2"));
         }
         return;
     }    

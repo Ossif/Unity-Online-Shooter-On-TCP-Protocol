@@ -586,7 +586,11 @@ public class Client : MonoBehaviour
                     }
                     break;
                 }
-            
+            case WorldCommand.SMSG_ADD_PLAYER_AMMO:
+                {
+                    GameObject.Find("Player(Clone)").GetComponent<WeaponSystem>().AddPlayerAmmo();
+                    break;
+                }
         }
     }
 

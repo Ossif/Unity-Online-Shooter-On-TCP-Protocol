@@ -26,6 +26,9 @@ public class WeaponSystem : MonoBehaviour
     public AudioClip SOReloadClip;
     public AudioClip SOShotClip;
     public AudioClip SOTakeClip;
+    
+    public AudioClip GetNewAmmo;
+
 
     public WeaponId[] weaponSlots = new WeaponId[3];
     public int[] slotAmmo = new int[3];
@@ -161,6 +164,20 @@ public class WeaponSystem : MonoBehaviour
         }
     }
 
+    public void AddPlayerAmmo()
+    {
+        slotAmmo[0] = 30;
+        slotAmmo[1] = 10;
+        slotAmmo[2] = 2;
+
+        maxAmmo[0] = 120;
+        maxAmmo[1] = 70;
+        maxAmmo[2] = 30;
+        AS.PlayOneShot(GetNewAmmo);
+        canvasController.SetAmmoLeft(slotAmmo[currentSlot]);
+        canvasController.SetAmmoTotal(maxAmmo[currentSlot]);
+    }
+
     void Update()
     {    
         if(Input.GetKeyDown("1") && currentSlot != 0){ 
@@ -176,7 +193,6 @@ public class WeaponSystem : MonoBehaviour
         }
 
         if(Input.GetKeyDown(KeyCode.R) && isReloading == false && maxAmmo[currentSlot] > 0){
-            Debug.Log("RRR");
             isReloading = true;
             string handAnim = "H_";
 

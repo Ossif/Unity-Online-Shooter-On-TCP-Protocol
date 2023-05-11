@@ -49,6 +49,8 @@ namespace PacketHeaders
 
         CMSG_SEND_MESSAGE = 30,
         SMSG_SEND_MESSAGE = 31,
-        SMSG_CLEAR_PLAYER_CHAT = 32
+        SMSG_CLEAR_PLAYER_CHAT = 32,
+
+        SMSG_ADD_PLAYER_AMMO = 33
     }
 }

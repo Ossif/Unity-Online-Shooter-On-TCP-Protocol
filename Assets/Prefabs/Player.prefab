@@ -326,6 +326,7 @@ MonoBehaviour:
   SOReloadClip: {fileID: 8300000, guid: c053152386b4e124ab6fcef10fa9b00b, type: 3}
   SOShotClip: {fileID: 8300000, guid: 8d15cbf5824508c4590f1b8a2da82e3b, type: 3}
   SOTakeClip: {fileID: 8300000, guid: 37f52cbbc68a91240ba7c3dfe2471170, type: 3}
+  GetNewAmmo: {fileID: 8300000, guid: de6ff4e2617557a418e52ac2eeb294fe, type: 3}
   weaponSlots: 000000000000000000000000
   slotAmmo: 000000000000000000000000
   maxAmmo: 000000000000000000000000
