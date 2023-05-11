@@ -43,6 +43,8 @@ namespace PacketHeaders
         CMSG_PLAYER_PICKUP_PICKUP = 26,
 
         CMSG_CREATE_BULLET_EFFECT = 27,
-        SMSG_CREATE_BULLET_EFFECT = 28
+        SMSG_CREATE_BULLET_EFFECT = 28,
+
+        SMSG_SET_PLAYER_IMPYLSE = 29
     }
 }

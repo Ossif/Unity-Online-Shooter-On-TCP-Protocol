@@ -80,9 +80,12 @@ public class Movement : MonoBehaviour
                 SetImpulse(hit.gameObject.GetComponent<Trampline>().impulseDirection, hit.gameObject.GetComponent<Trampline>().disableTime);
             }    
         }
-        else { 
-            if(preventCollisionFlag)
+        else {
+            if (preventCollisionFlag)
+            {
                 isImpulsed = false;
+                EnableMovement();
+            }
         }
     }
 

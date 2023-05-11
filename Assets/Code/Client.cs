@@ -560,7 +560,12 @@ public class Client : MonoBehaviour
                             break;
                         }
                     }
-                    break;    
+                    break;
+                }
+            case WorldCommand.SMSG_SET_PLAYER_IMPYLSE:
+                {
+                    GameObject.Find("Player(Clone)").GetComponent<Movement>().SetImpulse(new Vector3(InComePacket.ReadFloat(),InComePacket.ReadFloat(),InComePacket.ReadFloat()), InComePacket.ReadFloat());
+                    break;
                 }
         }
     }

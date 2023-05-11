@@ -91,6 +91,7 @@ public class Server : MonoBehaviour
     Dictionary<int, ServerCommands> teams = new Dictionary<int, ServerCommands>();
     public List<ServerPickup> pickups = new List<ServerPickup>();
     int HealthPickUP = -1;
+    int TramplinePicUP = -1;
     long HealthRespawnTime = long.MaxValue;
     long Gettime;
     /*public static void Main()
@@ -127,7 +128,9 @@ public class Server : MonoBehaviour
               { 0, new ServerCommands(new Vector3(0f, 2f, 0f))},
               { 1, new ServerCommands(new Vector3(130f, 6.3f, 60f))}
             };
-            HealthPickUP = CreatePickup(new ServerPickup(new Vector3(15f, 8.5f, 18.5f), 0, "0"));
+            HealthPickUP = CreatePickup(new ServerPickup(new Vector3(82f, -6.3f, 85.6f), 0, "0"));
+            TramplinePicUP = CreatePickup(new ServerPickup(new Vector3(15f, 8.505f, 18.5f), new Vector3(-90, 0, 45), 0, "1"));
+            
         }
         catch (Exception e)
         {
@@ -612,8 +615,11 @@ public class Server : MonoBehaviour
             packet.Write((byte)0);
             packet.Write(c.health);
 
-            c.stream.WriteAsync(packet.GetBytes());
-            
+            c.stream.WriteAsync(packet.GetBytes());   
+        }
+        else if(pickupid == TramplinePicUP)
+        {
+            SetPlayerVelocity(c, new Vector3(18f, 30f, 18f), 1f);
         }
         return;
     }
@@ -657,6 +663,16 @@ public class Server : MonoBehaviour
             }
         }
         return false;
+    }
+
+    public void SetPlayerVelocity(ServerClient c, Vector3 direction, float disableMoveTime)
+    {
+        Packet packet = new Packet((int)WorldCommand.SMSG_SET_PLAYER_IMPYLSE);
+        packet.Write((float)direction.x);
+        packet.Write((float)direction.y);
+        packet.Write((float)direction.z);
+        packet.Write((float)disableMoveTime);
+        c.stream.WriteAsync(packet.GetBytes());
     }
     private void OnApplicationQuit()
     {
