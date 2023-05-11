@@ -73,17 +73,6 @@ public class Movement : MonoBehaviour
         this.transform.position = newpos;
         cc.enabled = true;
     }
-
-    private void OnCollisionEnter(Collision other)
-    {
-        if (other.gameObject.CompareTag("PickUP"))
-        {
-            Debug.Log("прыжок");
-
-        }
-
-    }
-
     private void OnControllerColliderHit(ControllerColliderHit hit) {
 
         if(hit.gameObject.tag == "Trampline") { 

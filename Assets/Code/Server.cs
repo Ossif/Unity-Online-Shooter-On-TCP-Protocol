@@ -41,18 +41,24 @@ public class ServerClient
 
 public class ServerPickup
 {
+    private static int picupIdCounter = 0;
+    public int id;
     public Vector3 PickupPos;
     public Vector3 PickupRot;
     public byte type;
     public string ModelName;
     public ServerPickup(Vector3 pos, byte type, string ModelName)
     {
+        this.id = picupIdCounter;
+        picupIdCounter++;
         PickupPos = pos;
         this.type = type;
         this.ModelName = ModelName;
     }
     public ServerPickup(Vector3 pos, Vector3 rot, byte type, string ModelName)
     {
+        this.id = picupIdCounter;
+        picupIdCounter++;
         PickupPos = pos;
         PickupRot = rot;
         this.type = type;
@@ -84,6 +90,9 @@ public class Server : MonoBehaviour
     public StreamWriter sw = null;
     Dictionary<int, ServerCommands> teams = new Dictionary<int, ServerCommands>();
     public List<ServerPickup> pickups = new List<ServerPickup>();
+    int HealthPickUP = -1;
+    long HealthRespawnTime = long.MaxValue;
+    long Gettime;
     /*public static void Main()
     {
         Program init = new Program();
@@ -104,6 +113,7 @@ public class Server : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         // Create a file to write to.
         sw = new StreamWriter(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "ServerLogs.txt"));
+        InvokeRepeating("SecondTimer", 1, 1);
         printf("SERVER начал работу.");
         try
         {
@@ -117,7 +127,7 @@ public class Server : MonoBehaviour
               { 0, new ServerCommands(new Vector3(0f, 2f, 0f))},
               { 1, new ServerCommands(new Vector3(130f, 6.3f, 60f))}
             };
-            pickups.Add(new ServerPickup(new Vector3(15f, 8.5f, 18.5f), 0, "0"));
+            HealthPickUP = CreatePickup(new ServerPickup(new Vector3(15f, 8.5f, 18.5f), 0, "0"));
         }
         catch (Exception e)
         {
@@ -384,6 +394,7 @@ public class Server : MonoBehaviour
                     picupPacket.Write(pickups.Count);
                     foreach(ServerPickup pic in pickups)
                     {
+                        picupPacket.Write(pic.id);
                         picupPacket.Write(pic.type);
                         picupPacket.Write(pic.ModelName);
                         picupPacket.Write(pic.PickupPos.x);
@@ -521,65 +532,154 @@ public class Server : MonoBehaviour
                     break;
                 }
             case (WorldCommand.CMSG_PLAYER_RESTORE_HEALTH): //восстановление здоровья
-            {
-                string playerId = c.tcp.Client.RemoteEndPoint.ToString();
-                float health = packet.ReadFloat();
-                c.health = health;
-                c.status = (int)PlayerStatus.PLAYER_ON_FOOT;
-                Packet apacket = new Packet((int)WorldCommand.SMSG_PLAYER_RESPAWN);
-                apacket.Write(playerId);
-                foreach (ServerClient client in clients.Keys)
                 {
-                    if(client.tcp.Client.RemoteEndPoint.ToString() != playerId){
+                    string playerId = c.tcp.Client.RemoteEndPoint.ToString();
+                    float health = packet.ReadFloat();
+                    c.health = health;
+                    c.status = (int)PlayerStatus.PLAYER_ON_FOOT;
+                    Packet apacket = new Packet((int)WorldCommand.SMSG_PLAYER_RESPAWN);
+                    apacket.Write(playerId);
+                    foreach (ServerClient client in clients.Keys)
+                    {
+                        if(client.tcp.Client.RemoteEndPoint.ToString() != playerId){
+                                client.stream.WriteAsync(apacket.GetBytes());
+                        }
+                    }
+                    break;
+                }
+            case (WorldCommand.CMSG_PLAYER_WEAPON_INFO): 
+                { 
+                    c.weaponId = (WeaponId) packet.ReadInt(); 
+
+                    Packet apacket = new Packet((int)WorldCommand.SMSG_PLAYER_WEAPON_INFO);
+                    apacket.Write(c.tcp.Client.RemoteEndPoint.ToString());
+                    apacket.Write((int) c.weaponId);
+                    foreach (ServerClient client in clients.Keys)
+                    {
+                        if(client.tcp.Client.RemoteEndPoint.ToString() != c.tcp.Client.RemoteEndPoint.ToString()){
                             client.stream.WriteAsync(apacket.GetBytes());
+                        }
                     }
+                    break;
                 }
-                break;
-            }
-            case (WorldCommand.CMSG_PLAYER_WEAPON_INFO): { 
-                c.weaponId = (WeaponId) packet.ReadInt(); 
+            case (WorldCommand.CMSG_CREATE_BULLET_EFFECT): 
+                {  
+                    Packet apacket = new Packet((int)WorldCommand.SMSG_CREATE_BULLET_EFFECT);
 
-                Packet apacket = new Packet((int)WorldCommand.SMSG_PLAYER_WEAPON_INFO);
-                apacket.Write(c.tcp.Client.RemoteEndPoint.ToString());
-                apacket.Write((int) c.weaponId);
-                foreach (ServerClient client in clients.Keys)
+                    apacket.Write(packet.ReadFloat());
+                    apacket.Write(packet.ReadFloat());
+                    apacket.Write(packet.ReadFloat());
+                    apacket.Write(packet.ReadFloat());
+
+                    apacket.Write(packet.ReadFloat());
+                    apacket.Write(packet.ReadFloat());
+                    apacket.Write(packet.ReadFloat());
+
+                    apacket.Write(c.tcp.Client.RemoteEndPoint.ToString());
+
+                    foreach (ServerClient client in clients.Keys)
+                    {
+                        if(client.tcp.Client.RemoteEndPoint.ToString() != c.tcp.Client.RemoteEndPoint.ToString()){
+                            client.stream.WriteAsync(apacket.GetBytes());
+                        }
+                    }
+                    break;
+                }
+            case (WorldCommand.CMSG_PLAYER_PICKUP_PICKUP):
                 {
-                    if(client.tcp.Client.RemoteEndPoint.ToString() != c.tcp.Client.RemoteEndPoint.ToString()){
-                        client.stream.WriteAsync(apacket.GetBytes());
-                    }
+                    int pickupid = packet.ReadInt();
+                    OnPlayerPickupPickup(c, pickupid);
+                    break;
                 }
-                break;
-            }
-
-            case (WorldCommand.CMSG_CREATE_BULLET_EFFECT): {  
-                Packet apacket = new Packet((int)WorldCommand.SMSG_CREATE_BULLET_EFFECT);
-
-                apacket.Write(packet.ReadFloat());
-                apacket.Write(packet.ReadFloat());
-                apacket.Write(packet.ReadFloat());
-                apacket.Write(packet.ReadFloat());
-
-                apacket.Write(packet.ReadFloat());
-                apacket.Write(packet.ReadFloat());
-                apacket.Write(packet.ReadFloat());
-
-                apacket.Write(c.tcp.Client.RemoteEndPoint.ToString());
-
-                foreach (ServerClient client in clients.Keys)
-                {
-                    if(client.tcp.Client.RemoteEndPoint.ToString() != c.tcp.Client.RemoteEndPoint.ToString()){
-                        client.stream.WriteAsync(apacket.GetBytes());
-                    }
-                }
-                break;
-            }
         }
     }
+    public void OnPlayerPickupPickup(ServerClient c, int pickupid)
+    {
+        if(pickupid == HealthPickUP)
+        {   
+            if (c.health >= 100)
+                return;
+            
+            if (c.health + 50 > 100)
+                c.health = 100;
+            else
+                c.health += 50;
 
+            HealthPickUP = -1;
+            DestroyPickup(pickupid);
+            HealthRespawnTime = Gettime + 30;
+            Packet packet = new Packet((int)WorldCommand.SMSG_SET_PLAYER_HEALTH);
+            packet.Write((byte)0);
+            packet.Write(c.health);
+
+            c.stream.WriteAsync(packet.GetBytes());
+            
+        }
+        return;
+    }
+    public int CreatePickup(ServerPickup pickup)
+    {
+        pickups.Add(pickup);
+        Packet packet = new Packet((int)WorldCommand.SMSG_CREATE_PICKUP);
+        packet.Write(pickup.id);
+        packet.Write(pickup.type);
+        packet.Write(pickup.ModelName);
+        packet.Write(pickup.PickupPos.x);
+        packet.Write(pickup.PickupPos.y);
+        packet.Write(pickup.PickupPos.z);
+        if (pickup.type == 0)
+        {
+            packet.Write(pickup.PickupRot.x);
+            packet.Write(pickup.PickupRot.y);
+            packet.Write(pickup.PickupRot.z);
+        }
+        foreach (ServerClient client in clients.Keys)
+        {
+            client.stream.WriteAsync(packet.GetBytes());
+        }
+        return pickup.id;
+    }
+
+    public bool DestroyPickup(int pickupid)
+    {
+        foreach(ServerPickup pic in pickups)
+        {
+            if(pic.id == pickupid)
+            {
+                Packet packet = new Packet((int)WorldCommand.SMSG_DESTROY_PICKUP);
+                packet.Write(pickupid);
+                foreach (ServerClient client in clients.Keys)
+                {
+                    client.stream.WriteAsync(packet.GetBytes());
+                }
+                pickups.Remove(pic);
+                return true;
+            }
+        }
+        return false;
+    }
+    private void OnApplicationQuit()
+    {
+        if (serverStarted) server.Stop();
+        if (serverThread != null) serverThread.Abort();
+        Destroy(this);
+    }
     void OnDestroy()
     {
         if(serverStarted)server.Stop();
         if(serverThread != null) serverThread.Abort();
         Destroy(this);
     }
+
+    public void SecondTimer()
+    {
+        Gettime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        //Debug.Log($"Now gettime {Gettime}");
+        if (Gettime >= HealthRespawnTime)
+        {
+            HealthRespawnTime = long.MaxValue;
+            HealthPickUP = CreatePickup(new ServerPickup(new Vector3(15f, 8.5f, 18.5f), 0, "0"));
+        }
+        return;
+    }    
 }
