@@ -694,7 +694,7 @@ public class Server : MonoBehaviour
         if (Gettime >= HealthRespawnTime)
         {
             HealthRespawnTime = long.MaxValue;
-            HealthPickUP = CreatePickup(new ServerPickup(new Vector3(15f, 8.5f, 18.5f), 0, "0"));
+            HealthPickUP = CreatePickup(new ServerPickup(new Vector3(82f, -6.3f, 85.6f), 0, "0"));
         }
         return;
     }    

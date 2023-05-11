@@ -12,5 +12,9 @@ public class TramplineScript : MonoBehaviour
             this.GetComponentInParent<Animator>().SetTrigger("Open");
             this.GetComponentInParent<AudioSource>().PlayOneShot(TramplinClip);
         }
+        else if(other.CompareTag("Enemy"))
+        {
+            this.GetComponentInParent<Animator>().SetTrigger("Open");
+        }
     }
 }
