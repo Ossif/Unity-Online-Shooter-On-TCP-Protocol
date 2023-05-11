@@ -594,8 +594,61 @@ public class Server : MonoBehaviour
                     OnPlayerPickupPickup(c, pickupid);
                     break;
                 }
+            case (WorldCommand.CMSG_SEND_MESSAGE):
+                {
+                    string message = packet.ReadString();
+                    OnPlayerSendMessage(c, message);
+                    break;
+                }
         }
     }
+    public void OnPlayerSendMessage(ServerClient c, string message)
+    {
+        if (message[0] == '/')
+        {
+            int index = message.IndexOf(' ');
+            if(index == -1)
+            {
+                index = message.Length - 1;
+            }
+            else
+            {
+                index--;
+            }
+            string cmd = message.Substring(1, index);
+            if(cmd == "cc")
+            {
+                foreach (ServerClient client in clients.Keys)
+                {
+                    ClearPlayerChat(client);
+                }
+            }
+        }
+        else
+        {
+            string msg = $"{c.PlayerName}: {message}";
+            foreach (ServerClient client in clients.Keys)
+            {
+                SendPlayerMessage(client, msg);
+            }
+        }
+        return;
+    }
+
+    public void SendPlayerMessage(ServerClient c, string messsage)
+    {
+        Packet packet = new Packet((int)WorldCommand.SMSG_SEND_MESSAGE);
+        packet.Write(messsage);
+        c.stream.WriteAsync(packet.GetBytes());
+    }
+
+    public void ClearPlayerChat(ServerClient c)
+    {
+        Packet packet = new Packet((int)WorldCommand.SMSG_CLEAR_PLAYER_CHAT);
+        packet.Write(1);
+        c.stream.WriteAsync(packet.GetBytes());
+    }
+
     public void OnPlayerPickupPickup(ServerClient c, int pickupid)
     {
         if(pickupid == HealthPickUP)

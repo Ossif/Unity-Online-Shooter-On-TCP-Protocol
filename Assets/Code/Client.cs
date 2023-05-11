@@ -567,6 +567,26 @@ public class Client : MonoBehaviour
                     GameObject.Find("Player(Clone)").GetComponent<Movement>().SetImpulse(new Vector3(InComePacket.ReadFloat(),InComePacket.ReadFloat(),InComePacket.ReadFloat()), InComePacket.ReadFloat());
                     break;
                 }
+            case WorldCommand.SMSG_SEND_MESSAGE:
+                {
+                    Transform chat = GameObject.Find("Canvas").transform.Find("Chat");
+                    if(chat != null)
+                    {
+                        string message = InComePacket.ReadString();
+                        chat.GetComponent<ChatUI>().AddChatMessage(message);
+                    }
+                    break;
+                }
+            case WorldCommand.SMSG_CLEAR_PLAYER_CHAT:
+                {
+                    Transform chat = GameObject.Find("Canvas").transform.Find("Chat");
+                    if(chat != null)
+                    {
+                        chat.GetComponent<ChatUI>().ClearChat();
+                    }
+                    break;
+                }
+            
         }
     }
 

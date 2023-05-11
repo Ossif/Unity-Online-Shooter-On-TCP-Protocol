@@ -45,6 +45,10 @@ namespace PacketHeaders
         CMSG_CREATE_BULLET_EFFECT = 27,
         SMSG_CREATE_BULLET_EFFECT = 28,
 
-        SMSG_SET_PLAYER_IMPYLSE = 29
+        SMSG_SET_PLAYER_IMPYLSE = 29,
+
+        CMSG_SEND_MESSAGE = 30,
+        SMSG_SEND_MESSAGE = 31,
+        SMSG_CLEAR_PLAYER_CHAT = 32
     }
 }

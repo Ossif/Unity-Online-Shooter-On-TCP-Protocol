@@ -21,10 +21,12 @@ public class Movement : MonoBehaviour
     private Vector3 impulseDirection = Vector3.zero;
     private bool isImpulsed = false;
     private bool preventCollisionFlag = true;
+    private ChatUI chat;
 
     void Start()
     {
         cc = gameObject.GetComponent<CharacterController>();
+        chat = GameObject.Find("Canvas").transform.Find("Chat").GetComponent<ChatUI>();
         EnabledMovement = true;
     }
 
@@ -33,7 +35,7 @@ public class Movement : MonoBehaviour
         Vector3 horV = new Vector3();
         Vector3 verV = new Vector3();
 
-        if (EnabledMovement == true)
+        if (EnabledMovement == true && chat.ChatIsOpen == false)
         {
             horV = transform.right * Speed * Input.GetAxis("Horizontal");
             verV = transform.forward * Speed * Input.GetAxis("Vertical");
@@ -45,7 +47,7 @@ public class Movement : MonoBehaviour
 
         actualVel = verV + horV;
 
-        if (cc.isGrounded && (Input.GetAxis("Jump") > 0))
+        if (cc.isGrounded && (Input.GetAxis("Jump") > 0) && chat.ChatIsOpen == false)
         {
             actualVel.y = JumpForce;
         }
