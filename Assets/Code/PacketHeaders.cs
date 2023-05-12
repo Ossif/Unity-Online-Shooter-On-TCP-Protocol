@@ -51,6 +51,8 @@ namespace PacketHeaders
         SMSG_SEND_MESSAGE = 31,
         SMSG_CLEAR_PLAYER_CHAT = 32,
 
-        SMSG_ADD_PLAYER_AMMO = 33
+        SMSG_ADD_PLAYER_AMMO = 33,
+        
+        SMSG_SEND_KILL_MESSAGE = 34
     }
 }

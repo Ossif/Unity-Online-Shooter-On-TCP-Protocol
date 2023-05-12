@@ -35,6 +35,7 @@ public class ServerClient
 
     public int status = (int)PlayerStatus.PLAYER_ON_FOOT;
     public float health = 100.0f;
+    public long TimeOutTimer;
 
     public WeaponId weaponId = WeaponId.NONE;
 }
@@ -98,7 +99,7 @@ public class Server : MonoBehaviour
     int AmmoPickUP = -1;
     long AmmoRespawnTime = long.MaxValue;
 
-    long Gettime;
+    long Gettime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
     /*public static void Main()
     {
         Program init = new Program();
@@ -160,6 +161,7 @@ public class Server : MonoBehaviour
             ServerClient client = new ServerClient(await server.AcceptTcpClientAsync());
             client.health = 100.0f;
             clients.TryAdd(client, null);
+            client.TimeOutTimer = Gettime;
             Debug.Log($"Client connected: {client.tcp.Client.RemoteEndPoint}");
             client.stream = client.tcp.GetStream();
             Packet packet = new Packet((int)WorldCommand.SMSG_OFFER_ENTER);
@@ -206,7 +208,7 @@ public class Server : MonoBehaviour
                 int byteRead = await client.stream.ReadAsync(client.buffer, 0, client.Remaining);
                 ReadHeaderCallback(client.buffer, byteRead, client);
             }
-
+            client.TimeOutTimer = Gettime;
             client.CountGetPacketData += bytesRead;
             try
             {
@@ -244,6 +246,7 @@ public class Server : MonoBehaviour
             client.CountGetPacketData = 0;
 
             messageQueue.Enqueue(Tuple.Create(client, packet));
+            client.TimeOutTimer = Gettime;
 
             client.Remaining = HeaderSize;
             client.buffer = new byte[client.Remaining];
@@ -262,15 +265,16 @@ public class Server : MonoBehaviour
     {
         // Соединение было закрыто сервером
         Debug.Log($"DATA: Сервер разорвал соединение с {c.tcp.Client.RemoteEndPoint}");
-        c.stream.Close();
-        clients.TryRemove(c, out _);
         Packet packet = new Packet((int)WorldCommand.SMSG_REMOVE_PLAYER);
         packet.Write(c.PlayerID);
         foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
         {
             client.stream.WriteAsync(packet.GetBytes());
+            SendPlayerMessage(client, $"Игрок {c.PlayerName} покинул игру!");
             break;
         }
+        c.stream.Close();
+        clients.TryRemove(c, out _);
         return;
     }
     private void QueueUpdate()
@@ -368,7 +372,7 @@ public class Server : MonoBehaviour
                         if (c.tcp == client.tcp) continue;
                         if (client.authorized == false) continue;
                         client.stream.WriteAsync(responcePacket.GetBytes());
-                        Debug.Log($"Тестирование - {client.tcp.Client.RemoteEndPoint.ToString()}");
+                        SendPlayerMessage(client, $"Игрок {c.PlayerName} присоединился к игре!");
                     }
                     //
                     Packet playersPacket = new Packet((int)WorldCommand.SMSG_CREATE_PLAYERS);
@@ -509,6 +513,7 @@ public class Server : MonoBehaviour
                 {
                     string VictimID = packet.ReadString();
                     float damage = packet.ReadFloat();
+                    byte weaponid = packet.ReadByte();
 
                     //Debug.Log($"SERVER: received info about damage: {}");
                     foreach (ServerClient client in clients.Keys) //Проходимся по всем клиентам
@@ -531,6 +536,7 @@ public class Server : MonoBehaviour
                                     {
                                         if (cli.tcp.Client.RemoteEndPoint.ToString() != VictimID)
                                             cli.stream.WriteAsync(deathPacket.GetBytes());
+                                        SendKillMessage(cli, c.PlayerName, weaponid, client.PlayerName);
                                     }
                                 }
                             }
@@ -640,21 +646,18 @@ public class Server : MonoBehaviour
         }
         return;
     }
-
     public void SendPlayerMessage(ServerClient c, string messsage)
     {
         Packet packet = new Packet((int)WorldCommand.SMSG_SEND_MESSAGE);
         packet.Write(messsage);
         c.stream.WriteAsync(packet.GetBytes());
     }
-
     public void ClearPlayerChat(ServerClient c)
     {
         Packet packet = new Packet((int)WorldCommand.SMSG_CLEAR_PLAYER_CHAT);
         packet.Write(1);
         c.stream.WriteAsync(packet.GetBytes());
     }
-
     public void OnPlayerPickupPickup(ServerClient c, int pickupid)
     {
         if(pickupid == HealthPickUP)
@@ -740,6 +743,14 @@ public class Server : MonoBehaviour
         packet.Write((float)disableMoveTime);
         c.stream.WriteAsync(packet.GetBytes());
     }
+    public void SendKillMessage(ServerClient c, string KillerName, byte IconID, string DeathName)
+    {
+        Packet packet = new Packet((int)WorldCommand.SMSG_SEND_KILL_MESSAGE);
+        packet.Write(KillerName);
+        packet.Write(DeathName);
+        packet.Write(IconID);
+        c.stream.WriteAsync(packet.GetBytes());
+    }
     private void OnApplicationQuit()
     {
         if (serverStarted) server.Stop();
@@ -765,6 +776,13 @@ public class Server : MonoBehaviour
         {
             AmmoRespawnTime = long.MaxValue;
             AmmoPickUP = CreatePickup(new ServerPickup(new Vector3(10.5f, -13f, 75f), 0, "2"));
+        }
+        foreach(ServerClient c in clients.Keys)
+        {
+            if (Gettime - c.TimeOutTimer > 15)
+            {
+                DisconnectPlayer(c);
+            }
         }
         return;
     }    

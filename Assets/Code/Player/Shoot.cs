@@ -90,6 +90,7 @@ public class Shoot : MonoBehaviour
                         Packet packet = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_GIVE_DAMAGE);
                         packet.Write(enemny.playerId);
                         packet.Write(weaponList[index].damage);
+                        packet.Write((byte)ws.currentSlot);
                         client.Send(packet);
                     }
                     Rigidbody rb = hit.collider.GetComponent<Rigidbody>();
@@ -170,6 +171,7 @@ public class Shoot : MonoBehaviour
                         Packet packet = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_GIVE_DAMAGE);
                         packet.Write(playerDamages[i].playerid);
                         packet.Write(playerDamages[i].damage);
+                        packet.Write((byte)ws.currentSlot);
                         client.Send(packet);
                         Debug.Log($"damage {playerDamages[i].damage} to {playerDamages[i].playerid}");
                     }

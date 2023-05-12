@@ -591,6 +591,15 @@ public class Client : MonoBehaviour
                     GameObject.Find("Player(Clone)").GetComponent<WeaponSystem>().AddPlayerAmmo();
                     break;
                 }
+            case WorldCommand.SMSG_SEND_KILL_MESSAGE:
+                {
+                    Transform KillList = GameObject.Find("Canvas").transform.Find("KillList");
+                    if (KillList != null)
+                    {
+                        KillList.GetComponent<KillList>().AddKillMessage(InComePacket.ReadString(), InComePacket.ReadString(), InComePacket.ReadByte());
+                    }
+                    break;
+                }
         }
     }
 

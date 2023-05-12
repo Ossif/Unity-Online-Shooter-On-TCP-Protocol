@@ -83,7 +83,7 @@ public class Movement : MonoBehaviour
             }    
         }
         else {
-            if (preventCollisionFlag)
+            if (preventCollisionFlag && isImpulsed == true)
             {
                 isImpulsed = false;
                 EnableMovement();
