@@ -94,7 +94,7 @@ public class Server : MonoBehaviour
     int HealthPickUP = -1;
     long HealthRespawnTime = long.MaxValue;
 
-    int TramplinePicUP = -1;
+    int[] TramplinePicUP = { -1, -1 };
 
     int AmmoPickUP = -1;
     long AmmoRespawnTime = long.MaxValue;
@@ -136,7 +136,8 @@ public class Server : MonoBehaviour
             };
             HealthPickUP = CreatePickup(new ServerPickup(new Vector3(82f, -6.3f, 85.6f), 0, "0"));
             AmmoPickUP = CreatePickup(new ServerPickup(new Vector3(10.5f, -13f, 75f), 0, "2"));
-            TramplinePicUP = CreatePickup(new ServerPickup(new Vector3(15f, 8.505f, 18.5f), new Vector3(-90, 0, 45), 0, "1"));
+            TramplinePicUP[0] = CreatePickup(new ServerPickup(new Vector3(15f, 8.505f, 18.5f), new Vector3(-90, 0, 45), 0, "1"));
+            TramplinePicUP[1] = CreatePickup(new ServerPickup(new Vector3(-12.89f, -31.25f, 81.12f), new Vector3(-121.54f, -75, 180), 0, "1"));
             
         }
         catch (Exception e)
@@ -266,7 +267,8 @@ public class Server : MonoBehaviour
         // Соединение было закрыто сервером
         Debug.Log($"DATA: Сервер разорвал соединение с {c.tcp.Client.RemoteEndPoint}");
         Packet packet = new Packet((int)WorldCommand.SMSG_REMOVE_PLAYER);
-        packet.Write(c.PlayerID);
+        packet.Write(c.tcp.Client.RemoteEndPoint.ToString());
+        c.stream.Close();
         foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
         {
             client.stream.WriteAsync(packet.GetBytes());
@@ -700,9 +702,13 @@ public class Server : MonoBehaviour
             packet.Write((byte)0);
             c.stream.WriteAsync(packet.GetBytes());   
         }
-        else if(pickupid == TramplinePicUP)
+        else if(pickupid == TramplinePicUP[0])
         {
             SetPlayerVelocity(c, new Vector3(18f, 30f, 18f), 1f);
+        }
+        else if(pickupid == TramplinePicUP[1])
+        {
+            SetPlayerVelocity(c, new Vector3(2f, 30f, 10f), 1f);
         }
         return;
     }

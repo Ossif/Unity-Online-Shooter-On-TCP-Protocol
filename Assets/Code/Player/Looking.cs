@@ -36,6 +36,11 @@ public class Looking : MonoBehaviour
         Rigidbody body = GetComponent<Rigidbody>();
         if(body != null)
             body.freezeRotation = true;
+        if(PlayerPrefs.HasKey("Sens"))
+        {
+            sensivityHor = PlayerPrefs.GetFloat("Sens");
+            sensivityVer = PlayerPrefs.GetFloat("Sens");
+        }
 
         //_charController = GetComponent<CharacterController>();
     }
@@ -47,11 +52,13 @@ public class Looking : MonoBehaviour
         {
             sensivityHor += 0.5f;
             sensivityVer += 0.5f;
+            PlayerPrefs.SetFloat("Sens", sensivityVer);
         }
         if (Input.GetKeyDown(KeyCode.H))
         {
             sensivityHor -= 0.5f;
             sensivityVer -= 0.5f;
+            PlayerPrefs.SetFloat("Sens", sensivityVer);
         }
         if (axes == RotationAxes.MouseX){
             transform.Rotate(0, Input.GetAxis("Mouse X") * sensivityHor, 0);

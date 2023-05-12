@@ -51,6 +51,7 @@ public class LevelLogic : MonoBehaviour
         {
             if(go.name == ModelName)
             {
+                Debug.Log(rot);
                 GameObject pickup = Instantiate(go, pos, Quaternion.Euler(rot));
                 pickups pic = pickup.AddComponent<pickups>();
                 //pickup.AddComponent<Rigidbody>().isKinematic = true;
