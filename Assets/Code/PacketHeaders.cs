@@ -53,6 +53,9 @@ namespace PacketHeaders
 
         SMSG_ADD_PLAYER_AMMO = 33,
         
-        SMSG_SEND_KILL_MESSAGE = 34
+        SMSG_SEND_KILL_MESSAGE = 34,
+
+        CMSG_STEP = 35,
+        SMSG_STEP = 36
     }
 }

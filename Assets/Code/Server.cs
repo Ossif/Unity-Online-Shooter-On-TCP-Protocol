@@ -612,6 +612,18 @@ public class Server : MonoBehaviour
                     OnPlayerSendMessage(c, message);
                     break;
                 }
+            case (WorldCommand.CMSG_STEP):
+                { 
+                    Packet p = new Packet((int)WorldCommand.SMSG_STEP);
+                    p.Write(c.tcp.Client.RemoteEndPoint.ToString());
+                    foreach (ServerClient client in clients.Keys)
+                    {
+                        if(client.tcp.Client.RemoteEndPoint.ToString() != c.tcp.Client.RemoteEndPoint.ToString()){
+                            client.stream.WriteAsync(p.GetBytes());
+                        }
+                    }
+                    break;
+                }
         }
     }
     public void OnPlayerSendMessage(ServerClient c, string message)

@@ -237,6 +237,13 @@ MonoBehaviour:
   JumpForce: 8
   Gravity: 20
   girl: {fileID: 0}
+  AS: {fileID: 315349162582268344}
+  steps:
+  - {fileID: 8300000, guid: e6d131e0aed6fbf42b28261e73307445, type: 3}
+  - {fileID: 8300000, guid: 84cb452d77f76674e87bfb77a9231309, type: 3}
+  - {fileID: 8300000, guid: b8a247ad74119ea4fb15029fbe69594a, type: 3}
+  - {fileID: 8300000, guid: e9d760f77cdc728458f46c0552a05832, type: 3}
+  timeToStep: 0.3
 --- !u!114 &6015010691042460308
 MonoBehaviour:
   m_ObjectHideFlags: 0

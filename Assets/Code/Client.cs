@@ -9,6 +9,7 @@ using PacketHeaders;
 using System.Collections.Concurrent;
 using WeaponEnumIds;
 
+
 public class Client : MonoBehaviour
 {
     public bool readyToWork = false;
@@ -48,6 +49,8 @@ public class Client : MonoBehaviour
 
     public GameObject TrailEffectBullet;
     public AudioClip ShotClip;
+
+    public AudioClip[] steps = new AudioClip[4];
 
     // Start is called before the first frame update
     private void Start()
@@ -600,6 +603,20 @@ public class Client : MonoBehaviour
                     }
                     break;
                 }
+        
+            case WorldCommand.SMSG_STEP: {
+                string objectId = InComePacket.ReadString();
+                    
+                foreach (GameObject obj in enemies.Values)
+                {
+                    if (obj.GetComponent<EnemyInfo>().playerId == objectId)
+                    {
+                        obj.transform.Find("Audio Source").gameObject.GetComponent<AudioSource>().PlayOneShot(steps[UnityEngine.Random.Range(0,3)]);
+                        break;
+                    }
+                }
+                break;
+            }
         }
     }
 

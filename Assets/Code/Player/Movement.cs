@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using PacketHeaders;
 //using UnityEditor.Animations;
 
 public class Movement : MonoBehaviour
@@ -23,8 +24,16 @@ public class Movement : MonoBehaviour
     private bool preventCollisionFlag = true;
     private ChatUI chat;
 
+    //Шаги
+    public AudioSource AS;
+    public AudioClip[] steps = new AudioClip[4];
+    private float stepTime = 0;
+    public float timeToStep = 0.8f;
+    private Client client;
+
     void Start()
     {
+        client = FindObjectOfType<Client>().GetComponent<Client>();
         cc = gameObject.GetComponent<CharacterController>();
         chat = GameObject.Find("Canvas").transform.Find("Chat").GetComponent<ChatUI>();
         EnabledMovement = true;
@@ -63,9 +72,31 @@ public class Movement : MonoBehaviour
             actualVel += impulseDirection;
             impulseDirection.y = 0;
         }
+        
+        float hypotenuse = Mathf.Sqrt(Input.GetAxis("Horizontal") * Input.GetAxis("Horizontal") + Input.GetAxis("Vertical") * Input.GetAxis("Vertical"));
+        if(hypotenuse > 1) hypotenuse = 1;
+        
+        if(!cc.isGrounded) hypotenuse = 1; 
+
+        stepTime += Time.deltaTime * hypotenuse;
+
+        if( (actualVel.x != 0 && actualVel.z != 0) && cc.isGrounded) {
+           
+
+            if(stepTime >= timeToStep) {
+                stepTime = 0;
+            }
+            
+            if(stepTime == 0) {
+                AS.PlayOneShot(steps[Random.Range(0,3)]);
+
+                Packet p = new Packet((int) WorldCommand.CMSG_STEP);
+                p.Write(0);
+                client.Send(p);
+            }
+        }
 
         cc.Move(actualVel * Time.deltaTime);
-
     }
 
     public void SetPlayerPos(Vector3 newpos)

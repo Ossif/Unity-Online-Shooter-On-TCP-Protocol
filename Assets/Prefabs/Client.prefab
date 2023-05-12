@@ -58,3 +58,8 @@ MonoBehaviour:
   SpawnPos: {x: 0, y: 0, z: 0}
   TrailEffectBullet: {fileID: 8080948163780936430, guid: 30b8be2e27a995d43b75f164e0bce453, type: 3}
   ShotClip: {fileID: 8300000, guid: 03b2d2e29659d6543b9c0e715fb37ecd, type: 3}
+  steps:
+  - {fileID: 8300000, guid: e6d131e0aed6fbf42b28261e73307445, type: 3}
+  - {fileID: 8300000, guid: 84cb452d77f76674e87bfb77a9231309, type: 3}
+  - {fileID: 8300000, guid: b8a247ad74119ea4fb15029fbe69594a, type: 3}
+  - {fileID: 8300000, guid: e9d760f77cdc728458f46c0552a05832, type: 3}
