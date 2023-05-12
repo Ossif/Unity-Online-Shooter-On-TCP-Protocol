@@ -611,7 +611,7 @@ public class Client : MonoBehaviour
                 {
                     if (obj.GetComponent<EnemyInfo>().playerId == objectId)
                     {
-                        obj.transform.Find("Audio Source").gameObject.GetComponent<AudioSource>().PlayOneShot(steps[UnityEngine.Random.Range(0,3)]);
+                        obj.transform.Find("Audio Source2").gameObject.GetComponent<AudioSource>().PlayOneShot(steps[UnityEngine.Random.Range(0,3)]);
                         break;
                     }
                 }
