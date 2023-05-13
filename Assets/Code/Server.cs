@@ -38,6 +38,9 @@ public class ServerClient
     public long TimeOutTimer;
 
     public WeaponId weaponId = WeaponId.NONE;
+
+    public int KillsCount = 0;
+    public int DeathCount = 0;
 }
 
 public class ServerPickup
@@ -91,8 +94,9 @@ public class Server : MonoBehaviour
     public StreamWriter sw = null;
     Dictionary<int, ServerCommands> teams = new Dictionary<int, ServerCommands>();
     public List<ServerPickup> pickups = new List<ServerPickup>();
-    int HealthPickUP = -1;
-    long HealthRespawnTime = long.MaxValue;
+    int[] HealthPickUP = { -1, -1 };
+    Vector3[] HealthPicPos = { new Vector3(82f, -6.3f, 85.6f), new Vector3(6.5f, -31.5f, 76f)};
+    long[] HealthRespawnTime = { long.MaxValue, long.MaxValue };
 
     int[] TramplinePicUP = { -1, -1 };
 
@@ -134,7 +138,8 @@ public class Server : MonoBehaviour
               { 0, new ServerCommands(new Vector3(0f, 2f, 0f))},
               { 1, new ServerCommands(new Vector3(130f, 6.3f, 60f))}
             };
-            HealthPickUP = CreatePickup(new ServerPickup(new Vector3(82f, -6.3f, 85.6f), 0, "0"));
+            HealthPickUP[0] = CreatePickup(new ServerPickup(HealthPicPos[0], 0, "0"));
+            HealthPickUP[1] = CreatePickup(new ServerPickup(HealthPicPos[1], 0, "0"));
             AmmoPickUP = CreatePickup(new ServerPickup(new Vector3(10.5f, -13f, 75f), 0, "2"));
             TramplinePicUP[0] = CreatePickup(new ServerPickup(new Vector3(15f, 8.505f, 18.5f), new Vector3(-90, 0, 45), 0, "1"));
             TramplinePicUP[1] = CreatePickup(new ServerPickup(new Vector3(-12.89f, -31.25f, 81.12f), new Vector3(-121.54f, -75, 180), 0, "1"));
@@ -163,7 +168,8 @@ public class Server : MonoBehaviour
             client.health = 100.0f;
             clients.TryAdd(client, null);
             client.TimeOutTimer = Gettime;
-            Debug.Log($"Client connected: {client.tcp.Client.RemoteEndPoint}");
+            client.PlayerID = client.tcp.Client.RemoteEndPoint.ToString();
+            Debug.Log($"Client connected: {client.PlayerID}");
             client.stream = client.tcp.GetStream();
             Packet packet = new Packet((int)WorldCommand.SMSG_OFFER_ENTER);
             packet.Write((int)0);
@@ -265,18 +271,17 @@ public class Server : MonoBehaviour
     private void DisconnectPlayer(ServerClient c)
     {
         // Соединение было закрыто сервером
-        Debug.Log($"DATA: Сервер разорвал соединение с {c.tcp.Client.RemoteEndPoint}");
+        Debug.Log($"DATA: Сервер разорвал соединение с {c.PlayerID}");
         Packet packet = new Packet((int)WorldCommand.SMSG_REMOVE_PLAYER);
-        packet.Write(c.tcp.Client.RemoteEndPoint.ToString());
+        packet.Write(c.PlayerID);
         c.stream.Close();
+        clients.TryRemove(c, out _);
         foreach (ServerClient client in clients.Keys)//Отправляем всем игрокам позицию нового игрока
         {
             client.stream.WriteAsync(packet.GetBytes());
             SendPlayerMessage(client, $"Игрок {c.PlayerName} покинул игру!");
             break;
         }
-        c.stream.Close();
-        clients.TryRemove(c, out _);
         return;
     }
     private void QueueUpdate()
@@ -531,6 +536,8 @@ public class Server : MonoBehaviour
 
                                 if (client.health <= 0) //Если ХП у игрока не осталось
                                 {
+                                    c.KillsCount++;
+                                    client.DeathCount++;
                                     Packet deathPacket = new Packet((int)WorldCommand.SMSG_PLAYER_DEATH); //формируем пакет смерти и отправляем всем игрокам кроме того, кто помер
                                     deathPacket.Write(VictimID);
                                     client.status = (int)PlayerStatus.PLAYER_IS_DEATH;
@@ -642,11 +649,52 @@ public class Server : MonoBehaviour
                 index--;
             }
             string cmd = message.Substring(1, index);
-            if(cmd == "cc")
+            string[] CMDparams = ConvertStringToParameters(message.Substring(index + 1, message.Length - (index + 1)));
+            Debug.Log(CMDparams.Length);
+            if (cmd == "cc")
             {
                 foreach (ServerClient client in clients.Keys)
                 {
                     ClearPlayerChat(client);
+                }
+            }
+            else if(cmd == "stats")
+            {
+                string statstring = "Статистка игроков матча:";
+                foreach(ServerClient cli in clients.Keys)
+                {
+                    statstring += $"\n{cli.PlayerName}: {cli.KillsCount}/{cli.DeathCount}";
+                }
+                SendPlayerMessage(c, statstring);
+            }
+            else if(cmd == "kick")
+            {
+                if (CMDparams.Length != 1)
+                {
+                    SendPlayerMessage(c, "Ошибка, используй /kick [nick]");
+                    return;
+                }
+                foreach (ServerClient client in clients.Keys)
+                {
+                    if (client.PlayerName == CMDparams[0])
+                    {
+                        DisconnectPlayer(client);
+                    }
+                }
+            }
+            else if(cmd == "sethp")
+            {
+                if (CMDparams.Length != 2)
+                {
+                    SendPlayerMessage(c, "Ошибка, используй /sethp [nick] [HP]");
+                    return;
+                }
+                foreach (ServerClient client in clients.Keys)
+                {
+                    if (client.PlayerName == CMDparams[0])
+                    {
+                        SetPlayerHealth(client, (float) int.Parse(CMDparams[1]));
+                    }
                 }
             }
         }
@@ -674,24 +722,24 @@ public class Server : MonoBehaviour
     }
     public void OnPlayerPickupPickup(ServerClient c, int pickupid)
     {
-        if(pickupid == HealthPickUP)
-        {   
-            if (c.health >= 100)
+        for (int i = 0; i < HealthPickUP.Length; i++)
+        {
+            if (pickupid == HealthPickUP[i])
+            {
+                if (c.health >= 100)
+                    return;
+
+                if (c.health + 50 > 100)
+                    c.health = 100;
+                else
+                    c.health += 50;
+
+                HealthPickUP[i] = -1;
+                DestroyPickup(pickupid);
+                HealthRespawnTime[i] = Gettime + 30;
+                SetPlayerHealth(c, c.health, 0);
                 return;
-            
-            if (c.health + 50 > 100)
-                c.health = 100;
-            else
-                c.health += 50;
-
-            HealthPickUP = -1;
-            DestroyPickup(pickupid);
-            HealthRespawnTime = Gettime + 30;
-            Packet packet = new Packet((int)WorldCommand.SMSG_SET_PLAYER_HEALTH);
-            packet.Write((byte)0);
-            packet.Write(c.health);
-
-            c.stream.WriteAsync(packet.GetBytes());   
+            }
         }
         if(pickupid == AmmoPickUP)
         {   
@@ -700,15 +748,18 @@ public class Server : MonoBehaviour
             AmmoRespawnTime = Gettime + 30;
             Packet packet = new Packet((int)WorldCommand.SMSG_ADD_PLAYER_AMMO);
             packet.Write((byte)0);
-            c.stream.WriteAsync(packet.GetBytes());   
+            c.stream.WriteAsync(packet.GetBytes());
+            return;
         }
         else if(pickupid == TramplinePicUP[0])
         {
             SetPlayerVelocity(c, new Vector3(18f, 30f, 18f), 1f);
+            return;
         }
         else if(pickupid == TramplinePicUP[1])
         {
-            SetPlayerVelocity(c, new Vector3(2f, 30f, 10f), 1f);
+            SetPlayerVelocity(c, new Vector3(10f, 30f, -3f), 1f);
+            return;
         }
         return;
     }
@@ -752,6 +803,25 @@ public class Server : MonoBehaviour
         }
         return false;
     }
+    public void SetPlayerHealth(ServerClient c, float Health, byte type = 1)
+    {
+        Packet packet = new Packet((int)WorldCommand.SMSG_SET_PLAYER_HEALTH);
+        packet.Write((byte)type);
+        packet.Write(Health);
+        c.stream.WriteAsync(packet.GetBytes());
+        if(Health <= 0)
+        {
+            Packet deathPacket = new Packet((int)WorldCommand.SMSG_PLAYER_DEATH); //формируем пакет смерти и отправляем всем игрокам кроме того, кто помер
+            deathPacket.Write(c.PlayerID);
+            c.status = (int)PlayerStatus.PLAYER_IS_DEATH;
+            foreach (ServerClient cli in clients.Keys)
+            {
+                if (cli.PlayerID != c.PlayerID)
+                    cli.stream.WriteAsync(deathPacket.GetBytes());
+            }
+        }
+        return;
+    }
     public void SetPlayerVelocity(ServerClient c, Vector3 direction, float disableMoveTime)
     {
         Packet packet = new Packet((int)WorldCommand.SMSG_SET_PLAYER_IMPYLSE);
@@ -785,10 +855,13 @@ public class Server : MonoBehaviour
     {
         Gettime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         //Debug.Log($"Now gettime {Gettime}");
-        if (Gettime >= HealthRespawnTime)
+        for (int i = 0; i < HealthPickUP.Length; i++)
         {
-            HealthRespawnTime = long.MaxValue;
-            HealthPickUP = CreatePickup(new ServerPickup(new Vector3(82f, -6.3f, 85.6f), 0, "0"));
+            if (Gettime >= HealthRespawnTime[i])
+            {
+                HealthRespawnTime[i] = long.MaxValue;
+                HealthPickUP[i] = CreatePickup(new ServerPickup(HealthPicPos[i], 0, "0"));
+            }
         }
         if (Gettime >= AmmoRespawnTime)
         {
@@ -803,5 +876,11 @@ public class Server : MonoBehaviour
             }
         }
         return;
-    }    
+    }
+    public static string[] ConvertStringToParameters(string input)
+    {
+        char[] delimiterChars = { ' ' };
+        string[] parameters = input.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries);
+        return parameters;
+    }
 }

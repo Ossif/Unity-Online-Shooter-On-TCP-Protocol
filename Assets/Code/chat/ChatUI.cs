@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class ChatUI : MonoBehaviour
@@ -40,6 +41,8 @@ public class ChatUI : MonoBehaviour
         }
         ChatArray[0] = Instantiate(ChatMessage, Content);
         ChatArray[0].transform.GetComponent<TMP_Text>().text = message;
+        int count = message.Split('\n').Length - 1;
+        ChatArray[0].transform.GetComponent<RectTransform>().sizeDelta = new Vector2(ChatArray[0].transform.GetComponent<RectTransform>().sizeDelta.x, 18.14f * (count + 1));
         return;
     }
 

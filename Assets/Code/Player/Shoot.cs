@@ -60,6 +60,7 @@ public class Shoot : MonoBehaviour
             Vector3 vec = cam.transform.position + cam.transform.forward;
             if(weaponList[index].weaponId != WeaponEnumIds.WeaponId.SAWNED_OFF)
             {
+                Debug.Log(cam.transform.forward);
                 Ray ray = new Ray(cam.transform.position, cam.transform.forward);
                 RaycastHit hit;
                 GameObject bullet = Instantiate(TrailEffectBullet, MuzzleFlash.position, cam.transform.rotation);

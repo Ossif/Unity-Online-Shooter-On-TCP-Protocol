@@ -28,18 +28,18 @@ public class CanvasLogic : MonoBehaviour
         health.text = var.ToString();
     }
     public void HideHUD(){
-        transform.Find("AmmoLeft").gameObject.SetActive(false);
-        transform.Find("AmmoRight").gameObject.SetActive(false);
-        transform.Find("AmmoTotal").gameObject.SetActive(false);
-        transform.Find("AmmoStr").gameObject.SetActive(false);
+        transform.Find("Ammo").Find("AmmoLeft").gameObject.SetActive(false);
+        transform.Find("Ammo").Find("AmmoRight").gameObject.SetActive(false);
+        transform.Find("Ammo").Find("AmmoTotal").gameObject.SetActive(false);
+        transform.Find("Ammo").Find("AmmoStr").gameObject.SetActive(false);
         transform.Find("Cross").gameObject.SetActive(false);
         transform.Find("Health").gameObject.SetActive(false);
     }
     public void ShowHUD(){
-        transform.Find("AmmoLeft").gameObject.SetActive(true);
-        transform.Find("AmmoRight").gameObject.SetActive(true);
-        transform.Find("AmmoTotal").gameObject.SetActive(true);
-        transform.Find("AmmoStr").gameObject.SetActive(true);
+        transform.Find("Ammo").Find("AmmoLeft").gameObject.SetActive(true);
+        transform.Find("Ammo").Find("AmmoRight").gameObject.SetActive(true);
+        transform.Find("Ammo").Find("AmmoTotal").gameObject.SetActive(true);
+        transform.Find("Ammo").Find("AmmoStr").gameObject.SetActive(true);
         transform.Find("Cross").gameObject.SetActive(true);
         transform.Find("Health").gameObject.SetActive(true);
     }
