@@ -9,6 +9,7 @@ TagManager:
   - DeadZone
   - PickUP
   - Trampline
+  - IgnoreRayCast
   layers:
   - Default
   - TransparentFX

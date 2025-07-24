@@ -56,6 +56,12 @@ namespace PacketHeaders
         SMSG_SEND_KILL_MESSAGE = 34,
 
         CMSG_STEP = 35,
-        SMSG_STEP = 36
+        SMSG_STEP = 36,
+
+        CMSG_PLAYER_WEAPON_SHOT = 37,
+        SMSG_CREATE_OBJECT = 38,
+
+        SMSG_CREATE_NPC = 39,
+        SMSG_NPC_MOVE_PATH = 40
     }
 }

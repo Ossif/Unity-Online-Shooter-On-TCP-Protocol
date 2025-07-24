@@ -63,3 +63,4 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 84cb452d77f76674e87bfb77a9231309, type: 3}
   - {fileID: 8300000, guid: b8a247ad74119ea4fb15029fbe69594a, type: 3}
   - {fileID: 8300000, guid: e9d760f77cdc728458f46c0552a05832, type: 3}
+  NPCprefab: {fileID: 2908902476576423160, guid: d462dbb2437082c48800e5624eb7a909, type: 3}

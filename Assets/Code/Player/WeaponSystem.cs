@@ -48,6 +48,7 @@ public class WeaponSystem : MonoBehaviour
         Packet packet = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_WEAPON_INFO);
         packet.Write((int) wid);
         c.Send(packet);
+        Debug.Log("Отправлен пакет о смене оружия");
     }
 
     void Start()

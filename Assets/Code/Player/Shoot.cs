@@ -67,6 +67,16 @@ public class Shoot : MonoBehaviour
                 bullet.transform.GetComponent<Bullet>().creatorId = client.playerId;
                 bullet.transform.GetComponent<ConstantForce>().force = cam.transform.forward * 5000;
 
+                Packet shotPacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_WEAPON_SHOT);
+                shotPacket.Write((float)cam.transform.position.x);
+                shotPacket.Write((float)cam.transform.position.y);
+                shotPacket.Write((float)cam.transform.position.z);
+
+                shotPacket.Write((float)cam.transform.forward.x);
+                shotPacket.Write((float)cam.transform.forward.y);
+                shotPacket.Write((float)cam.transform.forward.z);
+                client.Send(shotPacket);
+
                 Packet bpacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_CREATE_BULLET_EFFECT);
                 bpacket.Write((float) cam.transform.rotation.w);
                 bpacket.Write((float) cam.transform.rotation.x);

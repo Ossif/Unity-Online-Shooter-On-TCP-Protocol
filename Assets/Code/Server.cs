@@ -135,7 +135,7 @@ public class Server : MonoBehaviour
             Debug.Log("SERVER начал работу.");
             //Создаём команды
             teams = new Dictionary<int, ServerCommands> {
-              { 0, new ServerCommands(new Vector3(0f, 2f, 0f))},
+              { 0, new ServerCommands(new Vector3(-63f, 9f, -62f))},
               { 1, new ServerCommands(new Vector3(130f, 6.3f, 60f))}
             };
             HealthPickUP[0] = CreatePickup(new ServerPickup(HealthPicPos[0], 0, "0"));

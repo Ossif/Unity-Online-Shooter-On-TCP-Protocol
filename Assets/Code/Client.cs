@@ -42,6 +42,7 @@ public class Client : MonoBehaviour
     public Vector3 SpawnPos;
 
     static ConcurrentDictionary<string, GameObject> enemies = new ConcurrentDictionary<string, GameObject>();
+    static List<(GameObject, NPC)> NPCarray = new List<(GameObject, NPC)>();
 
     private Animator animator;
 
@@ -51,6 +52,7 @@ public class Client : MonoBehaviour
     public AudioClip ShotClip;
 
     public AudioClip[] steps = new AudioClip[4];
+    public GameObject NPCprefab;
 
     // Start is called before the first frame update
     private void Start()
@@ -603,20 +605,61 @@ public class Client : MonoBehaviour
                     }
                     break;
                 }
-        
-            case WorldCommand.SMSG_STEP: {
-                string objectId = InComePacket.ReadString();
-                    
-                foreach (GameObject obj in enemies.Values)
+            case WorldCommand.SMSG_STEP: 
                 {
-                    if (obj.GetComponent<EnemyInfo>().playerId == objectId)
+                    string objectId = InComePacket.ReadString();
+                    
+                    foreach (GameObject obj in enemies.Values)
                     {
-                        obj.transform.Find("Audio Source2").gameObject.GetComponent<AudioSource>().PlayOneShot(steps[UnityEngine.Random.Range(0,3)]);
-                        break;
+                        if (obj.GetComponent<EnemyInfo>().playerId == objectId)
+                        {
+                            obj.transform.Find("Audio Source2").gameObject.GetComponent<AudioSource>().PlayOneShot(steps[UnityEngine.Random.Range(0,3)]);
+                            break;
+                        }
                     }
+                    break;
                 }
-                break;
-            }
+            case WorldCommand.SMSG_CREATE_OBJECT:
+                {
+                    Vector3 objpos = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                    Instantiate(bulletPrefab, objpos, Quaternion.identity);
+                    break;
+                }
+            case WorldCommand.SMSG_CREATE_NPC:
+                {
+                    int count = InComePacket.ReadInt16();
+                    for(int i = 0; i < count; i++)
+                    {
+                        int npcID = InComePacket.ReadInt16();
+                        Vector3 npcPos = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
+                        string npcName = InComePacket.ReadString();
+                        Debug.Log($"NPC {npcName}({npcID}): {npcPos}");
+                        GameObject npc = Instantiate(NPCprefab, npcPos, Quaternion.identity);
+                        NPC NPCScript = npc.transform.GetComponent<NPC>();
+                        NPCScript.npcID = npcID;
+                        NPCScript.npcName = npcName;
+                        NPCarray.Add((npc, NPCScript));
+                    }
+                    break;
+                }
+            case WorldCommand.SMSG_NPC_MOVE_PATH:
+                {
+                    Debug.Log("SMSG_NPC_MOVE_PATH");
+                    int npcID = InComePacket.ReadInt16();
+                    Vector3 npcPos = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat()); //Начальная точка движения
+                    float moveSpeed = InComePacket.ReadFloat(); //Скорость движения по маршруту
+                    Vector3 endPoint = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat()); //Конечная точка движения
+                    for(int i = 0; i < NPCarray.Count; i++)
+                    { 
+                        Debug.Log($"item = {NPCarray[i].Item2.npcID}, npcid = {npcID}");
+                        if(NPCarray[i].Item2.npcID == npcID)
+                        {
+                            NPCarray[i].Item2.StartMovePath(npcPos, endPoint, moveSpeed);
+                            break;
+                        }
+                    }
+                    break;
+                }
         }
     }
 
