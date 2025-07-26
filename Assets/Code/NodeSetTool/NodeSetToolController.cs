@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using System.IO;
 using Dummiesman;
 using TMPro;
@@ -893,6 +895,7 @@ public class NodeSetToolController : MonoBehaviour
             canvas.transform.Find("InputPath").gameObject.SetActive(true);
         }
     }
+#if UNITY_EDITOR
     public void ChooseFile()
     {
         string path = EditorUtility.OpenFilePanel("�������� .obj ���� ��� �������", "", "obj");
@@ -901,6 +904,7 @@ public class NodeSetToolController : MonoBehaviour
             pathString.text = path;
         }
     }
+#endif
 
     public void LoadFile()
     {

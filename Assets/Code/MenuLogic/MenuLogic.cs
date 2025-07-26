@@ -22,6 +22,7 @@ public class MenuLogic : MonoBehaviour
     public GameObject Canvas;
     public GameObject Settings;
     public string NickName;
+    public float MouseSensitivity = 9.0f; // Добавляем переменную для чувствительности мыши
 
     public bool windowed = true;
 
@@ -46,6 +47,17 @@ public class MenuLogic : MonoBehaviour
             NickName = PlayerPrefs.GetString("PlayerNick");
         }
         else NickName = null;
+
+        // Загружаем настройки чувствительности мыши
+        if (PlayerPrefs.HasKey("MouseSensitivity"))
+        {
+            MouseSensitivity = PlayerPrefs.GetFloat("MouseSensitivity");
+        }
+        else
+        {
+            MouseSensitivity = 9.0f; // Значение по умолчанию
+            PlayerPrefs.SetFloat("MouseSensitivity", MouseSensitivity);
+        }
     }
 
     public void OpenFindMenu()
@@ -168,6 +180,38 @@ public class MenuLogic : MonoBehaviour
         PlayerPrefs.SetString("PlayerNick", NickName); //Сохраняем ник
         return;
     }
+
+    // Методы для работы с настройками чувствительности мыши
+    public void IncreaseMouseSensitivity()
+    {
+        MouseSensitivity += 0.5f;
+        if (MouseSensitivity > 20.0f) MouseSensitivity = 20.0f; // Максимальное значение
+        PlayerPrefs.SetFloat("MouseSensitivity", MouseSensitivity);
+        PlayerPrefs.Save();
+        CreateNotify(NotificationType.Accept, "Чувствительность", $"Чувствительность мыши: {MouseSensitivity:F1}");
+    }
+
+    public void DecreaseMouseSensitivity()
+    {
+        MouseSensitivity -= 0.5f;
+        if (MouseSensitivity < 1.0f) MouseSensitivity = 1.0f; // Минимальное значение
+        PlayerPrefs.SetFloat("MouseSensitivity", MouseSensitivity);
+        PlayerPrefs.Save();
+        CreateNotify(NotificationType.Accept, "Чувствительность", $"Чувствительность мыши: {MouseSensitivity:F1}");
+    }
+
+    public void SetMouseSensitivity(float value)
+    {
+        MouseSensitivity = Mathf.Clamp(value, 1.0f, 20.0f);
+        PlayerPrefs.SetFloat("MouseSensitivity", MouseSensitivity);
+        PlayerPrefs.Save();
+    }
+
+    public float GetMouseSensitivity()
+    {
+        return MouseSensitivity;
+    }
+
     public void ExitButton()
     {
         Application.Quit();

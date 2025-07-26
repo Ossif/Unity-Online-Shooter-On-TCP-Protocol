@@ -62,6 +62,8 @@ namespace PacketHeaders
         SMSG_CREATE_OBJECT = 38,
 
         SMSG_CREATE_NPC = 39,
-        SMSG_NPC_MOVE_PATH = 40
+        SMSG_NPC_MOVE_PATH = 40,
+
+        SMSG_DISCONNECT = 41
     }
 }

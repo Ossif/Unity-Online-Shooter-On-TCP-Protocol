@@ -245,6 +245,7 @@ public class Client : MonoBehaviour
                 }
             case WorldCommand.SMSG_CREATE_PLAYERS: //Создание игорьков при подключении
                 {
+                    Debug.Log("SMSG_CREATE_PLAYERS");
                     string id;
                     string PlayerName;
                     Vector3 position = new Vector3();
@@ -658,6 +659,25 @@ public class Client : MonoBehaviour
                             break;
                         }
                     }
+                    break;
+                }
+            case WorldCommand.SMSG_DISCONNECT:
+                {
+                    string reason = InComePacket.ReadString();
+                    int code = InComePacket.ReadInt();
+                    
+                    Debug.Log($"Сервер отключил клиента. Причина: {reason}, Код: {code}");
+                    
+                    // Показываем сообщение игроку
+                    if (GameObject.Find("Canvas")?.transform.Find("ChatUI") != null)
+                    {
+                        var chatUI = GameObject.Find("Canvas").transform.Find("ChatUI").GetComponent<ChatUI>();
+                        chatUI.AddChatMessage($"[СИСТЕМА] {reason}");
+                    }
+                    
+                    // Отключаемся и возвращаемся в меню
+                    CloseSocket();
+                    SceneManager.LoadScene("Menu");
                     break;
                 }
         }
