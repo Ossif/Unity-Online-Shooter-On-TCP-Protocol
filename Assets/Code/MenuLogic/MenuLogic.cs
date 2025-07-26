@@ -30,6 +30,10 @@ public class MenuLogic : MonoBehaviour
     public int maxNotifications = 3;
     public int currentNotifications = 0;
 
+    // Настройки чувствительности
+    private Slider sensitivitySlider;
+    public float currentSensitivity = 9.0f;
+
     private void Start()
     {
         //if(windowed) Screen.fullScreen = !Screen.fullScreen; 
@@ -39,13 +43,40 @@ public class MenuLogic : MonoBehaviour
         AddServerMenu.SetActive(false);
         Settings.SetActive(false);
 
-
         //Если есть ник-нейм то мы его загружаем
         if (PlayerPrefs.HasKey("PlayerNick"))
         {
             NickName = PlayerPrefs.GetString("PlayerNick");
         }
         else NickName = null;
+
+        if (PlayerPrefs.HasKey("Sens"))
+        {
+            currentSensitivity = PlayerPrefs.GetFloat("Sens");
+        }
+        else
+        {
+            currentSensitivity = 9.0f; // Значение по умолчанию
+            PlayerPrefs.SetFloat("Sens", currentSensitivity);
+            PlayerPrefs.Save();
+        }
+    }
+
+    // Сохранение настроек чувствительности
+    private void SaveSensitivitySettings()
+    {
+        PlayerPrefs.SetFloat("Sens", currentSensitivity);
+        PlayerPrefs.Save();
+    }
+
+    // Обработчик изменения чувствительности через UI
+    public void OnSensitivityChanged(float value)
+    {
+        // Преобразуем значение слайдера (0-1) в чувствительность (1-20)
+        float newSensitivity = value * 20f;
+        
+        currentSensitivity = newSensitivity + 1;
+        SaveSensitivitySettings();
     }
 
     public void OpenFindMenu()
@@ -134,12 +165,25 @@ public class MenuLogic : MonoBehaviour
         {
             Nick.text = NickName;
         }
+        
+        Scrollbar SensivityScrollbar = Settings.transform.Find("SensivityScrollbar").GetComponent<Scrollbar>();
+        if (SensivityScrollbar != null)
+        {
+            // Устанавливаем значение слайдера (0-1)
+            SensivityScrollbar.value = (currentSensitivity-1) / 20f;
+            // Подключаем обработчик события
+            SensivityScrollbar.onValueChanged.RemoveAllListeners();
+            SensivityScrollbar.onValueChanged.AddListener(OnSensitivityChanged);
+        }
+        
         Settings.SetActive(true);
         return;
     }
 
     public void CloseSettingsMenu()
     {
+        // Сохраняем настройки при закрытии меню
+        SaveSensitivitySettings();
         Settings.SetActive(false);
         return;
     }
