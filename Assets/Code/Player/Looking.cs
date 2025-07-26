@@ -48,6 +48,10 @@ public class Looking : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Блокируем управление камерой во время паузы
+        if (PauseMenuLogic.IsGamePaused)
+            return;
+            
         if (Input.GetKeyDown(KeyCode.Y))
         {
             sensivityHor += 0.5f;
