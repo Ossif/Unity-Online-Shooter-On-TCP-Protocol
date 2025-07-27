@@ -11,8 +11,7 @@ public class PauseMenuLogic : MonoBehaviour
     
     // Ссылки на скрипты игрока для блокировки управления
     private Movement playerMovement;
-    private Looking playerLooking;
-    private Shoot playerShoot;
+
 
     void Start()
     {
@@ -27,8 +26,6 @@ public class PauseMenuLogic : MonoBehaviour
         if (player != null)
         {
             playerMovement = player.GetComponent<Movement>();
-            playerLooking = player.GetComponent<Looking>();
-            playerShoot = player.GetComponent<Shoot>();
         }
         
         IsGamePaused = false;
@@ -43,7 +40,7 @@ public class PauseMenuLogic : MonoBehaviour
         }
     }
 
-    void TogglePauseMenu()
+    public void TogglePauseMenu()
     {
         if (PauseMenu != null)
         {
@@ -89,5 +86,24 @@ public class PauseMenuLogic : MonoBehaviour
         // Возобновляем управление игроком
         if (playerMovement != null)
             playerMovement.EnabledMovement = true;
+    }
+    public void ExitToMenu()
+    {
+        // Находим скрипты управления игроком
+        GameObject Client = GameObject.FindWithTag("Client");
+        if (Client != null)
+        {
+            Client clientScript = Client.GetComponent<Client>();
+            clientScript.CloseSocket();
+            Destroy(Client);
+        }
+
+        GameObject Server = GameObject.FindWithTag("Server");
+        if (Server != null)
+        {
+            Destroy(Server);
+        }
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Menu");
     }
 }

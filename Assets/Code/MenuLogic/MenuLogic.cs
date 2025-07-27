@@ -20,19 +20,10 @@ public class MenuLogic : MonoBehaviour
     public GameObject FindMenu;
     public GameObject AddServerMenu;
     public GameObject Canvas;
-    public GameObject Settings;
-    public string NickName;
+    public NotifyLogic NotifyLogic;
+
 
     public bool windowed = true;
-
-    //notifications
-    public GameObject notificationPrefab;
-    public int maxNotifications = 3;
-    public int currentNotifications = 0;
-
-    // Настройки чувствительности
-    private Slider sensitivitySlider;
-    public float currentSensitivity = 9.0f;
 
     private void Start()
     {
@@ -41,49 +32,13 @@ public class MenuLogic : MonoBehaviour
         mainMenu.SetActive(true);
         FindMenu.SetActive(false);
         AddServerMenu.SetActive(false);
-        Settings.SetActive(false);
-
-        //Если есть ник-нейм то мы его загружаем
-        if (PlayerPrefs.HasKey("PlayerNick"))
-        {
-            NickName = PlayerPrefs.GetString("PlayerNick");
-        }
-        else NickName = null;
-
-        if (PlayerPrefs.HasKey("Sens"))
-        {
-            currentSensitivity = PlayerPrefs.GetFloat("Sens");
-        }
-        else
-        {
-            currentSensitivity = 9.0f; // Значение по умолчанию
-            PlayerPrefs.SetFloat("Sens", currentSensitivity);
-            PlayerPrefs.Save();
-        }
-    }
-
-    // Сохранение настроек чувствительности
-    private void SaveSensitivitySettings()
-    {
-        PlayerPrefs.SetFloat("Sens", currentSensitivity);
-        PlayerPrefs.Save();
-    }
-
-    // Обработчик изменения чувствительности через UI
-    public void OnSensitivityChanged(float value)
-    {
-        // Преобразуем значение слайдера (0-1) в чувствительность (1-20)
-        float newSensitivity = value * 20f;
-        
-        currentSensitivity = newSensitivity + 1;
-        SaveSensitivitySettings();
     }
 
     public void OpenFindMenu()
-    {
-        if(!CheckNickNameToAvaible())
+    {   
+        if(!SettingsLogic.CheckNickNameToAvaible())
         {
-            CreateNotify(NotificationType.Error, "Некорректный ник-нейм", "Вы не можете приступить к поиску игры пока не установите корректный ник-нейм");
+            NotifyLogic.CreateNotify(NotificationType.Error, "Некорректный ник-нейм", "Вы не можете приступить к поиску игры пока не установите корректный ник-нейм");
             return;
         }
         FindMenu.SetActive(true); //Открываем меню
@@ -123,9 +78,9 @@ public class MenuLogic : MonoBehaviour
     }
     public void HostButton()
     {
-        if (!CheckNickNameToAvaible())
+        if (!SettingsLogic.CheckNickNameToAvaible())
         {
-            CreateNotify(NotificationType.Error, "Некорректный ник-нейм", "Вы не можете приступить к созданию игры пока не установите корректный ник-нейм");
+            NotifyLogic.CreateNotify(NotificationType.Error, "Некорректный ник-нейм", "Вы не можете приступить к созданию игры пока не установите корректный ник-нейм");
             return;
         }
         try
@@ -158,60 +113,7 @@ public class MenuLogic : MonoBehaviour
         waitingMenu.SetActive(false);
         mainMenu.SetActive(true);
     }
-    public void OpenSettingMenu()
-    {
-        InputField Nick = Settings.transform.Find("NickField").GetComponent<InputField>();
-        if(NickName != null)
-        {
-            Nick.text = NickName;
-        }
-        
-        Scrollbar SensivityScrollbar = Settings.transform.Find("SensivityScrollbar").GetComponent<Scrollbar>();
-        if (SensivityScrollbar != null)
-        {
-            // Устанавливаем значение слайдера (0-1)
-            SensivityScrollbar.value = (currentSensitivity-1) / 20f;
-            // Подключаем обработчик события
-            SensivityScrollbar.onValueChanged.RemoveAllListeners();
-            SensivityScrollbar.onValueChanged.AddListener(OnSensitivityChanged);
-        }
-        
-        Settings.SetActive(true);
-        return;
-    }
-
-    public void CloseSettingsMenu()
-    {
-        // Сохраняем настройки при закрытии меню
-        SaveSensitivitySettings();
-        Settings.SetActive(false);
-        return;
-    }
-    public void AcceptPlayerNick()
-    {
-        InputField Nick = Settings.transform.Find("NickField").GetComponent<InputField>();
-        if(Nick.text.Length < 4)
-        {
-            CreateNotify(NotificationType.Error, "Ошибка ввода", "Ваш ник должен содержать как минимум 4 символа");
-            return;
-        }
-        if(Nick.text.Length > 20)
-        {
-            CreateNotify(NotificationType.Error, "Ошибка ввода", "Ваш ник не должен быть длиннее 20 символов");
-        }
-        foreach (char c in Nick.text)
-        {
-            if (!Char.IsLetter(c) && c != '-' && c != '_')
-            {
-                CreateNotify(NotificationType.Error, "Ошибка ввода", "Ваш ник-нейм должен содержать только символы алфавита.");
-                return;
-            }
-        }
-        CreateNotify(NotificationType.Accept, "Ник-нейм", $"Теперь ваш ник-нейм - {Nick.text}.");
-        NickName = Nick.text;
-        PlayerPrefs.SetString("PlayerNick", NickName); //Сохраняем ник
-        return;
-    }
+  
     public void ExitButton()
     {
         Application.Quit();
@@ -219,48 +121,5 @@ public class MenuLogic : MonoBehaviour
     public void StartGame()
     {
         SceneManager.LoadScene("Game");
-    }
-
-    public bool CheckNickNameToAvaible()
-    {
-        if (NickName == null) return false;
-        if (NickName.Length < 4) return false;
-        if (NickName.Length > 20) return false;
-        foreach (char c in NickName)
-            if (!Char.IsLetter(c) && c != '-' && c != '_')
-                return false;
-
-        return true;
-    }
-    public void CreateNotify(NotificationType type, string title, string description)
-    {
-        if (currentNotifications >= maxNotifications)
-        {
-            return;
-        }
-
-        GameObject notificationObject = Instantiate(notificationPrefab, Canvas.transform);
-        Notification notification = notificationObject.GetComponent<Notification>();
-
-        notification.Initialize(type, title, description, HideNotification);
-
-
-        float x = Screen.width - notification.GetWidth() - 10f;
-        float y = Screen.height - ((currentNotifications + 1) * notification.GetHeight()) - 10f;
-        notification.SetPosition(new Vector2(x, y));
-
-        currentNotifications++;
-
-        //Invoke(nameof(HideNotification), 3f);
-    }
-
-    private void HideNotification()
-    {
-        currentNotifications--;
-
-        if (transform.childCount > 0)
-        {
-            Destroy(transform.GetChild(0).gameObject);
-        }
     }
 }

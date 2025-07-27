@@ -56,7 +56,7 @@ public class Movement : MonoBehaviour
 
         actualVel = verV + horV;
 
-        if (cc.isGrounded && (Input.GetAxis("Jump") > 0) && chat.ChatIsOpen == false)
+        if (cc.isGrounded && (Input.GetAxis("Jump") > 0) && chat.ChatIsOpen == false && EnabledMovement == true)
         {
             actualVel.y = JumpForce;
         }

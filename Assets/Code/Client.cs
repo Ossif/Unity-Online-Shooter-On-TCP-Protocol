@@ -674,10 +674,9 @@ public class Client : MonoBehaviour
                         var chatUI = GameObject.Find("Canvas").transform.Find("ChatUI").GetComponent<ChatUI>();
                         chatUI.AddChatMessage($"[СИСТЕМА] {reason}");
                     }
-                    
+
                     // Отключаемся и возвращаемся в меню
-                    CloseSocket();
-                    SceneManager.LoadScene("Menu");
+                    GoToMenu();
                     break;
                 }
         }
@@ -692,7 +691,14 @@ public class Client : MonoBehaviour
         CloseSocket();
     }
 
-    private void CloseSocket()
+    private void GoToMenu()
+    {
+        CloseSocket();
+        Destroy(this.gameObject);
+        SceneManager.LoadScene("Menu");
+    }
+
+    public void CloseSocket()
     {
         if(!socketReady)
             return;
