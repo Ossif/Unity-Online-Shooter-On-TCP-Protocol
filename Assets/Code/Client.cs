@@ -74,7 +74,10 @@ public class Client : MonoBehaviour
         {
             byte[] packets = SendPacket.Item1.GetBytes();
             if(packets.Length > 0)
+            {
                 stream.Write(packets);
+                stream.Flush(); // Принудительная отправка без буферизации
+            }
         }
     }
     public async void ConnectToServer(string host, int port)//Присоединение к TCP серверу
@@ -90,6 +93,11 @@ public class Client : MonoBehaviour
 
             if (socket.Connected)
             {
+                // Настройка TCP для минимальной задержки
+                socket.NoDelay = true; // Отключаем Nagle Algorithm
+                socket.ReceiveBufferSize = 8192; // Уменьшаем буфер приема
+                socket.SendBufferSize = 8192; // Уменьшаем буфер отправки
+                
                 stream = socket.GetStream();
                 buffer = new byte[HeaderSize];
                 socketReady = true;
@@ -361,7 +369,8 @@ public class Client : MonoBehaviour
                     if(Position)
                     {
                         Vector3 position = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
-                        enemy.transform.position = position;
+                        // Используем плавную интерполяцию вместо прямой установки позиции
+                        enemy.GetComponent<EnemyInfo>().SetNetworkPosition(position);
                     }
 
                     if(Rotation)
@@ -373,7 +382,9 @@ public class Client : MonoBehaviour
                     if(Speed)
                     {
                         Vector3 speed = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
-                        enemy.GetComponent<Rigidbody>().velocity = speed;
+                        // Комментируем установку velocity чтобы избежать конфликта с интерполяцией позиции
+                        // enemy.GetComponent<Rigidbody>().velocity = speed;
+                        // Скорость используется только для информации, позиция обновляется через SetNetworkPosition
                     }
                     break;
                 }

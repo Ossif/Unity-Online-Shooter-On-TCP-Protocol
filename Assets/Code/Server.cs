@@ -165,6 +165,12 @@ public class Server : MonoBehaviour
         while (true)
         {
             ServerClient client = new ServerClient(await server.AcceptTcpClientAsync());
+            
+            // Настройка TCP для минимальной задержки
+            client.tcp.NoDelay = true; // Отключаем Nagle Algorithm
+            client.tcp.ReceiveBufferSize = 8192; // Уменьшаем буфер приема
+            client.tcp.SendBufferSize = 8192; // Уменьшаем буфер отправки
+            
             client.health = 100.0f;
             clients.TryAdd(client, null);
             client.TimeOutTimer = Gettime;
