@@ -36,11 +36,6 @@ public class Looking : MonoBehaviour
         Rigidbody body = GetComponent<Rigidbody>();
         if(body != null)
             body.freezeRotation = true;
-        if(PlayerPrefs.HasKey("Sens"))
-        {
-            sensivityHor = PlayerPrefs.GetFloat("Sens");
-            sensivityVer = PlayerPrefs.GetFloat("Sens");
-        }
 
         //_charController = GetComponent<CharacterController>();
     }
@@ -48,6 +43,15 @@ public class Looking : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (PlayerPrefs.HasKey("Sens"))
+        {
+            sensivityHor = PlayerPrefs.GetFloat("Sens");
+            sensivityVer = PlayerPrefs.GetFloat("Sens");
+        }
+        // Блокируем управление камерой во время паузы
+        if (PauseMenuLogic.IsGamePaused)
+            return;
+            
         if (Input.GetKeyDown(KeyCode.Y))
         {
             sensivityHor += 0.5f;

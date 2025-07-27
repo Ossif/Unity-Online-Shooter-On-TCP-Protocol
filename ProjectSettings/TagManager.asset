@@ -10,6 +10,7 @@ TagManager:
   - PickUP
   - Trampline
   - IgnoreRayCast
+  - Client
   layers:
   - Default
   - TransparentFX

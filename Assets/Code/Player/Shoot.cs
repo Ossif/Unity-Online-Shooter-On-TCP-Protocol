@@ -306,6 +306,10 @@ public class Shoot : MonoBehaviour
     }
     void Update()
     {
+        // Блокируем стрельбу во время паузы
+        if (PauseMenuLogic.IsGamePaused)
+            return;
+            
         /*bool isAuto = false;
         float shotTime = 0;*/
         int index = 0;
