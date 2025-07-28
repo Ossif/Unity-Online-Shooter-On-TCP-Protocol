@@ -58,88 +58,38 @@ public class Shoot : MonoBehaviour
             MuzzleFlash.GetComponent<ParticleSystem>().Play();
 
             Vector3 vec = cam.transform.position + cam.transform.forward;
-            if(weaponList[index].weaponId != WeaponEnumIds.WeaponId.SAWNED_OFF)
+            switch (weaponList[index].weaponId)
             {
-                Debug.Log(cam.transform.forward);
-                Ray ray = new Ray(cam.transform.position, cam.transform.forward);
-                RaycastHit hit;
-                GameObject bullet = Instantiate(TrailEffectBullet, MuzzleFlash.position, cam.transform.rotation);
-                bullet.transform.GetComponent<Bullet>().creatorId = client.playerId;
-                bullet.transform.GetComponent<ConstantForce>().force = cam.transform.forward * 5000;
-
-                Packet shotPacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_WEAPON_SHOT);
-                shotPacket.Write((float)cam.transform.position.x);
-                shotPacket.Write((float)cam.transform.position.y);
-                shotPacket.Write((float)cam.transform.position.z);
-
-                shotPacket.Write((float)cam.transform.forward.x);
-                shotPacket.Write((float)cam.transform.forward.y);
-                shotPacket.Write((float)cam.transform.forward.z);
-                client.Send(shotPacket);
-
-                Packet bpacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_CREATE_BULLET_EFFECT);
-                bpacket.Write((float) cam.transform.rotation.w);
-                bpacket.Write((float) cam.transform.rotation.x);
-                bpacket.Write((float) cam.transform.rotation.y);
-                bpacket.Write((float) cam.transform.rotation.z);
-
-                bpacket.Write((float) cam.transform.forward.x);
-                bpacket.Write((float) cam.transform.forward.y);
-                bpacket.Write((float) cam.transform.forward.z);
-
-                client.Send(bpacket);
-
-                // Проверяем, столкнулся ли луч с каким-либо объектом
-                if (Physics.Raycast(ray, out hit))
+                case WeaponId.PISTOL:
+                case WeaponId.AK:
                 {
-                    // Получаем информацию об объекте, с которым столкнулся луч
-                    if (hit.collider.gameObject.tag == "Enemy")
-                    {
-                        Invoke("GiveDamage", 0.1f);
-                        EnemyInfo enemny = hit.collider.transform.GetComponent<EnemyInfo>();
-                        Debug.Log($"Попал в игрока {enemny.PlayerName}");
-                        Packet packet = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_GIVE_DAMAGE);
-                        packet.Write(enemny.playerId);
-                        packet.Write(weaponList[index].damage);
-                        packet.Write((byte)ws.currentSlot);
-                        client.Send(packet);
-                    }
-                    Rigidbody rb = hit.collider.GetComponent<Rigidbody>();
-                    if (rb != null && hit.collider.gameObject.tag != "Enemy")
-                    {
-                        rb.AddForceAtPosition((hit.point - transform.position).normalized * 100, hit.point, ForceMode.Impulse);
-                    }
-                }
-
-            }
-            else
-            {
-                PlayerDamage[] playerDamages = new PlayerDamage[5];
-                int counter = 0;
-                for(int i = 0; i < 5; i++)
-                {
-                    playerDamages[0].playerid = null;
-                }
-                for (int i = 0; i < 5; i ++)
-                {
-                    Vector3 direction = Quaternion.Euler(Random.Range(-maxAngle, maxAngle), Random.Range(-maxAngle, maxAngle), 0) * cam.transform.forward;
-                    Ray ray = new Ray(cam.transform.position, direction);
+                    Debug.Log(cam.transform.forward);
+                    Ray ray = new Ray(cam.transform.position, cam.transform.forward);
                     RaycastHit hit;
                     GameObject bullet = Instantiate(TrailEffectBullet, MuzzleFlash.position, cam.transform.rotation);
                     bullet.transform.GetComponent<Bullet>().creatorId = client.playerId;
-                    bullet.transform.GetComponent<ConstantForce>().force = direction * 5000;
+                    bullet.transform.GetComponent<ConstantForce>().force = cam.transform.forward * 5000;
 
-                    ///посылаем информацию о траектории пули для отображения
+                    Packet shotPacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_WEAPON_SHOT);
+                    shotPacket.Write((float)cam.transform.position.x);
+                    shotPacket.Write((float)cam.transform.position.y);
+                    shotPacket.Write((float)cam.transform.position.z);
+
+                    shotPacket.Write((float)cam.transform.forward.x);
+                    shotPacket.Write((float)cam.transform.forward.y);
+                    shotPacket.Write((float)cam.transform.forward.z);
+                    client.Send(shotPacket);
+
                     Packet bpacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_CREATE_BULLET_EFFECT);
-                    bpacket.Write((float) cam.transform.rotation.w);
-                    bpacket.Write((float) cam.transform.rotation.x);
-                    bpacket.Write((float) cam.transform.rotation.y);
-                    bpacket.Write((float) cam.transform.rotation.z);
+                    bpacket.Write((float)cam.transform.rotation.w);
+                    bpacket.Write((float)cam.transform.rotation.x);
+                    bpacket.Write((float)cam.transform.rotation.y);
+                    bpacket.Write((float)cam.transform.rotation.z);
 
-                    bpacket.Write((float) direction.x);
-                    bpacket.Write((float) direction.y);
-                    bpacket.Write((float) direction.z);
-                    
+                    bpacket.Write((float)cam.transform.forward.x);
+                    bpacket.Write((float)cam.transform.forward.y);
+                    bpacket.Write((float)cam.transform.forward.z);
+
                     client.Send(bpacket);
 
                     // Проверяем, столкнулся ли луч с каким-либо объектом
@@ -148,44 +98,99 @@ public class Shoot : MonoBehaviour
                         // Получаем информацию об объекте, с которым столкнулся луч
                         if (hit.collider.gameObject.tag == "Enemy")
                         {
+                            Invoke("GiveDamage", 0.1f);
                             EnemyInfo enemny = hit.collider.transform.GetComponent<EnemyInfo>();
-                            for (int a = 0; a < 5; a++)
-                            {
-                                if (playerDamages[a].playerid == null)
-                                {
-                                    playerDamages[a].playerid = enemny.playerId;
-                                    playerDamages[a].damage = weaponList[index].damage;
-                                    counter++;
-                                    break;
-                                }
-                                if(playerDamages[a].playerid == enemny.playerId)
-                                {
-                                    playerDamages[a].damage += weaponList[index].damage;
-                                    break;
-                                }
-                            }
+                            Debug.Log($"Попал в игрока {enemny.PlayerName}");
+                            Packet packet = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_GIVE_DAMAGE);
+                            packet.Write(enemny.playerId);
+                            packet.Write(weaponList[index].damage);
+                            packet.Write((byte)ws.currentSlot);
+                            client.Send(packet);
                         }
                         Rigidbody rb = hit.collider.GetComponent<Rigidbody>();
                         if (rb != null && hit.collider.gameObject.tag != "Enemy")
                         {
-                            rb.AddForceAtPosition((hit.point - transform.position).normalized * 500, hit.point, ForceMode.Impulse);
+                            rb.AddForceAtPosition((hit.point - transform.position).normalized * 100, hit.point, ForceMode.Impulse);
                         }
                     }
-                    Debug.DrawRay(cam.transform.position + cam.transform.forward, direction * 5, Color.green, 5);
-
+                    break;
                 }
-                if(counter > 0)
+                case WeaponId.SAWNED_OFF:
                 {
-                    Invoke("GiveDamage", 0.1f);
-                    for (int i = 0; i < counter; i++)
+                    PlayerDamage[] playerDamages = new PlayerDamage[5];
+                    int counter = 0;
+                    for (int i = 0; i < 5; i++)
                     {
-                        Packet packet = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_GIVE_DAMAGE);
-                        packet.Write(playerDamages[i].playerid);
-                        packet.Write(playerDamages[i].damage);
-                        packet.Write((byte)ws.currentSlot);
-                        client.Send(packet);
-                        Debug.Log($"damage {playerDamages[i].damage} to {playerDamages[i].playerid}");
+                        playerDamages[0].playerid = null;
                     }
+                    for (int i = 0; i < 5; i++)
+                    {
+                        Vector3 direction = Quaternion.Euler(Random.Range(-maxAngle, maxAngle), Random.Range(-maxAngle, maxAngle), 0) * cam.transform.forward;
+                        Ray ray = new Ray(cam.transform.position, direction);
+                        RaycastHit hit;
+                        GameObject bullet = Instantiate(TrailEffectBullet, MuzzleFlash.position, cam.transform.rotation);
+                        bullet.transform.GetComponent<Bullet>().creatorId = client.playerId;
+                        bullet.transform.GetComponent<ConstantForce>().force = direction * 5000;
+
+                        ///посылаем информацию о траектории пули для отображения
+                        Packet bpacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_CREATE_BULLET_EFFECT);
+                        bpacket.Write((float)cam.transform.rotation.w);
+                        bpacket.Write((float)cam.transform.rotation.x);
+                        bpacket.Write((float)cam.transform.rotation.y);
+                        bpacket.Write((float)cam.transform.rotation.z);
+
+                        bpacket.Write((float)direction.x);
+                        bpacket.Write((float)direction.y);
+                        bpacket.Write((float)direction.z);
+
+                        client.Send(bpacket);
+
+                        // Проверяем, столкнулся ли луч с каким-либо объектом
+                        if (Physics.Raycast(ray, out hit))
+                        {
+                            // Получаем информацию об объекте, с которым столкнулся луч
+                            if (hit.collider.gameObject.tag == "Enemy")
+                            {
+                                EnemyInfo enemny = hit.collider.transform.GetComponent<EnemyInfo>();
+                                for (int a = 0; a < 5; a++)
+                                {
+                                    if (playerDamages[a].playerid == null)
+                                    {
+                                        playerDamages[a].playerid = enemny.playerId;
+                                        playerDamages[a].damage = weaponList[index].damage;
+                                        counter++;
+                                        break;
+                                    }
+                                    if (playerDamages[a].playerid == enemny.playerId)
+                                    {
+                                        playerDamages[a].damage += weaponList[index].damage;
+                                        break;
+                                    }
+                                }
+                            }
+                            Rigidbody rb = hit.collider.GetComponent<Rigidbody>();
+                            if (rb != null && hit.collider.gameObject.tag != "Enemy")
+                            {
+                                rb.AddForceAtPosition((hit.point - transform.position).normalized * 500, hit.point, ForceMode.Impulse);
+                            }
+                        }
+                        Debug.DrawRay(cam.transform.position + cam.transform.forward, direction * 5, Color.green, 5);
+
+                    }
+                    if (counter > 0)
+                    {
+                        Invoke("GiveDamage", 0.1f);
+                        for (int i = 0; i < counter; i++)
+                        {
+                            Packet packet = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_GIVE_DAMAGE);
+                            packet.Write(playerDamages[i].playerid);
+                            packet.Write(playerDamages[i].damage);
+                            packet.Write((byte)ws.currentSlot);
+                            client.Send(packet);
+                            Debug.Log($"damage {playerDamages[i].damage} to {playerDamages[i].playerid}");
+                        }
+                    }
+                    break;
                 }
             }
             switch (weaponList[index].weaponId){ 

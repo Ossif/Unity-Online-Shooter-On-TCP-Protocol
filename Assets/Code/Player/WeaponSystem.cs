@@ -30,9 +30,9 @@ public class WeaponSystem : MonoBehaviour
     public AudioClip GetNewAmmo;
 
 
-    public WeaponId[] weaponSlots = new WeaponId[3];
-    public int[] slotAmmo = new int[3];
-    public int[] maxAmmo = new int[3];
+    public WeaponId[] weaponSlots = new WeaponId[4];
+    public int[] slotAmmo = new int[4];
+    public int[] maxAmmo = new int[4];
     public int currentSlot = 0;
 
     private bool isReloading = false;
@@ -48,7 +48,7 @@ public class WeaponSystem : MonoBehaviour
         Packet packet = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_WEAPON_INFO);
         packet.Write((int) wid);
         c.Send(packet);
-        Debug.Log("Отправлен пакет о смене оружия");
+        Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ");
     }
 
     void Start()
@@ -63,14 +63,17 @@ public class WeaponSystem : MonoBehaviour
         weaponSlots[0] = WeaponId.AK;
         weaponSlots[1] = WeaponId.PISTOL;
         weaponSlots[2] = WeaponId.SAWNED_OFF;
+        weaponSlots[3] = WeaponId.GRENADE_LAUNCHER;
     
         slotAmmo[0] = 30;
         slotAmmo[1] = 10;
         slotAmmo[2] = 2;
+        slotAmmo[3] = 1;
 
         maxAmmo[0] = 120;
         maxAmmo[1] = 70;
         maxAmmo[2] = 30;
+        maxAmmo[3] = 3;
 
         foreach(Weapon w in we.weaponList)
         {
@@ -125,6 +128,10 @@ public class WeaponSystem : MonoBehaviour
                         break;
                     }
                     case WeaponEnumIds.WeaponId.SAWNED_OFF:{ 
+                        AS.PlayOneShot(SOTakeClip);
+                        break;
+                    }
+                    case WeaponEnumIds.WeaponId.GRENADE_LAUNCHER:{ 
                         AS.PlayOneShot(SOTakeClip);
                         break;
                     }
@@ -193,6 +200,10 @@ public class WeaponSystem : MonoBehaviour
             ChangeWeapon(2);
         }
 
+        if(Input.GetKeyDown("4") && currentSlot != 3){ 
+            ChangeWeapon(3);
+        }
+
         if(Input.GetKeyDown(KeyCode.R) && isReloading == false && maxAmmo[currentSlot] > 0){
             isReloading = true;
             string handAnim = "H_";
@@ -220,6 +231,10 @@ public class WeaponSystem : MonoBehaviour
                             break;
                         }
                         case WeaponEnumIds.WeaponId.SAWNED_OFF:{ 
+                            AS.PlayOneShot(SOReloadClip);
+                            break;
+                        }
+                        case WeaponEnumIds.WeaponId.GRENADE_LAUNCHER:{ 
                             AS.PlayOneShot(SOReloadClip);
                             break;
                         }

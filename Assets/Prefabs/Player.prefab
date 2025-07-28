@@ -308,6 +308,7 @@ MonoBehaviour:
   PistolObject: {fileID: 8775130466359070812, guid: be1a950b6ef43284e91b85c696fcec66, type: 3}
   AKObject: {fileID: 7430526173987213069, guid: 6d21e11344fb5e84ab4fcafdd8e8d9fe, type: 3}
   SawnedOffObject: {fileID: 6458820679182214592, guid: 8cfe636401f8e154ebcbadee048ebd85, type: 3}
+  GrenadeLauncherObject: {fileID: 4807641654706735110, guid: 4bc29e33304f58e4b99a7e8d3655c3c0, type: 3}
 --- !u!114 &3036624323170665951
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -334,9 +335,9 @@ MonoBehaviour:
   SOShotClip: {fileID: 8300000, guid: 8d15cbf5824508c4590f1b8a2da82e3b, type: 3}
   SOTakeClip: {fileID: 8300000, guid: 37f52cbbc68a91240ba7c3dfe2471170, type: 3}
   GetNewAmmo: {fileID: 8300000, guid: de6ff4e2617557a418e52ac2eeb294fe, type: 3}
-  weaponSlots: 000000000000000000000000
-  slotAmmo: 000000000000000000000000
-  maxAmmo: 000000000000000000000000
+  weaponSlots: 00000000000000000000000000000000
+  slotAmmo: 00000000000000000000000000000000
+  maxAmmo: 00000000000000000000000000000000
   currentSlot: 0
   weaponObject: {fileID: 0}
   handsAnimator: {fileID: 0}
