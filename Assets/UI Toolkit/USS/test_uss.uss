@@ -1,0 +1,39 @@
+.header {
+    font-size: 40px;
+    -unity-font: url('project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=2230732570650464555&guid=9592aa725141f4b42a713540c1777673&type=3#NotInter-Regular');
+    color: rgb(255, 255, 255);
+}
+
+.button {
+    font-size: 46px;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    -unity-text-align: middle-center;
+    background-color: rgb(123, 123, 123);
+    border-top-left-radius: 19px;
+    border-bottom-left-radius: 19px;
+    border-top-right-radius: 19px;
+    border-bottom-right-radius: 19px;
+    margin-top: 17px;
+    min-width: 250px;
+    height: 15%;
+    transition-property: all;
+    transition-duration: 0s;
+    transition-timing-function: ease;
+    transition-delay: 0s;
+}
+
+.basic-font {
+    -unity-font: url('project://database/Assets/Fonts/RubikDirt-Regular.ttf?fileID=12800000&guid=569fc768f3bee5a4181dffc018679f88&type=3#RubikDirt-Regular');
+}
+
+.server-button {
+    font-size: 247%;
+    background-color: rgba(51, 51, 51, 0.95);
+    width: 20%;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
