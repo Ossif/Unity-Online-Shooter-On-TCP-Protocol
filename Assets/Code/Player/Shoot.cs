@@ -192,6 +192,21 @@ public class Shoot : MonoBehaviour
                     }
                     break;
                 }
+                case WeaponId.GRENADE_LAUNCHER:
+                {
+                        Packet shotPacket = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_WEAPON_SHOT);
+                        shotPacket.Write((float)cam.transform.position.x);
+                        shotPacket.Write((float)cam.transform.position.y);
+                        shotPacket.Write((float)cam.transform.position.z);
+
+                        shotPacket.Write((float)cam.transform.forward.x);
+                        shotPacket.Write((float)cam.transform.forward.y);
+                        shotPacket.Write((float)cam.transform.forward.z);
+
+                        shotPacket.Write((int)WeaponId.GRENADE_LAUNCHER);
+                        client.Send(shotPacket);
+                        break;
+                }
             }
             switch (weaponList[index].weaponId){ 
                 case WeaponEnumIds.WeaponId.PISTOL:{

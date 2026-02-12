@@ -9,7 +9,7 @@ using System.Threading;
 using PacketHeaders;
 using System.Text;
 
-public class SendInfoAboutObject : MonoBehaviour
+public class SendPlayerMovementInfo : MonoBehaviour
 {
     public bool Position = true;
     public bool Rotation = true;

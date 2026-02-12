@@ -119,19 +119,19 @@ public class WeaponSystem : MonoBehaviour
                 handAnim += w.takeAnim;
 
                 switch (w.weaponId){ 
-                    case WeaponEnumIds.WeaponId.PISTOL:{ 
+                    case WeaponId.PISTOL:{ 
                         AS.PlayOneShot(PistolTakeClip);
                         break;
                     }
-                    case WeaponEnumIds.WeaponId.AK:{ 
+                    case WeaponId.AK:{ 
                         AS.PlayOneShot(AKTakeClip);
                         break;
                     }
-                    case WeaponEnumIds.WeaponId.SAWNED_OFF:{ 
+                    case WeaponId.SAWNED_OFF:{ 
                         AS.PlayOneShot(SOTakeClip);
                         break;
                     }
-                    case WeaponEnumIds.WeaponId.GRENADE_LAUNCHER:{ 
+                    case WeaponId.GRENADE_LAUNCHER:{ 
                         AS.PlayOneShot(SOTakeClip);
                         break;
                     }
@@ -176,7 +176,7 @@ public class WeaponSystem : MonoBehaviour
     {
         slotAmmo[0] = 30;
         slotAmmo[1] = 10;
-        slotAmmo[2] = 2;
+        slotAmmo[2] = 1;
 
         maxAmmo[0] = 120;
         maxAmmo[1] = 70;
