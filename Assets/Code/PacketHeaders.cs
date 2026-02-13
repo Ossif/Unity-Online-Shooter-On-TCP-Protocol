@@ -52,7 +52,7 @@ namespace PacketHeaders
         SMSG_CLEAR_PLAYER_CHAT = 32,
 
         SMSG_ADD_PLAYER_AMMO = 33,
-        
+
         SMSG_SEND_KILL_MESSAGE = 34,
 
         CMSG_STEP = 35,
@@ -64,6 +64,15 @@ namespace PacketHeaders
         SMSG_CREATE_NPC = 39,
         SMSG_NPC_MOVE_PATH = 40,
 
-        SMSG_DISCONNECT = 41
+        SMSG_DISCONNECT = 41,
+
+        // Пакеты для синхронизации объектов (снаряды RPG и т.д.)
+        SMSG_CREATE_SYNC_OBJECT = 42,
+        SMSG_SYNC_OBJECT_UPDATE = 43,
+        SMSG_DESTROY_SYNC_OBJECT = 44,
+
+        // Debug raycast для тестирования коллизий
+        CMSG_DEBUG_RAYCAST = 45,
+        SMSG_DEBUG_RAYCAST_RESULT = 46
     }
 }

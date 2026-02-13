@@ -52,6 +52,9 @@ MonoBehaviour:
   socketReady: 0
   playerPrefab: {fileID: 2908902476576423160, guid: 8f4d8bfbfaef08b47835e16f0247656c, type: 3}
   bulletPrefab: {fileID: 383235577832844704, guid: 5094691bacca0eb49a3efe3f4a6986c3, type: 3}
+  RocketPrefab: {fileID: 2581454252683835627, guid: f6f9d67cd67b2164cba97bd9d12be367, type: 3}
+  ExplosionEffectPrefab: {fileID: 1000011797152326, guid: acf39d9f4addf294d93fa56fa373961b, type: 3}
+  ExplosionSound: {fileID: 8300000, guid: 7b4e11fedc1275246b022dabede20531, type: 3}
   ClientName: 
   IsHost: 0
   playerId: 

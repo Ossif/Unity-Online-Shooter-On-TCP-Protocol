@@ -31,10 +31,15 @@ public class Client : MonoBehaviour
     byte[] buffer;
     private static int HeaderSize = 6; //(UInt16(2) - PacketID, Uint32(4) - PacketSize)
     int CountGetPacketData = 0;
-    
+
 
     public GameObject playerPrefab;
     public GameObject bulletPrefab;
+
+    [Header("Синхронизируемые объекты (RPG и т.д.)")]
+    public GameObject RocketPrefab;
+    public GameObject ExplosionEffectPrefab;
+    public AudioClip ExplosionSound;
 
     public string ClientName;
     public bool IsHost;
@@ -43,6 +48,7 @@ public class Client : MonoBehaviour
 
     static ConcurrentDictionary<string, GameObject> enemies = new ConcurrentDictionary<string, GameObject>();
     static List<(GameObject, NPC)> NPCarray = new List<(GameObject, NPC)>();
+    static Dictionary<uint, GameObject> syncObjects = new Dictionary<uint, GameObject>();
 
     private Animator animator;
 
@@ -84,7 +90,7 @@ public class Client : MonoBehaviour
     {
         if(socketReady)
             return;
-        
+
         try
         {
             Debug.Log($"ConnectToServer {host}");
@@ -97,7 +103,7 @@ public class Client : MonoBehaviour
                 socket.NoDelay = true; // Отключаем Nagle Algorithm
                 socket.ReceiveBufferSize = 8192; // Уменьшаем буфер приема
                 socket.SendBufferSize = 8192; // Уменьшаем буфер отправки
-                
+
                 stream = socket.GetStream();
                 buffer = new byte[HeaderSize];
                 socketReady = true;
@@ -201,7 +207,7 @@ public class Client : MonoBehaviour
                     string NickName = PlayerPrefs.GetString("PlayerNick");
                     int playerid = InComePacket.ReadInt();
                     Debug.Log("CLIENT: На клиент передали его id - " + playerid);
-                
+
                     Packet packet = new Packet((int) WorldCommand.CMSG_OFFER_ENTER_ANSWER);
                     packet.Write(playerid);
                     packet.Write(NickName);
@@ -217,7 +223,7 @@ public class Client : MonoBehaviour
                     int hostInt = InComePacket.ReadInt();
                     if(hostInt == 1)IsHost = true;
                     else IsHost = false;
-                
+
                     SpawnPos = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
                     Debug.Log($"IsPlayerHost: {IsHost}");
                     GameObject.Find("MenuLogic").GetComponent<MenuLogic>().StartGame();
@@ -225,7 +231,7 @@ public class Client : MonoBehaviour
                 }
             case WorldCommand.SMSG_PLAYER_LOGIN: //Создание вновь подключившегося игрока
                 {
-                
+
                     string uniqueId;
                     string PlayerName;
                     Vector3 position = new Vector3();
@@ -277,11 +283,11 @@ public class Client : MonoBehaviour
                         go.GetComponent<EnemyInfo>().playerId = id;
                         go.GetComponent<EnemyInfo>().PlayerName = PlayerName;
                         go.transform.Find("NickName").GetComponent<TMP_Text>().text = PlayerName;
-                    
+
                         go.GetComponent<EnemyInfo>().weaponId = (WeaponId) weaponId;
 
-                        switch (weaponId) { 
-                            case ((int) WeaponId.AK): { 
+                        switch (weaponId) {
+                            case ((int) WeaponId.AK): {
                                 go.GetComponent<EnemyInfo>().WeaponObject = Instantiate(AK, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
                                 go.GetComponent<EnemyInfo>().WeaponObject.transform.parent =  go.GetComponent<EnemyInfo>().WeaponParentBone.transform;
                                 go.GetComponent<EnemyInfo>().WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
@@ -289,14 +295,14 @@ public class Client : MonoBehaviour
                                 //ei.WeaponObject.transform.
                                 break;
                             }
-                            case ((int) WeaponId.PISTOL): { 
+                            case ((int) WeaponId.PISTOL): {
                                 go.GetComponent<EnemyInfo>().WeaponObject = Instantiate(pistol, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
                                 go.GetComponent<EnemyInfo>().WeaponObject.transform.parent = go.GetComponent<EnemyInfo>().WeaponParentBone.transform;
                                 go.GetComponent<EnemyInfo>().WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
                                 go.GetComponent<EnemyInfo>().WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
                                 break;
                             }
-                            case ((int) WeaponId.SAWNED_OFF): { 
+                            case ((int) WeaponId.SAWNED_OFF): {
                                 go.GetComponent<EnemyInfo>().WeaponObject = Instantiate(SO, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
                                 go.GetComponent<EnemyInfo>().WeaponObject.transform.parent =  go.GetComponent<EnemyInfo>().WeaponParentBone.transform;
                                 go.GetComponent<EnemyInfo>().WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
@@ -313,13 +319,13 @@ public class Client : MonoBehaviour
                 }
             case WorldCommand.SMSG_OBJ_INFO: //Синхронизация объектов и игроков
                 {
-                
+
                     string objectId = InComePacket.ReadString();
                     //Debug.Log(objectId);
                     GameObject enemy = null;
                     foreach (GameObject obj in enemies.Values){
                         //Debug.Log(uniqueId);
-                        if(obj.GetComponent<EnemyInfo>().playerId == objectId) 
+                        if(obj.GetComponent<EnemyInfo>().playerId == objectId)
                         {
                             enemy = obj;
                             break;
@@ -327,7 +333,7 @@ public class Client : MonoBehaviour
                     }
                     if (enemy == null) break;
                     int animId = InComePacket.ReadInt();
-                    if(enemy.GetComponent<EnemyInfo>().playerAnimId != animId) 
+                    if(enemy.GetComponent<EnemyInfo>().playerAnimId != animId)
                     {
                         animator = enemy.GetComponent<Animator>();
                         enemy.GetComponent<EnemyInfo>().playerAnimId = animId;
@@ -410,9 +416,9 @@ public class Client : MonoBehaviour
                     bullet.GetComponent<Rigidbody>().velocity = speed;
                     bullet.GetComponent<Bullet>().creatorId = objectId;
                     break;
-                } 
-            case WorldCommand.SMSG_PLAYER_TAKE_DAMAGE: 
-                { 
+                }
+            case WorldCommand.SMSG_PLAYER_TAKE_DAMAGE:
+                {
                     Debug.Log($"CLIENT: received info about damage");
                     float health = InComePacket.ReadFloat();
                     GameObject.Find("Player(Clone)").GetComponent<HealthSystem>().SetHealth(health);
@@ -461,7 +467,7 @@ public class Client : MonoBehaviour
             case WorldCommand.SMSG_REMOVE_PLAYER:
                 {
                     string objectId = InComePacket.ReadString();
-                    
+
                     foreach (GameObject obj in enemies.Values)
                     {
                         if (obj.GetComponent<EnemyInfo>().playerId == objectId)
@@ -473,8 +479,8 @@ public class Client : MonoBehaviour
                     enemies.TryRemove(objectId, out _);
                     break;
                 }
-            case WorldCommand.SMSG_PLAYER_WEAPON_INFO: 
-                { 
+            case WorldCommand.SMSG_PLAYER_WEAPON_INFO:
+                {
                     string objectId = InComePacket.ReadString();
 
                     foreach (GameObject obj in enemies.Values)
@@ -489,8 +495,8 @@ public class Client : MonoBehaviour
                                 ei.WeaponObject = null;
                             }
 
-                            switch (InComePacket.ReadInt()) { 
-                                case ((int) WeaponId.AK): { 
+                            switch (InComePacket.ReadInt()) {
+                                case ((int) WeaponId.AK): {
                                     ei.WeaponObject = Instantiate(AK, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
                                     ei.WeaponObject.transform.parent = ei.WeaponParentBone.transform;
                                     ei.WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
@@ -498,14 +504,14 @@ public class Client : MonoBehaviour
                                     //ei.WeaponObject.transform.
                                     break;
                                 }
-                                case ((int) WeaponId.PISTOL): { 
+                                case ((int) WeaponId.PISTOL): {
                                     ei.WeaponObject = Instantiate(pistol, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
                                     ei.WeaponObject.transform.parent = ei.WeaponParentBone.transform;
                                     ei.WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
                                     ei.WeaponObject.transform.rotation = new Quaternion(0, 0, 0, 0);
                                     break;
                                 }
-                                case ((int) WeaponId.SAWNED_OFF): { 
+                                case ((int) WeaponId.SAWNED_OFF): {
                                     ei.WeaponObject = Instantiate(SO, new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 0));
                                     ei.WeaponObject.transform.parent = ei.WeaponParentBone.transform;
                                     ei.WeaponObject.transform.localPosition = new Vector3(0, 0, 0);
@@ -516,7 +522,7 @@ public class Client : MonoBehaviour
                             break;
                         }
                     }
-                    break;    
+                    break;
                 }
             case WorldCommand.SMSG_CREATE_PICKUP_COMPRESS:
                 {
@@ -535,7 +541,7 @@ public class Client : MonoBehaviour
                         }
                     }
                     break;
-                }            
+                }
             case WorldCommand.SMSG_CREATE_PICKUP:
                 {
                     LevelLogic LG = GameObject.Find("LevelLogic").GetComponent<LevelLogic>();
@@ -557,16 +563,16 @@ public class Client : MonoBehaviour
                     LG.DestroyPickup(pickupid);
                     break;
                 }
-            case WorldCommand.SMSG_CREATE_BULLET_EFFECT: 
-                { 
+            case WorldCommand.SMSG_CREATE_BULLET_EFFECT:
+                {
                     Quaternion angle = new Quaternion(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
                     Vector3 impulse = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat());
                     string pid = InComePacket.ReadString();
 
                     foreach (GameObject obj in enemies.Values)
                     {
-                        if (obj.GetComponent<EnemyInfo>().playerId == pid) 
-                        { 
+                        if (obj.GetComponent<EnemyInfo>().playerId == pid)
+                        {
                             GameObject effect = Instantiate(TrailEffectBullet, new Vector3(0, 0, 0), angle);
                             effect.transform.localPosition = obj.GetComponent<EnemyInfo>().WeaponObject.transform.Find("model").Find("flashPlace").transform.position;
                             effect.transform.GetComponent<Bullet>().creatorId = pid;
@@ -617,10 +623,10 @@ public class Client : MonoBehaviour
                     }
                     break;
                 }
-            case WorldCommand.SMSG_STEP: 
+            case WorldCommand.SMSG_STEP:
                 {
                     string objectId = InComePacket.ReadString();
-                    
+
                     foreach (GameObject obj in enemies.Values)
                     {
                         if (obj.GetComponent<EnemyInfo>().playerId == objectId)
@@ -662,7 +668,7 @@ public class Client : MonoBehaviour
                     float moveSpeed = InComePacket.ReadFloat(); //Скорость движения по маршруту
                     Vector3 endPoint = new Vector3(InComePacket.ReadFloat(), InComePacket.ReadFloat(), InComePacket.ReadFloat()); //Конечная точка движения
                     for(int i = 0; i < NPCarray.Count; i++)
-                    { 
+                    {
                         Debug.Log($"item = {NPCarray[i].Item2.npcID}, npcid = {npcID}");
                         if(NPCarray[i].Item2.npcID == npcID)
                         {
@@ -676,9 +682,9 @@ public class Client : MonoBehaviour
                 {
                     string reason = InComePacket.ReadString();
                     int code = InComePacket.ReadInt();
-                    
+
                     Debug.Log($"Сервер отключил клиента. Причина: {reason}, Код: {code}");
-                    
+
                     // Показываем сообщение игроку
                     if (GameObject.Find("Canvas")?.transform.Find("ChatUI") != null)
                     {
@@ -688,6 +694,161 @@ public class Client : MonoBehaviour
 
                     // Отключаемся и возвращаемся в меню
                     GoToMenu();
+                    break;
+                }
+            case WorldCommand.SMSG_CREATE_SYNC_OBJECT:
+                {
+                    uint objectId = InComePacket.ReadUInt32();
+                    string objectType = InComePacket.ReadString();
+
+                    Vector3 position = new Vector3(
+                        InComePacket.ReadFloat(),
+                        InComePacket.ReadFloat(),
+                        InComePacket.ReadFloat()
+                    );
+
+                    Vector3 velocity = new Vector3(
+                        InComePacket.ReadFloat(),
+                        InComePacket.ReadFloat(),
+                        InComePacket.ReadFloat()
+                    );
+
+                    Debug.Log($"CLIENT: Создание синхронизируемого объекта ID={objectId}, Type={objectType}");
+
+                    if(objectType == "rocket")
+                    {
+                        if(RocketPrefab == null)
+                        {
+                            Debug.LogError("RocketPrefab не назначен в Client!");
+                            break;
+                        }
+
+                        GameObject rocket = Instantiate(
+                            RocketPrefab,
+                            position,
+                            Quaternion.identity
+                        );
+
+                        RocketBehaviour rb = rocket.GetComponent<RocketBehaviour>();
+                        if(rb != null)
+                        {
+                            rb.rocketId = objectId;
+                            rb.UpdateFromServer(position, velocity);
+                        }
+                        else
+                        {
+                            Debug.LogError("RocketPrefab не содержит компонент RocketBehaviour!");
+                        }
+
+                        syncObjects[objectId] = rocket;
+                    }
+                    break;
+                }
+            case WorldCommand.SMSG_SYNC_OBJECT_UPDATE:
+                {
+                    uint objectId = InComePacket.ReadUInt32();
+
+                    Vector3 position = new Vector3(
+                        InComePacket.ReadFloat(),
+                        InComePacket.ReadFloat(),
+                        InComePacket.ReadFloat()
+                    );
+
+                    Vector3 velocity = new Vector3(
+                        InComePacket.ReadFloat(),
+                        InComePacket.ReadFloat(),
+                        InComePacket.ReadFloat()
+                    );
+
+                    if(syncObjects.ContainsKey(objectId))
+                    {
+                        GameObject obj = syncObjects[objectId];
+                        if(obj != null)
+                        {
+                            RocketBehaviour rb = obj.GetComponent<RocketBehaviour>();
+                            if(rb != null)
+                            {
+                                rb.UpdateFromServer(position, velocity);
+                            }
+                        }
+                    }
+                    break;
+                }
+            case WorldCommand.SMSG_DESTROY_SYNC_OBJECT:
+                {
+                    uint objectId = InComePacket.ReadUInt32();
+
+                    Debug.Log($"CLIENT: Уничтожение синхронизируемого объекта ID={objectId}");
+
+                    if(syncObjects.ContainsKey(objectId))
+                    {
+                        GameObject obj = syncObjects[objectId];
+
+                        if(obj != null)
+                        {
+                            Vector3 explosionPos = obj.transform.position;
+
+                            // Проигрываем эффект взрыва
+                            if(ExplosionEffectPrefab != null)
+                            {
+                                GameObject explosion = Instantiate(ExplosionEffectPrefab, explosionPos, Quaternion.identity);
+                                Destroy(explosion, 3f); // Удаляем эффект через 3 секунды
+                            }
+
+                            // Звук взрыва с 3D пространственным звуком
+                            if(ExplosionSound != null)
+                            {
+                                Play3DSound(ExplosionSound, explosionPos, 1.0f, 100f);
+                            }
+
+                            // Camera shake при близком взрыве
+                            GameObject player = GameObject.Find("Player(Clone)");
+                            if(player != null)
+                            {
+                                float distance = Vector3.Distance(explosionPos, player.transform.position);
+                                if(distance < 20f)
+                                {
+                                    // TODO: Добавить Camera Shake когда будет готов компонент
+                                    // float intensity = 1.0f - (distance / 20f);
+                                    // CameraShake.Shake(intensity * 0.5f, 0.3f);
+                                }
+                            }
+
+                            // Удаляем снаряд
+                            Destroy(obj);
+                        }
+
+                        syncObjects.Remove(objectId);
+                    }
+                    break;
+                }
+            case WorldCommand.SMSG_DEBUG_RAYCAST_RESULT:
+                {
+                    bool hit = InComePacket.ReadByte() == 1;
+
+                    if (hit)
+                    {
+                        Vector3 hitPoint = new Vector3(
+                            InComePacket.ReadFloat(),
+                            InComePacket.ReadFloat(),
+                            InComePacket.ReadFloat()
+                        );
+
+                        // Передаём результат в DebugRaycast компонент
+                        DebugRaycast debugRaycast = FindObjectOfType<DebugRaycast>();
+                        if (debugRaycast != null)
+                        {
+                            debugRaycast.OnRaycastResult(true, hitPoint);
+                        }
+                    }
+                    else
+                    {
+                        DebugRaycast debugRaycast = FindObjectOfType<DebugRaycast>();
+                        if (debugRaycast != null)
+                        {
+                            debugRaycast.OnRaycastResult(false, Vector3.zero);
+                        }
+                    }
                     break;
                 }
         }
@@ -718,6 +879,38 @@ public class Client : MonoBehaviour
         SceneManager.LoadScene("Menu");
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+    }
+
+    /// <summary>
+    /// Воспроизводит 3D пространственный звук с правильными настройками
+    /// </summary>
+    /// <param name="clip">Аудиоклип</param>
+    /// <param name="position">Позиция в мире</param>
+    /// <param name="volume">Громкость (0-1)</param>
+    /// <param name="maxDistance">Максимальная дистанция слышимости</param>
+    private void Play3DSound(AudioClip clip, Vector3 position, float volume = 1.0f, float maxDistance = 100f)
+    {
+        // Создаём временный GameObject для AudioSource
+        GameObject tempGO = new GameObject("TempAudio_" + clip.name);
+        tempGO.transform.position = position;
+
+        // Добавляем и настраиваем AudioSource
+        AudioSource audioSource = tempGO.AddComponent<AudioSource>();
+        audioSource.clip = clip;
+        audioSource.volume = volume;
+
+        // Настройки 3D звука
+        audioSource.spatialBlend = 1.0f; // Полностью 3D (0 = 2D, 1 = 3D)
+        audioSource.rolloffMode = AudioRolloffMode.Linear; // Линейное затухание
+        audioSource.minDistance = 1f; // Минимальная дистанция (полная громкость)
+        audioSource.maxDistance = maxDistance; // Максимальная дистанция слышимости
+        audioSource.dopplerLevel = 0f; // Отключаем эффект Доплера для взрывов
+
+        // Воспроизводим
+        audioSource.Play();
+
+        // Уничтожаем объект после окончания звука
+        Destroy(tempGO, clip.length);
     }
 }
 

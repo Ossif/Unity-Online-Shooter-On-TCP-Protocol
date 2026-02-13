@@ -57,6 +57,13 @@ class PacketDecryptor
         return value;
     }
 
+    public uint ReadUInt32()
+    {
+        uint value = BitConverter.ToUInt32(_data, _offset);
+        _offset += sizeof(uint);
+        return value;
+    }
+
     public byte ReadByte()
     {
         byte value = _data[_offset];
