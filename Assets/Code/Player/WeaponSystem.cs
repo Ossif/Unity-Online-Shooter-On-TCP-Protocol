@@ -226,7 +226,13 @@ public class WeaponSystem : MonoBehaviour
                         weaponCartridge.transform.localPosition = new Vector3(0, 0f, 0);
                     }
                     handAnim += w.reloadAnim;
-                    weaponObject.transform.GetChild(0).GetComponent<Animator>().Play(w.reloadAnim);
+
+                    // Ищем аниматор модели (универсально)
+                    Animator weaponAnimator = weaponObject.GetComponentInChildren<Animator>();
+                    if(weaponAnimator != null)
+                    {
+                        weaponAnimator.Play(w.reloadAnim);
+                    }
                     switch (w.weaponId){
                         case WeaponEnumIds.WeaponId.PISTOL:{
                             AS.PlayOneShot(PistolReloadClip);

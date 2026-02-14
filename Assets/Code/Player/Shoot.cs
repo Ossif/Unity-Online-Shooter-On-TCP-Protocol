@@ -53,9 +53,44 @@ public class Shoot : MonoBehaviour
             ShotAudioSource.PlayOneShot(ShotClip);*/
 
             ws.handsAnimator.SetTrigger("H_" + weaponList[index].shotAnim);
-            ws.weaponObject.transform.Find("model").GetComponent<Animator>().SetTrigger("shot");
-            Transform MuzzleFlash = ws.weaponObject.transform.Find("model").Find("Bone").Find("Body").Find("MuzzleFlash");
-            MuzzleFlash.GetComponent<ParticleSystem>().Play();
+
+            // Ищем аниматор модели (универсально)
+            Animator weaponAnimator = ws.weaponObject.GetComponentInChildren<Animator>();
+            if(weaponAnimator != null)
+            {
+                weaponAnimator.SetTrigger("shot");
+            }
+            else
+            {
+                Debug.LogWarning($"Animator не найден для оружия {weaponList[index].name}");
+            }
+
+            // Ищем MuzzleFlash (старый путь для совместимости)
+            Transform MuzzleFlash = ws.weaponObject.transform.Find("model")?.Find("Bone")?.Find("Body")?.Find("MuzzleFlash");
+
+            // Если не найден, ищем в новой структуре (для RPG)
+            if(MuzzleFlash == null)
+            {
+                MuzzleFlash = ws.weaponObject.GetComponentInChildren<ParticleSystem>()?.transform;
+            }
+
+            // Проигрываем эффект выстрела если найден
+            if(MuzzleFlash != null)
+            {
+                ParticleSystem ps = MuzzleFlash.GetComponent<ParticleSystem>();
+                if(ps != null)
+                {
+                    ps.Play();
+                }
+                else
+                {
+                    Debug.LogWarning($"ParticleSystem не найден на MuzzleFlash для {weaponList[index].name}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"MuzzleFlash не найден для оружия {weaponList[index].name}");
+            }
 
             Vector3 vec = cam.transform.position + cam.transform.forward;
             switch (weaponList[index].weaponId)
