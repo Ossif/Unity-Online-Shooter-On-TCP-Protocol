@@ -270,29 +270,34 @@ weaponList.Add(new Weapon(
 
 **Где:** `Assets/Models/FPSAnim/FBX/animations/hands/`
 
-#### **2.3 Обновить WeaponSystem.cs**
+#### **2.3 Обновить WeaponSystem.cs** ✅
 ```csharp
-// В методе Start() изменить:
-weaponSlots[3] = WeaponId.GRENADE_LAUNCHER;
-slotAmmo[3] = 1;      // ❌ было 1 - стартовые патроны
-maxAmmo[3] = 3;       // ❌ было 3 - стартовый запас
+// ✅ ВЫПОЛНЕНО: Добавлены публичные поля для звуков RPG
+public AudioClip RPGReloadClip;
+public AudioClip RPGShotClip;
+public AudioClip RPGTakeClip;
 
-// В методе ChangeWeapon() добавить:
+// ✅ ВЫПОЛНЕНО: Слоты уже настроены в Start()
+weaponSlots[3] = WeaponId.GRENADE_LAUNCHER;
+slotAmmo[3] = 1;      // стартовые патроны
+maxAmmo[3] = 3;       // стартовый запас
+
+// ✅ ВЫПОЛНЕНО: В методе ChangeWeapon() добавлено:
 case WeaponId.GRENADE_LAUNCHER: { 
-    AS.PlayOneShot(RPGTakeClip);  // Новый звук
+    AS.PlayOneShot(RPGTakeClip);
     break;
 }
 
-// В методе Update() (секция reload) добавить:
+// ✅ ВЫПОЛНЕНО: В методе Update() (секция reload) добавлено:
 case WeaponId.GRENADE_LAUNCHER: { 
-    AS.PlayOneShot(RPGReloadClip);  // Новый звук
+    AS.PlayOneShot(RPGReloadClip);
     break;
 }
 ```
 
-#### **2.4 Обновить Shoot.cs**
+#### **2.4 Обновить Shoot.cs** ✅
 ```csharp
-// В switch звуков выстрела добавить:
+// ✅ ВЫПОЛНЕНО: В switch звуков выстрела добавлено:
 case WeaponId.GRENADE_LAUNCHER: {
     ws.AS.PlayOneShot(ws.RPGShotClip);
     break;
@@ -473,6 +478,9 @@ def test_rocket_gravity():
 - [ ] Снаряд взрывается при столкновении
 - [ ] Взрыв наносит урон игрокам в радиусе
 - [ ] Урон падает с расстоянием
+- [ ] Взрыв отталкивает игроков (импульс)
+- [ ] Rocket jump работает (выстрел под ноги → прыжок вверх)
+- [ ] Урон себе меньше чем врагам (40% vs 100%)
 - [ ] Эффект взрыва проигрывается
 - [ ] Звук взрыва слышен
 - [ ] Камера трясётся при близком взрыве
@@ -562,6 +570,145 @@ if self.hit_player_directly:
     damage = self.explosion_damage * 1.5  # +50% за прямое попадание
 ```
 
+#### **6.5 Rocket Jump** 🚀
+**Концепция:** Игрок может использовать взрыв собственной ракеты для прыжка на высоту/дальность (как в TF2, Quake).
+
+**Механика:**
+1. Взрыв рядом с игроком отталкивает его в противоположном направлении
+2. Игрок получает урон, но меньший чем от чужих ракет
+3. Импульс зависит от расстояния до взрыва
+4. Можно выстрелить под ноги/за спину для прыжка
+
+**Реализация на сервере (SyncObjectSystem.py):**
+```python
+def explode(self):
+    """Взрыв ракеты с rocket jump механикой"""
+    for client in clients:
+        if not client.authorized:
+            continue
+
+        # Вычисляем расстояние до игрока
+        distance = math.sqrt(
+            (client.lastPos[0] - self.position[0]) ** 2
+            + (client.lastPos[1] - self.position[1]) ** 2
+            + (client.lastPos[2] - self.position[2]) ** 2
+        )
+
+        if distance <= self.explosion_radius:
+            # Вектор от взрыва к игроку
+            direction = [
+                client.lastPos[0] - self.position[0],
+                client.lastPos[1] - self.position[1],
+                client.lastPos[2] - self.position[2],
+            ]
+            
+            # Нормализуем направление
+            length = math.sqrt(sum(d**2 for d in direction))
+            if length > 0:
+                direction = [d / length for d in direction]
+            
+            # Сила импульса зависит от расстояния (ближе = сильнее)
+            impulse_strength = (1.0 - distance / self.explosion_radius) * 15.0
+            
+            # Вектор импульса
+            impulse = [
+                direction[0] * impulse_strength,
+                direction[1] * impulse_strength,
+                direction[2] * impulse_strength,
+            ]
+            
+            # Отправляем пакет импульса клиенту
+            impulse_packet = Packet(WorldCommand.SMSG_SET_PLAYER_IMPYLSE.value)
+            impulse_packet.write_float(impulse[0])
+            impulse_packet.write_float(impulse[1])
+            impulse_packet.write_float(impulse[2])
+            impulse_packet.write_float(0.3)  # Длительность действия импульса
+            packet_queue.enqueue([client, impulse_packet.to_bytes()])
+            
+            # Урон с уменьшением
+            damage_multiplier = 1.0 - (distance / self.explosion_radius)
+            
+            # Если это своя ракета - меньше урона (для rocket jump)
+            if client.player_id == self.owner_id:
+                damage = self.explosion_damage * damage_multiplier * 0.4  # 40% урона себе
+            else:
+                damage = self.explosion_damage * damage_multiplier  # 100% урона врагам
+
+            # Наносим урон
+            client.health -= damage
+
+            # Отправляем пакет урона
+            damage_packet = Packet(WorldCommand.SMSG_PLAYER_TAKE_DAMAGE.value)
+            damage_packet.write_float(client.health)
+            packet_queue.enqueue([client, damage_packet.to_bytes()])
+
+            # Проверяем смерть
+            if client.health <= 0:
+                from KillListSystem import kill_list_system
+                kill_list_system.handle_player_death(
+                    self.get_owner_client(),
+                    client,
+                    5,  # ID гранатомета
+                )
+
+                # Отправляем пакет смерти
+                death_packet = Packet(WorldCommand.SMSG_PLAYER_DEATH.value)
+                death_packet.write_string(client.player_id)
+                client.status = 1  # PLAYER_IS_DEATH
+
+                for other_client in clients:
+                    if other_client.player_id != client.player_id:
+                        packet_queue.enqueue([other_client, death_packet.to_bytes()])
+
+    # Уничтожаем ракету
+    self.destroy()
+```
+
+**Балансировка параметров:**
+```python
+# Параметры rocket jump
+ROCKET_JUMP_IMPULSE_MULTIPLIER = 15.0  # Сила отталкивания
+ROCKET_JUMP_SELF_DAMAGE_MULTIPLIER = 0.4  # 40% урона себе
+ROCKET_JUMP_MAX_HEIGHT = ~10 метров  # При выстреле прямо под ноги
+ROCKET_JUMP_MAX_DISTANCE = ~15 метров  # При выстреле под углом 45°
+```
+
+**Клиент уже поддерживает импульсы** (проверено в Client.cs:442):
+```csharp
+case WorldCommand.SMSG_SET_PLAYER_IMPYLSE:
+{
+    GameObject.Find("Player(Clone)")
+        .GetComponent<Movement>()
+        .SetImpulse(
+            new Vector3(
+                InComePacket.ReadFloat(),
+                InComePacket.ReadFloat(),
+                InComePacket.ReadFloat()
+            ), 
+            InComePacket.ReadFloat()
+        );
+    break;
+}
+```
+
+**Преимущества реализации:**
+- ✅ Пакет SMSG_SET_PLAYER_IMPYLSE уже существует
+- ✅ Movement.SetImpulse() уже реализован
+- ✅ Не требует изменений на клиенте
+- ✅ Работает по той же системе что и батут (Trampline.cs)
+- ✅ Добавляет глубину геймплея (speedrun, tricks)
+
+**Тактические применения:**
+1. **Вертикальный прыжок:** Выстрел под ноги → прыжок на крышу
+2. **Горизонтальный буст:** Выстрел за спину → быстрое перемещение
+3. **Комбо с движением:** Прыжок + rocket jump → супер-прыжок
+4. **Отступление:** Враг близко → взрыв между вами → отлетаете назад
+
+**Риски:**
+- Возможность убить себя при малом здоровье
+- Требует навыка (timing, aim)
+- Расход дорогих патронов для мобильности
+
 ---
 
 ## 🗂️ Структура файлов после доработки
@@ -621,8 +768,8 @@ ServerShooter/
 | **3. Аудио и эффекты** | Звуки, взрыв, shake | 3 часа |
 | **4. Балансировка** | Настройка параметров | 2 часа |
 | **5. Тестирование** | Отладка, фикс багов | 3 часа |
-| **6. Дополнительно** | Предикция, траектория | 2 часа |
-| **ИТОГО** | | **16 часов** |
+| **6. Дополнительно** | Предикция, траектория, rocket jump | 3 часа |
+| **ИТОГО** | | **17 часов** |
 
 ---
 
@@ -638,10 +785,11 @@ ServerShooter/
 5. Этап 2.4 - Анимации рук
 6. Этап 3.1 - Звуки
 7. Этап 4 - Балансировка
+8. Этап 6.5 - Rocket Jump (простая реализация)
 
 ### **Низкий приоритет (полировка):**
-8. Этап 3.3 - Camera Shake
-9. Этап 6 - Дополнительные улучшения
+9. Этап 3.3 - Camera Shake
+10. Этап 6.1-6.4 - Дополнительные улучшения (предикция, траектория, прямое попадание)
 
 ---
 

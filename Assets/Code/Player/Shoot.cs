@@ -28,12 +28,12 @@ public class Shoot : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        try{ 
+        try{
             client = FindObjectOfType<Client>().GetComponent<Client>();
             AS = this.transform.Find("Audio Source").GetComponent<AudioSource>();
-        }    
-        catch{ 
-            
+        }
+        catch{
+
         }
         if(client == null) Debug.Log("Ошибка:Клиент не найден!");
         ws = gameObject.GetComponent<WeaponSystem>();
@@ -43,7 +43,7 @@ public class Shoot : MonoBehaviour
         weaponList = we.weaponList;
     }
 
-    public void CreateBullet(int index){ 
+    public void CreateBullet(int index){
         if(TimeToNextShot >= weaponList[index].shotTime){
             TimeToNextShot = 0;
             ws.slotAmmo[ws.currentSlot] --;
@@ -208,7 +208,7 @@ public class Shoot : MonoBehaviour
                         break;
                 }
             }
-            switch (weaponList[index].weaponId){ 
+            switch (weaponList[index].weaponId){
                 case WeaponEnumIds.WeaponId.PISTOL:{
                     ws.AS.PlayOneShot(ws.PistolShotClip);
                     break;
@@ -221,10 +221,14 @@ public class Shoot : MonoBehaviour
                     ws.AS.PlayOneShot(ws.SOShotClip);
                     break;
                 }
-            }        
+                case WeaponEnumIds.WeaponId.GRENADE_LAUNCHER:{
+                    ws.AS.PlayOneShot(ws.RPGShotClip);
+                    break;
+                }
+            }
         }
-    }   
-    /*public void CreateBullet(int index){ 
+    }
+    /*public void CreateBullet(int index){
         if(TimeToNextShot >= weaponList[index].shotTime){
             TimeToNextShot = 0;
             ws.slotAmmo[ws.currentSlot] --;
@@ -237,17 +241,17 @@ public class Shoot : MonoBehaviour
             ws.weaponObject.transform.Find("model").GetComponent<Animator>().SetTrigger("shot");
 
             Vector3 vec = cam.transform.position + cam.transform.forward;
-            if(weaponList[index].weaponId != WeaponEnumIds.WeaponId.SAWNED_OFF){ 
+            if(weaponList[index].weaponId != WeaponEnumIds.WeaponId.SAWNED_OFF){
                 GameObject insBull = Instantiate(bullet, vec, Quaternion.identity);
                 insBull.GetComponent<Rigidbody>().velocity = cam.transform.forward * speed;
                 insBull.GetComponent<Bullet>().damage = weaponList[index].damage;
                 insBull.GetComponent<Bullet>().creatorId = FindObjectOfType<Client>().GetComponent<Client>().playerId;
                 if(client != null){
                     Packet packet = new Packet((int) PacketHeaders.WorldCommand.CMSG_CREATE_BULLET);
-                
+
 
                     //Vector3 position = gameObject.transform.position;
-                
+
                     packet.Write((float)vec.x);
                     packet.Write((float)vec.y);
                     packet.Write((float)vec.z);
@@ -263,12 +267,12 @@ public class Shoot : MonoBehaviour
                     packet.Write((float) bulletSpeed.z);
 
                     packet.Write((float) weaponList[index].damage);
-                
+
                     client.Send(packet);
                 }
             }
-            else{ 
-                for(int i = 0; i < 5; i ++){ 
+            else{
+                for(int i = 0; i < 5; i ++){
                     var rotationY = Quaternion.AngleAxis(Random.Range(-5.0f,5.0f), transform.up);
                     var rotationX = Quaternion.AngleAxis(Random.Range(-5.0f,5.0f), transform.right);
 
@@ -276,13 +280,13 @@ public class Shoot : MonoBehaviour
                     insBull.GetComponent<Rigidbody>().velocity = insBull.transform.forward * speed;
                     insBull.GetComponent<Bullet>().damage = weaponList[index].damage;
                     insBull.GetComponent<Bullet>().creatorId = FindObjectOfType<Client>().GetComponent<Client>().playerId;
-        
+
                     if(client != null){
                         Packet packet = new Packet((int) PacketHeaders.WorldCommand.CMSG_CREATE_BULLET);
-                
+
 
                         //Vector3 position = gameObject.transform.position;
-                
+
                         packet.Write((float)vec.x);
                         packet.Write((float)vec.y);
                         packet.Write((float)vec.z);
@@ -298,12 +302,12 @@ public class Shoot : MonoBehaviour
                         packet.Write((float) bulletSpeed.z);
 
                         packet.Write((float) weaponList[index].damage);
-                
+
                         client.Send(packet);
                     }
                 }
             }
-            switch (weaponList[index].weaponId){ 
+            switch (weaponList[index].weaponId){
                 case WeaponEnumIds.WeaponId.PISTOL:{
                     ws.AS.PlayOneShot(ws.PistolShotClip);
                     break;
@@ -316,7 +320,7 @@ public class Shoot : MonoBehaviour
                     ws.AS.PlayOneShot(ws.SOShotClip);
                     break;
                 }
-            }        
+            }
         }
     }*/
 
@@ -329,13 +333,13 @@ public class Shoot : MonoBehaviour
         // Блокируем стрельбу во время паузы
         if (PauseMenuLogic.IsGamePaused)
             return;
-            
+
         /*bool isAuto = false;
         float shotTime = 0;*/
         int index = 0;
         int counter = 0;
-        foreach(Weapon weapon in weaponList){ 
-            if(ws.weaponSlots[ws.currentSlot] == weapon.weaponId){ 
+        foreach(Weapon weapon in weaponList){
+            if(ws.weaponSlots[ws.currentSlot] == weapon.weaponId){
                 /*isAuto = weapon.isAuto;
                 shotTime = weapon.shotTime;*/
                 index = counter;
@@ -343,27 +347,27 @@ public class Shoot : MonoBehaviour
             }
             counter ++;
         }
-        
-        if(ws.slotAmmo[ws.currentSlot] != 0){ 
+
+        if(ws.slotAmmo[ws.currentSlot] != 0){
             if(weaponList[index].isAuto == true)
-            { 
+            {
                 if(Input.GetKey(KeyCode.Mouse0)) {
                     CreateBullet(index);
-                    
+
                 }
                 if(TimeToNextShot <= weaponList[index].shotTime) TimeToNextShot += Time.deltaTime;
             }
             else
             {
-                if(Input.GetKeyDown(KeyCode.Mouse0)) 
+                if(Input.GetKeyDown(KeyCode.Mouse0))
                 {
                     CreateBullet(index);
                 }
                 if(TimeToNextShot <= weaponList[index].shotTime) TimeToNextShot += Time.deltaTime;
             }
         }
-        else{ 
-            if(Input.GetKeyDown(KeyCode.Mouse0)) 
+        else{
+            if(Input.GetKeyDown(KeyCode.Mouse0))
             {
                 ws.AS.PlayOneShot(ws.EmptyAmmo);
             }

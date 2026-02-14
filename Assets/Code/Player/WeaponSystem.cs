@@ -12,7 +12,7 @@ public class WeaponSystem : MonoBehaviour
     public WeaponEnum we;
 
     public AudioSource AS;
-    
+
     public AudioClip EmptyAmmo;
 
     public AudioClip PistolReloadClip;
@@ -26,7 +26,11 @@ public class WeaponSystem : MonoBehaviour
     public AudioClip SOReloadClip;
     public AudioClip SOShotClip;
     public AudioClip SOTakeClip;
-    
+
+    public AudioClip RPGReloadClip;
+    public AudioClip RPGShotClip;
+    public AudioClip RPGTakeClip;
+
     public AudioClip GetNewAmmo;
 
 
@@ -43,8 +47,8 @@ public class WeaponSystem : MonoBehaviour
     public CanvasLogic canvasController;
     // Start is called before the first frame update
 
-    void SendInfoAboutWeapon(WeaponId wid) { 
-        Client c = FindObjectOfType<Client>().GetComponent<Client>();  
+    void SendInfoAboutWeapon(WeaponId wid) {
+        Client c = FindObjectOfType<Client>().GetComponent<Client>();
         Packet packet = new Packet((int)PacketHeaders.WorldCommand.CMSG_PLAYER_WEAPON_INFO);
         packet.Write((int) wid);
         c.Send(packet);
@@ -64,7 +68,7 @@ public class WeaponSystem : MonoBehaviour
         weaponSlots[1] = WeaponId.PISTOL;
         weaponSlots[2] = WeaponId.SAWNED_OFF;
         weaponSlots[3] = WeaponId.GRENADE_LAUNCHER;
-    
+
         slotAmmo[0] = 30;
         slotAmmo[1] = 10;
         slotAmmo[2] = 2;
@@ -118,24 +122,24 @@ public class WeaponSystem : MonoBehaviour
 
                 handAnim += w.takeAnim;
 
-                switch (w.weaponId){ 
-                    case WeaponId.PISTOL:{ 
+                switch (w.weaponId){
+                    case WeaponId.PISTOL:{
                         AS.PlayOneShot(PistolTakeClip);
                         break;
                     }
-                    case WeaponId.AK:{ 
+                    case WeaponId.AK:{
                         AS.PlayOneShot(AKTakeClip);
                         break;
                     }
-                    case WeaponId.SAWNED_OFF:{ 
+                    case WeaponId.SAWNED_OFF:{
                         AS.PlayOneShot(SOTakeClip);
                         break;
                     }
-                    case WeaponId.GRENADE_LAUNCHER:{ 
-                        AS.PlayOneShot(SOTakeClip);
+                    case WeaponId.GRENADE_LAUNCHER:{
+                        AS.PlayOneShot(RPGTakeClip);
                         break;
                     }
-                }  
+                }
 
                 break;
             }
@@ -147,11 +151,11 @@ public class WeaponSystem : MonoBehaviour
     }
 
     public void SuccessReload(){
-        foreach(Weapon w in we.weaponList){ 
+        foreach(Weapon w in we.weaponList){
             if(weaponSlots[currentSlot] == w.weaponId){
                 maxAmmo[currentSlot] -= (w.ammoCartridge - slotAmmo[currentSlot]);
                 slotAmmo[currentSlot] = w.ammoCartridge;
-                if(maxAmmo[currentSlot] < 0){ 
+                if(maxAmmo[currentSlot] < 0){
                     slotAmmo[currentSlot] += maxAmmo[currentSlot];
                     maxAmmo[currentSlot] = 0;
                 }
@@ -159,13 +163,13 @@ public class WeaponSystem : MonoBehaviour
                 canvasController.SetAmmoLeft(slotAmmo[currentSlot]);
                 canvasController.SetAmmoTotal(maxAmmo[currentSlot]);
                 break;
-            } 
+            }
         }
     }
 
     public void FinishReload(){
         isReloading = false;
-        if(weaponCartridge != null) 
+        if(weaponCartridge != null)
         {
             Destroy(weaponCartridge);
             weaponCartridge = null;
@@ -187,20 +191,20 @@ public class WeaponSystem : MonoBehaviour
     }
 
     void Update()
-    {    
-        if(Input.GetKeyDown("1") && currentSlot != 0){ 
+    {
+        if(Input.GetKeyDown("1") && currentSlot != 0){
             ChangeWeapon(0);
         }
 
-        if(Input.GetKeyDown("2") && currentSlot != 1){ 
+        if(Input.GetKeyDown("2") && currentSlot != 1){
             ChangeWeapon(1);
         }
 
-        if(Input.GetKeyDown("3") && currentSlot != 2){ 
+        if(Input.GetKeyDown("3") && currentSlot != 2){
             ChangeWeapon(2);
         }
 
-        if(Input.GetKeyDown("4") && currentSlot != 3){ 
+        if(Input.GetKeyDown("4") && currentSlot != 3){
             ChangeWeapon(3);
         }
 
@@ -221,24 +225,24 @@ public class WeaponSystem : MonoBehaviour
                     }
                     handAnim += w.reloadAnim;
                     weaponObject.transform.GetChild(0).GetComponent<Animator>().Play(w.reloadAnim);
-                    switch (w.weaponId){ 
-                        case WeaponEnumIds.WeaponId.PISTOL:{ 
+                    switch (w.weaponId){
+                        case WeaponEnumIds.WeaponId.PISTOL:{
                             AS.PlayOneShot(PistolReloadClip);
                             break;
                         }
-                        case WeaponEnumIds.WeaponId.AK:{ 
+                        case WeaponEnumIds.WeaponId.AK:{
                             AS.PlayOneShot(AKReloadClip);
                             break;
                         }
-                        case WeaponEnumIds.WeaponId.SAWNED_OFF:{ 
+                        case WeaponEnumIds.WeaponId.SAWNED_OFF:{
                             AS.PlayOneShot(SOReloadClip);
                             break;
                         }
-                        case WeaponEnumIds.WeaponId.GRENADE_LAUNCHER:{ 
-                            AS.PlayOneShot(SOReloadClip);
+                        case WeaponEnumIds.WeaponId.GRENADE_LAUNCHER:{
+                            AS.PlayOneShot(RPGReloadClip);
                             break;
                         }
-                    }           
+                    }
                     break;
                 }
             }
@@ -249,7 +253,7 @@ public class WeaponSystem : MonoBehaviour
     void OnKeyDown(KeyDownEvent ev)
     {
         /*switch (ev.keyCode) {
-            
+
             case (KeyCode.Keypad2):
             {
                 if(currentSlot == 1) break;
@@ -273,7 +277,7 @@ public class WeaponSystem : MonoBehaviour
                     }
                 }
                 handsAnimator.Play(handAnim);
-                break; 
+                break;
             }
             case (KeyCode.Keypad3):
             {
@@ -299,7 +303,7 @@ public class WeaponSystem : MonoBehaviour
                 }
 
                 handsAnimator.Play(handAnim);
-                break; 
+                break;
             }
 
 
