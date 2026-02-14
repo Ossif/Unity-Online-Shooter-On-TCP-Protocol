@@ -333,18 +333,31 @@ ExplosionEffect
 - Auto-destroy после проигрывания
 - Prefab должен быть в Resources для Instantiate
 
-#### **3.3 Добавить Camera Shake**
-**Создать скрипт CameraShake.cs:**
+#### **3.3 Добавить Camera Shake** ✅
+**✅ ВЫПОЛНЕНО: Создан скрипт CameraShake.cs:**
 ```csharp
 public class CameraShake : MonoBehaviour {
+    // Синглтон для глобального доступа
+    private static CameraShake instance;
+    
+    // Статический метод для запуска тряски
     public static void Shake(float intensity, float duration) {
-        // Трясём камеру при взрыве рядом
-        // Intensity зависит от расстояния до взрыва
+        // Использует Perlin Noise для плавной тряски
+        // Смещение позиции до 15 см
+        // Вращение до 2 градусов
+        // Автоматическое затухание к концу
     }
 }
 ```
 
-**В Client.cs при SMSG_DESTROY_SYNC_OBJECT:**
+**Особенности реализации:**
+- ✅ Использует Perlin Noise для плавной и реалистичной тряски
+- ✅ Затухание интенсивности со временем (damper)
+- ✅ Смещение по X/Y/Z осям + вращение камеры
+- ✅ Синглтон паттерн для глобального доступа
+- ✅ Настраиваемый множитель силы тряски через Inspector
+
+**✅ ВЫПОЛНЕНО: В Client.cs при SMSG_DESTROY_SYNC_OBJECT:**
 ```csharp
 // Вычисляем расстояние до игрока
 float distance = Vector3.Distance(
@@ -788,7 +801,7 @@ ServerShooter/
 8. Этап 6.5 - Rocket Jump (простая реализация)
 
 ### **Низкий приоритет (полировка):**
-9. Этап 3.3 - Camera Shake
+9. ✅ ~~Этап 3.3 - Camera Shake~~ (ВЫПОЛНЕНО)
 10. Этап 6.1-6.4 - Дополнительные улучшения (предикция, траектория, прямое попадание)
 
 ---

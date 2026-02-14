@@ -808,9 +808,8 @@ public class Client : MonoBehaviour
                                 float distance = Vector3.Distance(explosionPos, player.transform.position);
                                 if(distance < 20f)
                                 {
-                                    // TODO: Добавить Camera Shake когда будет готов компонент
-                                    // float intensity = 1.0f - (distance / 20f);
-                                    // CameraShake.Shake(intensity * 0.5f, 0.3f);
+                                    float intensity = 1.0f - (distance / 20f);
+                                    CameraShake.Shake(intensity * 0.5f, 0.3f);
                                 }
                             }
 

@@ -181,10 +181,12 @@ public class WeaponSystem : MonoBehaviour
         slotAmmo[0] = 30;
         slotAmmo[1] = 10;
         slotAmmo[2] = 1;
+        slotAmmo[3] = 1;  // Патроны для RPG
 
         maxAmmo[0] = 120;
         maxAmmo[1] = 70;
         maxAmmo[2] = 30;
+        maxAmmo[3] = 3;   // Максимум патронов для RPG
         AS.PlayOneShot(GetNewAmmo);
         canvasController.SetAmmoLeft(slotAmmo[currentSlot]);
         canvasController.SetAmmoTotal(maxAmmo[currentSlot]);
